@@ -4,6 +4,15 @@ ctypedef int MKL_INT
 
 
 cdef extern from "mkl.h":
+    # int mkl_domain_set_num_threads(int nt, int domain)
+    # int mkl_domain_get_max_threads(int domain)
+    # In
+    int MKL_DOMAIN_BLAS
+    int MKL_DOMAIN_FFT
+    int MKL_DOMAIN_VML
+    int MKL_DOMAIN_PARDISO
+    int MKL_DOMAIN_ALL
+
     # MKL_INT64 mkl_peak_mem_usage(int mode)
     # In
     int MKL_PEAK_MEM_ENABLE
