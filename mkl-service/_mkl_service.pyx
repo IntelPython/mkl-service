@@ -3,23 +3,18 @@ from enum import IntEnum
 
 
 class enums(IntEnum):
-    # MKL Function Domains
+    # MKL Function Domains Constants
     MKL_DOMAIN_BLAS = mkl.MKL_DOMAIN_BLAS
     MKL_DOMAIN_FFT = mkl.MKL_DOMAIN_FFT
     MKL_DOMAIN_VML = mkl.MKL_DOMAIN_VML
     MKL_DOMAIN_PARDISO = mkl.MKL_DOMAIN_PARDISO
     MKL_DOMAIN_ALL = mkl.MKL_DOMAIN_ALL
 
-    # MKL_INT64 mkl_peak_mem_usage(int mode)
-    # In
+    # MKL Peak Memory Usage Constants
     MKL_PEAK_MEM_ENABLE = mkl.MKL_PEAK_MEM_ENABLE
     MKL_PEAK_MEM_DISABLE = mkl.MKL_PEAK_MEM_DISABLE
     MKL_PEAK_MEM = mkl.MKL_PEAK_MEM
     MKL_PEAK_MEM_RESET = mkl.MKL_PEAK_MEM_RESET
-
-    # int mkl_set_memory_limit(int mem_type, size_t limit)
-    # In
-    MKL_MEM_MCDRAM = mkl.MKL_MEM_MCDRAM
 
     # CNR Control Constants
     MKL_CBWR_AUTO = mkl.MKL_CBWR_AUTO
@@ -40,13 +35,18 @@ class enums(IntEnum):
     MKL_CBWR_ERR_UNSUPPORTED_BRANCH = mkl.MKL_CBWR_ERR_UNSUPPORTED_BRANCH
     MKL_CBWR_ERR_MODE_CHANGE_FAILURE = mkl.MKL_CBWR_ERR_MODE_CHANGE_FAILURE
 
-    # int mkl_enable_instructions(int isa)
-    # In
+    # ISA Constants
     MKL_ENABLE_AVX512 = mkl.MKL_ENABLE_AVX512
     MKL_ENABLE_AVX512_MIC = mkl.MKL_ENABLE_AVX512_MIC
     MKL_ENABLE_AVX2 = mkl.MKL_ENABLE_AVX2
     MKL_ENABLE_AVX = mkl.MKL_ENABLE_AVX
     MKL_ENABLE_SSE4_2 = mkl.MKL_ENABLE_SSE4_2
+
+    # MPI Implementation Constants
+    MKL_BLACS_CUSTOM = mkl.MKL_BLACS_CUSTOM
+    MKL_BLACS_MSMPI = mkl.MKL_BLACS_MSMPI
+    MKL_BLACS_INTELMPI = mkl.MKL_BLACS_INTELMPI
+    #MKL_BLACS_MPICH = mkl.MKL_BLACS_MPICH
 
     # unsigned int vmlSetMode(unsigned int mode)
     # In
@@ -73,14 +73,20 @@ class enums(IntEnum):
     VML_STATUS_OVERFLOW = mkl.VML_STATUS_OVERFLOW
     VML_STATUS_UNDERFLOW = mkl.VML_STATUS_UNDERFLOW
 
-# MKL Function Domains
+# MKL Function Domains Constants
 __mkl_domain_enums = {'blas': mkl.MKL_DOMAIN_BLAS,
                       'fft': mkl.MKL_DOMAIN_FFT,
                       'vml': mkl.MKL_DOMAIN_VML,
                       'pardiso': mkl.MKL_DOMAIN_PARDISO,
                       'all': mkl.MKL_DOMAIN_ALL}
 
-# CNR Control Constants
+# MKL Peak Memory Usage Constants
+__mkl_peak_mem_usage_enums = {'enable': mkl.MKL_PEAK_MEM_ENABLE,
+                              'disable': mkl.MKL_PEAK_MEM_DISABLE,
+                              'peak_mem': mkl.MKL_PEAK_MEM,
+                              'peak_mem_reset': mkl.MKL_PEAK_MEM_RESET}
+
+# CNR Control Constants Constants
 __mkl_cbwr_set_in_enums = {'auto': mkl.MKL_CBWR_AUTO,
                            'compatible': mkl.MKL_CBWR_COMPATIBLE,
                            'sse2': mkl.MKL_CBWR_SSE2,
@@ -107,6 +113,19 @@ __mkl_cbwr_get_out_enums.update({value: key for key, value in __mkl_cbwr_set_in_
 
 __mkl_cbwr_get_auto_branch_out_enums = {}
 __mkl_cbwr_get_auto_branch_out_enums.update({value: key for key, value in __mkl_cbwr_set_in_enums.items()})
+
+# ISA Constants
+__mkl_isa_enums = {'avx512': mkl.MKL_ENABLE_AVX512,
+                   'avx512_mic': mkl.MKL_ENABLE_AVX512_MIC,
+                   'avx2': mkl.MKL_ENABLE_AVX2,
+                   'avx': mkl.MKL_ENABLE_AVX,
+                   'sse4_2': mkl.MKL_ENABLE_SSE4_2}
+
+# MPI Implementation Constants
+__mkl_blacs_enums = {'custom': mkl.MKL_BLACS_CUSTOM,
+                     'msmpi': mkl.MKL_BLACS_MSMPI,
+                     'intelmpi': mkl.MKL_BLACS_INTELMPI}
+                     #'mpich': mkl.MKL_BLACS_MPICH}
 
 
 '''
@@ -287,12 +306,35 @@ def mkl_mem_stat():
     return AllocatedBytes, AllocatedBuffers
 
 
-def mkl_peak_mem_usage(mode):
-    return mkl.mkl_peak_mem_usage(mode)
+def mkl_peak_mem_usage(mem_const):
+    mem_const_type = type(mem_const)
+    if mem_const_type is str:
+        assert(mem_const in __mkl_peak_mem_usage_enums.keys())
+        mem_const = __mkl_peak_mem_usage_enums[mem_const]
+    else:
+        assert((mem_const_type is int) and (mem_const in __mkl_peak_mem_usage_enums.values()))
+
+    memory_allocator = mkl.mkl_peak_mem_usage(mem_const)
+    assert(type(memory_allocator) is int)
+    assert(memory_allocator >= -1)
+
+    if memory_allocator == -1:
+        memory_allocator = 'error'
+
+    return memory_allocator
 
 
-def mkl_set_memory_limit(mem_type, limit):
-    return mkl.mkl_set_memory_limit(mem_type, limit)
+def mkl_set_memory_limit(limit):
+    assert(limit >= 0)
+    status = mkl.mkl_set_memory_limit(mkl.MKL_MEM_MCDRAM, limit)
+    assert((status == 0) or (status == 1))
+
+    if status == 1:
+        status = 'success'
+    else:
+        status = 'error'
+
+    return status
 
 
 '''
@@ -301,7 +343,7 @@ def mkl_set_memory_limit(mem_type, limit):
     int mkl_cbwr_get(int option)
     int mkl_cbwr_get_auto_branch()
 '''
-def mkl_cbwr_set(branch=''):
+def mkl_cbwr_set(branch=None):
     branch_type = type(branch)
     if branch_type is str:
         assert(branch in __mkl_cbwr_set_in_enums.keys())
@@ -315,7 +357,7 @@ def mkl_cbwr_set(branch=''):
     return __mkl_cbwr_set_out_enums[status]
 
 
-def mkl_cbwr_get(cnr_const=''):
+def mkl_cbwr_get(cnr_const=None):
     cnr_const_type = type(cnr_const)
     if cnr_const_type is str:
         assert(cnr_const in __mkl_cbwr_get_in_enums)
@@ -346,11 +388,31 @@ def mkl_cbwr_get_auto_branch():
     int mkl_verbose(int enable)
     int mkl_set_mpi (int vendor, const char *custom_library_name)
 '''
-def mkl_enable_instructions(isa):
-    return mkl.mkl_enable_instructions(isa)
+__mkl_isa_enums
+def mkl_enable_instructions(isa=None):
+    isa_type = type(isa)
+    if isa_type is str:
+        assert(isa in __mkl_isa_enums)
+        isa = __mkl_isa_enums[isa]
+    else:
+        assert(issubclass(isa_type, IntEnum))
+        assert(type(isa.value) is int)
+        assert(isa.value in __mkl_isa_enums.values())
+        isa = isa.value
+
+    status = mkl.mkl_enable_instructions(isa)
+    assert((status == 0) or (status == 1))
+
+    if (status == 1):
+        status = 'success'
+    else:
+        status = 'error'
+
+    return status
 
 
 def mkl_set_env_mode(mode):
+    assert((mode == 0) or (mode == 1))
     return mkl.mkl_set_env_mode(mode)
 
 
@@ -360,9 +422,31 @@ def mkl_verbose(enable):
 
 
 def mkl_set_mpi(vendor, custom_library_name):
+    vendor_type = type(vendor)
+    if vendor_type is str:
+        assert(vendor in __mkl_blacs_enums)
+        vendor = __mkl_blacs_enums[vendor]
+    else:
+        assert(issubclass(vendor_type, IntEnum))
+        assert(type(vendor.value) is int)
+        assert(vendor.value in __mkl_blacs_enums.values())
+        vendor = vendor.value
+
     cdef bytes c_bytes = custom_library_name.encode()
     cdef char* c_string = c_bytes
-    return mkl.mkl_set_mpi(vendor, c_string)
+    status = mkl.mkl_set_mpi(vendor, c_string)
+    assert(status in range(-3, 1))
+
+    if status == 0:
+        status = 'success'
+    elif status == -1:
+        status = 'vendor_invalid'
+    elif status == '-2':
+        status = 'custom_library_name_invalid'
+    else:
+        status = 'the MPI library cannot be set at this point'
+
+    return status
 
 
 '''

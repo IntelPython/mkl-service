@@ -82,7 +82,7 @@ class test_memory_management():
         mkl_service.mkl_peak_mem_usage(0)
 
     def test_mkl_set_memory_limit(self):
-        mkl_service.mkl_set_memory_limit(0, 128)
+        mkl_service.mkl_set_memory_limit(128)
 
 
 class test_conditional_numerical_reproducibility_control:
@@ -110,7 +110,7 @@ class test_miscellaneous():
         mkl_service.mkl_verbose(False)
 
     def test_mkl_set_mpi(self):
-        mkl_service.mkl_set_mpi(1, 'test')
+        mkl_service.mkl_set_mpi('intelmpi', 'test')
 
 class test_vm_service_functions():
     # https://software.intel.com/en-us/mkl-developer-reference-c-vm-service-functions

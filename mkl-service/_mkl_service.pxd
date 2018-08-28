@@ -56,6 +56,11 @@ cdef extern from "mkl.h":
     int MKL_ENABLE_AVX
     int MKL_ENABLE_SSE4_2
 
+    int MKL_BLACS_CUSTOM
+    int MKL_BLACS_MSMPI
+    int MKL_BLACS_INTELMPI
+    #int MKL_BLACS_MPICH
+
     # unsigned int vmlSetMode(unsigned int mode)
     # In
     int VML_HA
