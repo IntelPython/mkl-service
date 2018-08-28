@@ -90,6 +90,9 @@ class test_conditional_numerical_reproducibility_control:
     def test_mkl_cbwr_set(self):
         mkl_service.mkl_cbwr_set(mkl_service.MKL_CBWR_AUTO)
 
+    def test_mkl_cbwr_get(self):
+        mkl_service.mkl_cbwr_get(mkl_service.MKL_CBWR_ALL)
+
     def test_mkl_cbwr_get_auto_branch(self):
         mkl_service.mkl_cbwr_get_auto_branch()
 
@@ -103,7 +106,7 @@ class test_miscellaneous():
         mkl_service.mkl_set_env_mode(0)
 
     def test_mkl_verbose(self):
-        mkl_service.mkl_verbose(0)
+        mkl_service.mkl_verbose(False)
 
     def test_mkl_set_mpi(self):
         mkl_service.mkl_set_mpi(1, 'test')

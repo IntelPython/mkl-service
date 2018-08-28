@@ -31,6 +31,11 @@ MKL_CBWR_ERR_INVALID_INPUT = mkl.MKL_CBWR_ERR_INVALID_INPUT
 MKL_CBWR_ERR_UNSUPPORTED_BRANCH = mkl.MKL_CBWR_ERR_UNSUPPORTED_BRANCH
 MKL_CBWR_ERR_MODE_CHANGE_FAILURE = mkl.MKL_CBWR_ERR_MODE_CHANGE_FAILURE
 
+# int mkl_cbwr_get(int option)
+# In
+MKL_CBWR_BRANCH = mkl.MKL_CBWR_BRANCH
+MKL_CBWR_ALL = mkl.MKL_CBWR_ALL
+
 # int mkl_enable_instructions(int isa)
 # In
 MKL_ENABLE_AVX512 = mkl.MKL_ENABLE_AVX512
@@ -197,11 +202,14 @@ def mkl_set_memory_limit(mem_type, limit):
 '''
     #Conditional Numerical Reproducibility
     int mkl_cbwr_set(int settings)
+    int mkl_cbwr_get()
     int mkl_cbwr_get_auto_branch()
 '''
 def mkl_cbwr_set(settings):
     return mkl.mkl_cbwr_set(settings)
 
+def mkl_cbwr_get(option):
+    return mkl.mkl_cbwr_get(option)
 
 def mkl_cbwr_get_auto_branch():
     return mkl.mkl_cbwr_get_auto_branch()
@@ -222,9 +230,9 @@ def mkl_set_env_mode(mode):
     return mkl.mkl_set_env_mode(mode)
 
 
-def mkl_verbose(isEnabled):
-    assert(type(isEnabled) is bool)
-    return mkl.mkl_verbose(isEnabled)
+def mkl_verbose(enable):
+    assert(type(enable) is bool)
+    return mkl.mkl_verbose(enable)
 
 
 def mkl_set_mpi(vendor, custom_library_name):

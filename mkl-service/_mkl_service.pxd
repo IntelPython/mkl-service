@@ -43,6 +43,11 @@ cdef extern from "mkl.h":
     int MKL_CBWR_ERR_UNSUPPORTED_BRANCH
     int MKL_CBWR_ERR_MODE_CHANGE_FAILURE
 
+    # int mkl_cbwr_get(int option)
+    # In
+    int MKL_CBWR_BRANCH
+    int MKL_CBWR_ALL
+
     # int mkl_enable_instructions(int isa)
     # In
     int MKL_ENABLE_AVX512
@@ -117,6 +122,7 @@ cdef extern from "mkl.h":
 
     # Conditional Numerical Reproducibility
     int mkl_cbwr_set(int settings)
+    int mkl_cbwr_get(int option)
     int mkl_cbwr_get_auto_branch()
 
     # Miscellaneous
