@@ -222,9 +222,9 @@ def mkl_set_env_mode(mode):
     return mkl.mkl_set_env_mode(mode)
 
 
-def mkl_verbose(enable):
-    # ToDo: type - bool
-    return mkl.mkl_verbose(enable)
+def mkl_verbose(isEnabled):
+    assert(type(isEnabled) is bool)
+    return mkl.mkl_verbose(isEnabled)
 
 
 def mkl_set_mpi(vendor, custom_library_name):
