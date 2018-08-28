@@ -75,12 +75,12 @@ def setup_package():
     from numpy.distutils.core import setup
     metadata = dict(
         name = 'mkl-service',
-        maintainer = "Intel Corp.",
+        maintainer = "Intel",
         maintainer_email = "scripting@intel.com",
         description = "MKL-service",
         long_description = """MKL-service""",
         url = "http://github.com/IntelPython/mkl-service",
-        author = "Dmitry Zagorny",
+        author = "Intel",
         download_url = "http://github.com/IntelPython/mkl-service",
         license = 'BSD',
         classifiers = [_f for _f in CLASSIFIERS.split('\n') if _f],
