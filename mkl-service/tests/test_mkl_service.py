@@ -16,13 +16,13 @@ class test_threading_control():
         mkl_service.mkl_set_num_threads(1)
 
     def test_mkl_domain_set_num_threads(self):
-        mkl_service.mkl_domain_set_num_threads(1, 1)
+        mkl_service.mkl_domain_set_num_threads(1, domain='fft')
 
     def test_mkl_set_num_threads_local(self):
         mkl_service.mkl_set_num_threads_local(1)
 
     def test_mkl_set_dynamic(self):
-        mkl_service.mkl_set_dynamic(0)
+        mkl_service.mkl_set_dynamic(True)
 
     def test_mkl_get_max_threads(self):
         mkl_service.mkl_get_max_threads()
@@ -88,10 +88,11 @@ class test_memory_management():
 class test_conditional_numerical_reproducibility_control:
     # https://software.intel.com/en-us/mkl-developer-reference-c-conditional-numerical-reproducibility-control
     def test_mkl_cbwr_set(self):
-        mkl_service.mkl_cbwr_set(mkl_service.MKL_CBWR_AUTO)
+        #mkl_service.mkl_cbwr_set(mkl_service.MKL_CBWR_AUTO)
+        mkl_service.mkl_cbwr_set(branch='auto')
 
     def test_mkl_cbwr_get(self):
-        mkl_service.mkl_cbwr_get(mkl_service.MKL_CBWR_ALL)
+        mkl_service.mkl_cbwr_get(cnr_const=mkl_service.enums.MKL_CBWR_ALL)
 
     def test_mkl_cbwr_get_auto_branch(self):
         mkl_service.mkl_cbwr_get_auto_branch()
@@ -100,7 +101,7 @@ class test_conditional_numerical_reproducibility_control:
 class test_miscellaneous():
     # https://software.intel.com/en-us/mkl-developer-reference-c-miscellaneous
     def test_mkl_enable_instructions(self):
-        mkl_service.mkl_enable_instructions(mkl_service.MKL_ENABLE_AVX)
+        mkl_service.mkl_enable_instructions(mkl_service.enums.MKL_ENABLE_AVX)
 
     def test_mkl_set_env_mode(self):
         mkl_service.mkl_set_env_mode(0)
@@ -114,13 +115,13 @@ class test_miscellaneous():
 class test_vm_service_functions():
     # https://software.intel.com/en-us/mkl-developer-reference-c-vm-service-functions
     def test_vmlSetMode(self):
-        mkl_service.vmlSetMode(mkl_service.VML_HA)
+        mkl_service.vmlSetMode(mkl_service.enums.VML_HA)
 
     def test_vmlGetMode(self):
         mkl_service.vmlGetMode()
 
     def test_vmlSetErrStatus(self):
-        mkl_service.vmlSetErrStatus(mkl_service.VML_STATUS_OK)
+        mkl_service.vmlSetErrStatus(mkl_service.enums.VML_STATUS_OK)
 
     def test_vmlGetErrStatus(self):
         mkl_service.vmlGetErrStatus()
