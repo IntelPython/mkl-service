@@ -99,66 +99,79 @@ class enums(IntEnum):
     VML_STATUS_OVERFLOW = mkl.VML_STATUS_OVERFLOW
     VML_STATUS_UNDERFLOW = mkl.VML_STATUS_UNDERFLOW
 
+
 # MKL Function Domains Constants
-__mkl_domain_enums = {'blas': mkl.MKL_DOMAIN_BLAS,
-                      'fft': mkl.MKL_DOMAIN_FFT,
-                      'vml': mkl.MKL_DOMAIN_VML,
-                      'pardiso': mkl.MKL_DOMAIN_PARDISO,
-                      'all': mkl.MKL_DOMAIN_ALL}
+__mkl_domain_enums = {
+    'blas': mkl.MKL_DOMAIN_BLAS,
+    'fft': mkl.MKL_DOMAIN_FFT,
+    'vml': mkl.MKL_DOMAIN_VML,
+    'pardiso': mkl.MKL_DOMAIN_PARDISO,
+    'all': mkl.MKL_DOMAIN_ALL,
+}
 
 # MKL Peak Memory Usage Constants
-__mkl_peak_mem_usage_enums = {'enable': mkl.MKL_PEAK_MEM_ENABLE,
-                              'disable': mkl.MKL_PEAK_MEM_DISABLE,
-                              'peak_mem': mkl.MKL_PEAK_MEM,
-                              'peak_mem_reset': mkl.MKL_PEAK_MEM_RESET}
+__mkl_peak_mem_usage_enums = {
+    'enable': mkl.MKL_PEAK_MEM_ENABLE,
+    'disable': mkl.MKL_PEAK_MEM_DISABLE,
+    'peak_mem': mkl.MKL_PEAK_MEM,
+    'peak_mem_reset': mkl.MKL_PEAK_MEM_RESET,
+}
 
 # CNR Control Constants Constants
-__mkl_cbwr_set_in_enums = {'auto': mkl.MKL_CBWR_AUTO,
-                           'compatible': mkl.MKL_CBWR_COMPATIBLE,
-                           'sse2': mkl.MKL_CBWR_SSE2,
-                           'sse3': mkl.MKL_CBWR_SSE3,
-                           'ssse3': mkl.MKL_CBWR_SSSE3,
-                           'sse4_1': mkl.MKL_CBWR_SSE4_1,
-                           'sse4_2': mkl.MKL_CBWR_SSE4_2,
-                           'avx': mkl.MKL_CBWR_AVX,
-                           'avx2': mkl.MKL_CBWR_AVX2,
-                           'avx512_mic': mkl.MKL_CBWR_AVX512_MIC,
-                           'avx512': mkl.MKL_CBWR_AVX512}
+__mkl_cbwr_set_in_enums = {
+    'auto': mkl.MKL_CBWR_AUTO,
+    'compatible': mkl.MKL_CBWR_COMPATIBLE,
+    'sse2': mkl.MKL_CBWR_SSE2,
+    'sse3': mkl.MKL_CBWR_SSE3,
+    'ssse3': mkl.MKL_CBWR_SSSE3,
+    'sse4_1': mkl.MKL_CBWR_SSE4_1,
+    'sse4_2': mkl.MKL_CBWR_SSE4_2,
+    'avx': mkl.MKL_CBWR_AVX,
+    'avx2': mkl.MKL_CBWR_AVX2,
+    'avx512_mic': mkl.MKL_CBWR_AVX512_MIC,
+    'avx512': mkl.MKL_CBWR_AVX512,
+}
 
-__mkl_cbwr_set_out_enums = {mkl.MKL_CBWR_SUCCESS: 'success',
-                            mkl.MKL_CBWR_ERR_INVALID_INPUT: 'err_invalid_input',
-                            mkl.MKL_CBWR_ERR_UNSUPPORTED_BRANCH: 'err_unsupported_branch',
-                            mkl.MKL_CBWR_ERR_MODE_CHANGE_FAILURE: 'err_mode_change_failure'}
+__mkl_cbwr_set_out_enums = {
+    mkl.MKL_CBWR_SUCCESS: 'success',
+    mkl.MKL_CBWR_ERR_INVALID_INPUT: 'err_invalid_input',
+    mkl.MKL_CBWR_ERR_UNSUPPORTED_BRANCH: 'err_unsupported_branch',
+    mkl.MKL_CBWR_ERR_MODE_CHANGE_FAILURE: 'err_mode_change_failure',
+}
 
-__mkl_cbwr_get_in_enums = {'branch': mkl.MKL_CBWR_BRANCH,
-                           'all': mkl.MKL_CBWR_ALL}
+__mkl_cbwr_get_in_enums = {
+    'branch': mkl.MKL_CBWR_BRANCH,
+    'all': mkl.MKL_CBWR_ALL,
+}
 
-__mkl_cbwr_get_out_enums = {mkl.MKL_CBWR_SUCCESS: 'success',
-                            mkl.MKL_CBWR_ERR_INVALID_INPUT: 'err_invalid_input'}
+__mkl_cbwr_get_out_enums = {
+    mkl.MKL_CBWR_SUCCESS: 'success',
+    mkl.MKL_CBWR_ERR_INVALID_INPUT: 'err_invalid_input',
+}
 __mkl_cbwr_get_out_enums.update({value: key for key, value in __mkl_cbwr_set_in_enums.items()})
 
 __mkl_cbwr_get_auto_branch_out_enums = {}
 __mkl_cbwr_get_auto_branch_out_enums.update({value: key for key, value in __mkl_cbwr_set_in_enums.items()})
 
 # ISA Constants
-__mkl_isa_enums = {'avx512': mkl.MKL_ENABLE_AVX512,
-                   'avx512_mic': mkl.MKL_ENABLE_AVX512_MIC,
-                   'avx2': mkl.MKL_ENABLE_AVX2,
-                   'avx': mkl.MKL_ENABLE_AVX,
-                   'sse4_2': mkl.MKL_ENABLE_SSE4_2}
+__mkl_isa_enums = {
+    'avx512': mkl.MKL_ENABLE_AVX512,
+    'avx512_mic': mkl.MKL_ENABLE_AVX512_MIC,
+    'avx2': mkl.MKL_ENABLE_AVX2,
+    'avx': mkl.MKL_ENABLE_AVX,
+    'sse4_2': mkl.MKL_ENABLE_SSE4_2,
+}
 
 # MPI Implementation Constants
-__mkl_blacs_enums = {'custom': mkl.MKL_BLACS_CUSTOM,
-                     'msmpi': mkl.MKL_BLACS_MSMPI,
-                     'intelmpi': mkl.MKL_BLACS_INTELMPI}
-                     #'mpich': mkl.MKL_BLACS_MPICH}
+__mkl_blacs_enums = {
+    'custom': mkl.MKL_BLACS_CUSTOM,
+    'msmpi': mkl.MKL_BLACS_MSMPI,
+    'intelmpi': mkl.MKL_BLACS_INTELMPI,
+    #'mpich': mkl.MKL_BLACS_MPICH,}
+}
 
 
-'''
-    # MKL support functions
-    void mkl_get_version(MKLVersion * pv)
-    void mkl_get_version_string(char *buf, int len)
-'''
+# MKL support functions
 def mkl_get_version():
     cdef mkl.MKLVersion c_mkl_version
     mkl.mkl_get_version(&c_mkl_version)
@@ -172,16 +185,7 @@ def mkl_get_version_string():
     return c_string.decode()
 
 
-'''
-    # Threading
-    void mkl_set_num_threads(int nth)
-    int mkl_domain_set_num_threads(int nt, int domain)
-    int mkl_set_num_threads_local(int nth)
-    void mkl_set_dynamic(int flag)
-    int mkl_get_max_threads()
-    int mkl_domain_get_max_threads(int domain)
-    int mkl_get_dynamic()
-'''
+# Threading
 def mkl_set_num_threads(num_threads):
     assert(type(num_threads) is int)
     assert(num_threads > 0)
@@ -227,6 +231,7 @@ def mkl_set_num_threads_local(num_threads):
 
     return status
 
+
 def mkl_set_dynamic(enable):
     assert(type(enable) is bool)
     if enable:
@@ -268,15 +273,7 @@ def mkl_get_dynamic():
     return mkl.mkl_get_dynamic()
 
 
-'''
-    # Timing
-    float second()
-    double dsecnd()
-    void mkl_get_cpu_clocks(MKL_UINT64* cl)
-    double mkl_get_cpu_frequency()
-    double mkl_get_cpu_max_frequency()
-    double mkl_get_clocks_frequency()
-'''
+# Timing
 def second():
     return mkl.second()
 
@@ -303,16 +300,7 @@ def mkl_get_clocks_frequency():
     return mkl.mkl_get_clocks_frequency()
 
 
-'''
-    # Memory
-    void mkl_free_buffers()
-    void mkl_thread_free_buffers()
-    int mkl_disable_fast_mm()
-    MKL_INT64 mkl_mem_stat(int *buf)
-    MKL_INT64 mkl_peak_mem_usage(int mode)
-    int mkl_set_memory_limit(int mem_type, size_t limit)
-    
-'''
+# Memory
 def mkl_free_buffers():
     mkl.mkl_free_buffers()
 
@@ -363,12 +351,7 @@ def mkl_set_memory_limit(limit):
     return status
 
 
-'''
-    # Conditional Numerical Reproducibility
-    int mkl_cbwr_set(int settings)
-    int mkl_cbwr_get(int option)
-    int mkl_cbwr_get_auto_branch()
-'''
+# Conditional Numerical Reproducibility
 def mkl_cbwr_set(branch=None):
     branch_type = type(branch)
     if branch_type is str:
@@ -407,14 +390,7 @@ def mkl_cbwr_get_auto_branch():
     return __mkl_cbwr_get_auto_branch_out_enums[status]
 
 
-'''
-    #Miscellaneous
-    int mkl_enable_instructions(int isa)
-    int mkl_set_env_mode(int mode)
-    int mkl_verbose(int enable)
-    int mkl_set_mpi (int vendor, const char *custom_library_name)
-'''
-__mkl_isa_enums
+# Miscellaneous
 def mkl_enable_instructions(isa=None):
     isa_type = type(isa)
     if isa_type is str:
@@ -475,14 +451,7 @@ def mkl_set_mpi(vendor, custom_library_name):
     return status
 
 
-'''
-    #VM Service Functions
-    unsigned int vmlSetMode(unsigned int mode)
-    unsigned int vmlGetMode()
-    int vmlSetErrStatus(const MKL_INT status)
-    int vmlGetErrStatus()
-    int vmlClearErrStatus()
-'''
+# VM Service Functions
 def vmlSetMode(mode):
     return mkl.vmlSetMode(mode)
 

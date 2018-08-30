@@ -112,7 +112,6 @@ cdef extern from "mkl.h":
     int VML_STATUS_OVERFLOW
     int VML_STATUS_UNDERFLOW
 
-
     ctypedef struct MKLVersion:
         int MajorVersion
         int MinorVersion
@@ -123,8 +122,8 @@ cdef extern from "mkl.h":
         char* Platform
 
     # MKL support functions
-    void mkl_get_version(MKLVersion *pv)
-    void mkl_get_version_string(char *buf, int len)
+    void mkl_get_version(MKLVersion* pv)
+    void mkl_get_version_string(char* buf, int len)
 
     # Threading
     void mkl_set_num_threads(int nth)
@@ -138,7 +137,7 @@ cdef extern from "mkl.h":
     # Timing
     float second()
     double dsecnd()
-    void mkl_get_cpu_clocks(MKL_UINT64 *clocks)
+    void mkl_get_cpu_clocks(MKL_UINT64* clocks)
     double mkl_get_cpu_frequency()
     double mkl_get_max_cpu_frequency()
     double mkl_get_clocks_frequency()
@@ -147,7 +146,7 @@ cdef extern from "mkl.h":
     void mkl_free_buffers()
     void mkl_thread_free_buffers()
     int mkl_disable_fast_mm()
-    MKL_INT64 mkl_mem_stat(int *buf)
+    MKL_INT64 mkl_mem_stat(int* buf)
     MKL_INT64 mkl_peak_mem_usage(int mode)
     int mkl_set_memory_limit(int mem_type, size_t limit)
 
@@ -160,7 +159,7 @@ cdef extern from "mkl.h":
     int mkl_enable_instructions(int isa)
     int mkl_set_env_mode(int mode)
     int mkl_verbose(int enable)
-    int mkl_set_mpi (int vendor, const char *custom_library_name)
+    int mkl_set_mpi(int vendor, const char* custom_library_name)
 
     # VM Service Functions
     unsigned int vmlSetMode(unsigned int mode)
@@ -168,4 +167,3 @@ cdef extern from "mkl.h":
     int vmlSetErrStatus(const MKL_INT status)
     int vmlGetErrStatus()
     int vmlClearErrStatus()
-

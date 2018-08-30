@@ -28,7 +28,7 @@
 from os.path import join, exists, dirname
 
 
-def configuration(parent_package='',top_path=None):
+def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration
     from numpy.distutils.system_info import get_info
     config = Configuration('mkl_service', parent_package, top_path)
@@ -45,7 +45,7 @@ def configuration(parent_package='',top_path=None):
         have_cython = False
         sources = [join(pdir, '_mkl_service.c')]
         if not exists(sources[0]):
-            raise ValueError(str(e) + '. ' + 
+            raise ValueError(str(e) + '. ' +
                              'Cython is required to build the initial .c file.')
 
     config.add_extension(
