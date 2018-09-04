@@ -25,84 +25,9 @@
 
 
 cimport _mkl_service as mkl
-from enum import IntEnum
 
 
-class enums(IntEnum):
-    # MKL Function Domains Constants
-    MKL_DOMAIN_BLAS = mkl.MKL_DOMAIN_BLAS
-    MKL_DOMAIN_FFT = mkl.MKL_DOMAIN_FFT
-    MKL_DOMAIN_VML = mkl.MKL_DOMAIN_VML
-    MKL_DOMAIN_PARDISO = mkl.MKL_DOMAIN_PARDISO
-    MKL_DOMAIN_ALL = mkl.MKL_DOMAIN_ALL
-
-    # MKL Peak Memory Usage Constants
-    MKL_PEAK_MEM_ENABLE = mkl.MKL_PEAK_MEM_ENABLE
-    MKL_PEAK_MEM_DISABLE = mkl.MKL_PEAK_MEM_DISABLE
-    MKL_PEAK_MEM = mkl.MKL_PEAK_MEM
-    MKL_PEAK_MEM_RESET = mkl.MKL_PEAK_MEM_RESET
-
-    # CNR Control Constants
-    MKL_CBWR_AUTO = mkl.MKL_CBWR_AUTO
-    MKL_CBWR_COMPATIBLE = mkl.MKL_CBWR_COMPATIBLE
-    MKL_CBWR_SSE2 = mkl.MKL_CBWR_SSE2
-    MKL_CBWR_SSE3 = mkl.MKL_CBWR_SSE3
-    MKL_CBWR_SSSE3 = mkl.MKL_CBWR_SSSE3
-    MKL_CBWR_SSE4_1 = mkl.MKL_CBWR_SSE4_1
-    MKL_CBWR_SSE4_2 = mkl.MKL_CBWR_SSE4_2
-    MKL_CBWR_AVX = mkl.MKL_CBWR_AVX
-    MKL_CBWR_AVX2 = mkl.MKL_CBWR_AVX2
-    MKL_CBWR_AVX512_MIC = mkl.MKL_CBWR_AVX512_MIC
-    MKL_CBWR_AVX512 = mkl.MKL_CBWR_AVX512_MIC
-    MKL_CBWR_BRANCH = mkl.MKL_CBWR_BRANCH
-    MKL_CBWR_ALL = mkl.MKL_CBWR_ALL
-    MKL_CBWR_SUCCESS = mkl.MKL_CBWR_SUCCESS
-    MKL_CBWR_BRANCH_OFF = mkl.MKL_CBWR_BRANCH_OFF
-    MKL_CBWR_ERR_INVALID_INPUT = mkl.MKL_CBWR_ERR_INVALID_INPUT
-    MKL_CBWR_ERR_UNSUPPORTED_BRANCH = mkl.MKL_CBWR_ERR_UNSUPPORTED_BRANCH
-    MKL_CBWR_ERR_MODE_CHANGE_FAILURE = mkl.MKL_CBWR_ERR_MODE_CHANGE_FAILURE
-
-    # ISA Constants
-    MKL_ENABLE_AVX512_MIC_E1 = mkl.MKL_ENABLE_AVX512_MIC_E1
-    MKL_ENABLE_AVX512 = mkl.MKL_ENABLE_AVX512
-    MKL_ENABLE_AVX512_MIC = mkl.MKL_ENABLE_AVX512_MIC
-    MKL_ENABLE_AVX2 = mkl.MKL_ENABLE_AVX2
-    MKL_ENABLE_AVX = mkl.MKL_ENABLE_AVX
-    MKL_ENABLE_SSE4_2 = mkl.MKL_ENABLE_SSE4_2
-
-    # MPI Implementation Constants
-    MKL_BLACS_CUSTOM = mkl.MKL_BLACS_CUSTOM
-    MKL_BLACS_MSMPI = mkl.MKL_BLACS_MSMPI
-    MKL_BLACS_INTELMPI = mkl.MKL_BLACS_INTELMPI
-    MKL_BLACS_MPICH2 = mkl.MKL_BLACS_MPICH2
-
-    # unsigned int vmlSetMode(unsigned int mode)
-    # In
-    VML_HA = mkl.VML_HA
-    VML_LA = mkl.VML_LA
-    VML_EP = mkl.VML_EP
-    VML_FTZDAZ_ON = mkl.VML_FTZDAZ_ON
-    VML_FTZDAZ_OFF = mkl.VML_FTZDAZ_OFF
-    VML_ERRMODE_IGNORE = mkl.VML_ERRMODE_IGNORE
-    VML_ERRMODE_ERRNO = mkl.VML_ERRMODE_ERRNO
-    VML_ERRMODE_STDERR = mkl.VML_ERRMODE_STDERR
-    VML_ERRMODE_EXCEPT = mkl.VML_ERRMODE_EXCEPT
-    VML_ERRMODE_CALLBACK = mkl.VML_ERRMODE_CALLBACK
-    VML_ERRMODE_DEFAULT = mkl.VML_ERRMODE_DEFAULT
-
-    # int vmlSetErrStatus(const MKL_INT status)
-    # In
-    VML_STATUS_OK = mkl.VML_STATUS_OK
-    VML_STATUS_ACCURACYWARNING = mkl.VML_STATUS_ACCURACYWARNING
-    VML_STATUS_BADSIZE = mkl.VML_STATUS_BADSIZE
-    VML_STATUS_BADMEM = mkl.VML_STATUS_BADMEM
-    VML_STATUS_ERRDOM = mkl.VML_STATUS_ERRDOM
-    VML_STATUS_SING = mkl.VML_STATUS_SING
-    VML_STATUS_OVERFLOW = mkl.VML_STATUS_OVERFLOW
-    VML_STATUS_UNDERFLOW = mkl.VML_STATUS_UNDERFLOW
-
-
-def __str_or_enum_to_mkl_int(variable, possible_variables_dict):
+def __mkl_str_to_int(variable, possible_variables_dict):
     assert(variable is not None)
     assert(possible_variables_dict is not None)
 
@@ -111,11 +36,6 @@ def __str_or_enum_to_mkl_int(variable, possible_variables_dict):
     if variable_type is str:
         assert(variable in possible_variables_dict.keys()), 'Variable: <' + str(variable) + '> not in ' + str(possible_variables_dict)
         mkl_variable = possible_variables_dict[variable]
-    else:
-        assert(issubclass(variable_type, IntEnum))
-        assert(type(variable.value) is int)
-        assert(variable.value in possible_variables_dict.values()), 'Variable: <' + str(variable) + '> not in ' + str(possible_variables_dict)
-        mkl_variable = variable.value
 
     return mkl_variable
 
@@ -189,7 +109,7 @@ def domain_set_num_threads(num_threads, domain='all'):
     }
     assert(type(num_threads) is int)
     assert(num_threads >= 0)
-    mkl_domain = __str_or_enum_to_mkl_int(domain, __variables['input'])
+    mkl_domain = __mkl_str_to_int(domain, __variables['input'])
 
     mkl_status = mkl.mkl_domain_set_num_threads(num_threads, mkl_domain)
 
@@ -255,7 +175,7 @@ def domain_get_max_threads(domain='all'):
         },
         'output': None,
     }
-    mkl_domain = __str_or_enum_to_mkl_int(domain, __variables['input'])
+    mkl_domain = __mkl_str_to_int(domain, __variables['input'])
 
     num_threads = mkl.mkl_domain_get_max_threads(mkl_domain)
 
@@ -380,7 +300,7 @@ def peak_mem_usage(mem_const):
         },
         'output': None,
     }
-    mkl_mem_const = __str_or_enum_to_mkl_int(mem_const, __variables['input'])
+    mkl_mem_const = __mkl_str_to_int(mem_const, __variables['input'])
 
     memory_allocator = mkl.mkl_peak_mem_usage(mkl_mem_const)
 
@@ -444,7 +364,7 @@ def cbwr_set(branch=None):
             mkl.MKL_CBWR_ERR_MODE_CHANGE_FAILURE: 'err_mode_change_failure',
         },
     }
-    mkl_branch = __str_or_enum_to_mkl_int(branch, __variables['input'])
+    mkl_branch = __mkl_str_to_int(branch, __variables['input'])
 
     mkl_status = mkl.mkl_cbwr_set(mkl_branch)
 
@@ -469,7 +389,7 @@ def cbwr_get(cnr_const=None):
         },
     }
     __variables['output'].update({value: key for key, value in __mkl_cbwr_const.items()})
-    mkl_cnr_const = __str_or_enum_to_mkl_int(cnr_const, __variables['input'])
+    mkl_cnr_const = __mkl_str_to_int(cnr_const, __variables['input'])
 
     mkl_status = mkl.mkl_cbwr_get(mkl_cnr_const)
 
@@ -514,7 +434,7 @@ def enable_instructions(isa=None):
             1: 'success',
         },
     }
-    mkl_isa = __str_or_enum_to_mkl_int(isa, __variables['input'])
+    mkl_isa = __mkl_str_to_int(isa, __variables['input'])
 
     mkl_status = mkl.mkl_enable_instructions(mkl_isa)
 
@@ -586,7 +506,7 @@ def set_mpi(vendor, custom_library_name):
             -3: 'MPI library cannot be set at this point',
         },
     }
-    mkl_vendor = __str_or_enum_to_mkl_int(vendor, __variables['input'])
+    mkl_vendor = __mkl_str_to_int(vendor, __variables['input'])
 
     cdef bytes c_bytes = custom_library_name.encode()
     cdef char* c_string = c_bytes
@@ -634,9 +554,9 @@ def vml_set_mode(accuracy, ftzdaz, errmode):
     __variables['output']['accuracy'].update({value: key for key, value in __mkl_vml_mode['accuracy'].items()})
     __variables['output']['ftzdaz'].update({value: key for key, value in __mkl_vml_mode['ftzdaz'].items()})
     __variables['output']['errmode'].update({value: key for key, value in __mkl_vml_mode['errmode'].items()})
-    mkl_accuracy = __str_or_enum_to_mkl_int(accuracy, __variables['input']['accuracy'])
-    mkl_ftzdaz = __str_or_enum_to_mkl_int(ftzdaz, __variables['input']['ftzdaz'])
-    mkl_errmode = __str_or_enum_to_mkl_int(errmode, __variables['input']['errmode'])
+    mkl_accuracy = __mkl_str_to_int(accuracy, __variables['input']['accuracy'])
+    mkl_ftzdaz = __mkl_str_to_int(ftzdaz, __variables['input']['ftzdaz'])
+    mkl_errmode = __mkl_str_to_int(errmode, __variables['input']['errmode'])
 
     status = mkl.vmlSetMode(mkl_accuracy | mkl_ftzdaz | mkl_errmode)
 
@@ -693,7 +613,7 @@ def vml_set_err_status(status):
         'output': {},
     }
     __variables['output'].update({value: key for key, value in __mkl_vml_status.items()})
-    mkl_status_in = __str_or_enum_to_mkl_int(status, __variables['input'])
+    mkl_status_in = __mkl_str_to_int(status, __variables['input'])
 
     mkl_status_out = mkl.vmlSetErrStatus(mkl_status_in)
 
