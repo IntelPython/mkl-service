@@ -73,9 +73,12 @@ cdef extern from "mkl.h":
     # In
     int MKL_CBWR_BRANCH
     int MKL_CBWR_ALL
+    # Out
+    int MKL_CBWR_BRANCH_OFF
 
     # int mkl_enable_instructions(int isa)
     # In
+    int MKL_ENABLE_AVX512_MIC_E1
     int MKL_ENABLE_AVX512
     int MKL_ENABLE_AVX512_MIC
     int MKL_ENABLE_AVX2
@@ -85,7 +88,7 @@ cdef extern from "mkl.h":
     int MKL_BLACS_CUSTOM
     int MKL_BLACS_MSMPI
     int MKL_BLACS_INTELMPI
-    #int MKL_BLACS_MPICH
+    int MKL_BLACS_MPICH2
 
     # unsigned int vmlSetMode(unsigned int mode)
     # In
@@ -111,6 +114,12 @@ cdef extern from "mkl.h":
     int VML_STATUS_SING
     int VML_STATUS_OVERFLOW
     int VML_STATUS_UNDERFLOW
+
+    # unsigned int vmlGetMode()
+    # Mask
+    int VML_ACCURACY_MASK
+    int VML_FTZDAZ_MASK
+    int VML_ERRMODE_MASK
 
     ctypedef struct MKLVersion:
         int MajorVersion

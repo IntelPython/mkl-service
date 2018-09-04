@@ -47,16 +47,18 @@ Programming Language :: Python :: 2.7
 Programming Language :: Python :: 3
 Programming Language :: Python :: 3.5
 Programming Language :: Python :: 3.6
+Programming Language :: Python :: 3.7
 Programming Language :: Python :: Implementation :: CPython
 Topic :: Software Development
-Topic :: Scientific/Engineering
+Topic :: Utilities
 Operating System :: Microsoft :: Windows
 Operating System :: POSIX
 Operating System :: Unix
 Operating System :: MacOS
 """
 
-def configuration(parent_package='',top_path=None):
+
+def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration
 
     config = Configuration(None, parent_package, top_path)
@@ -76,25 +78,35 @@ def setup_package():
     from setuptools import setup
     from numpy.distutils.core import setup
     metadata = dict(
-        name = 'mkl-service',
-        maintainer = "Intel",
-        maintainer_email = "scripting@intel.com",
-        description = "MKL-service",
-        long_description = """MKL-service""",
-        url = "http://github.com/IntelPython/mkl-service",
-        author = "Intel",
-        download_url = "http://github.com/IntelPython/mkl-service",
-        license = 'BSD',
-        classifiers = [_f for _f in CLASSIFIERS.split('\n') if _f],
-        platforms = ["Windows", "Linux", "Mac OS-X"],
-        test_suite = 'nose.collector',
-        python_requires = '>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
-        install_requires = ['numpy', 'cython'],
-        configuration = configuration
+        name='mkl-service',
+        maintainer="Intel",
+        maintainer_email="scripting@intel.com",
+        description="MKL Support Functions",
+        long_description="""
+            Intel® Math Kernel Library (Intel® MKL) support functions are
+            subdivided into the following groups according to their purpose:
+                Version Information
+                Threading Control
+                Timing
+                Memory Management
+                Conditional Numerical Reproducibility Control
+                Miscellaneous
+        """,
+        url="http://github.com/IntelPython/mkl-service",
+        author="Intel",
+        download_url="http://github.com/IntelPython/mkl-service",
+        license='BSD',
+        classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
+        platforms=["Windows", "Linux", "Mac OS-X"],
+        test_suite='nose.collector',
+        python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
+        install_requires=['numpy', 'cython'],
+        configuration=configuration,
     )
     setup(**metadata)
 
     return None
+
 
 if __name__ == '__main__':
     setup_package()
