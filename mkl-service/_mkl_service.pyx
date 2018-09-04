@@ -327,7 +327,7 @@ def set_memory_limit(limit):
 
     mkl_status = mkl.mkl_set_memory_limit(mkl.MKL_MEM_MCDRAM, limit)
 
-    status =  __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(mkl_status, __variables['output'])
     return status
 
 
@@ -497,7 +497,7 @@ def set_mpi(vendor, custom_library_name):
             'custom': mkl.MKL_BLACS_CUSTOM,
             'msmpi': mkl.MKL_BLACS_MSMPI,
             'intelmpi': mkl.MKL_BLACS_INTELMPI,
-            #'mpich': mkl.MKL_BLACS_MPICH,
+            'mpich2': mkl.MKL_BLACS_MPICH2,
         },
         'output': {
             0: 'success',
