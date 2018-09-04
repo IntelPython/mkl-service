@@ -30,28 +30,21 @@ ctypedef int MKL_INT
 
 
 cdef extern from "mkl.h":
-    # int mkl_domain_set_num_threads(int nt, int domain)
-    # int mkl_domain_get_max_threads(int domain)
-    # In
+    # MKL Function Domains Constants
     int MKL_DOMAIN_BLAS
     int MKL_DOMAIN_FFT
     int MKL_DOMAIN_VML
     int MKL_DOMAIN_PARDISO
     int MKL_DOMAIN_ALL
 
-    # MKL_INT64 mkl_peak_mem_usage(int mode)
-    # In
+    # MKL Peak Memory Usage Constants
     int MKL_PEAK_MEM_ENABLE
     int MKL_PEAK_MEM_DISABLE
     int MKL_PEAK_MEM
     int MKL_PEAK_MEM_RESET
-
-    # int mkl_set_memory_limit(int mem_type, size_t limit)
-    # In
     int MKL_MEM_MCDRAM
 
-    # int mkl_cbwr_set(int settings)
-    # In
+    # CNR Control Constants
     int MKL_CBWR_AUTO
     int MKL_CBWR_COMPATIBLE
     int MKL_CBWR_SSE2
@@ -63,21 +56,15 @@ cdef extern from "mkl.h":
     int MKL_CBWR_AVX2
     int MKL_CBWR_AVX512_MIC
     int MKL_CBWR_AVX512
-    # Out
+    int MKL_CBWR_BRANCH
+    int MKL_CBWR_ALL
     int MKL_CBWR_SUCCESS
+    int MKL_CBWR_BRANCH_OFF
     int MKL_CBWR_ERR_INVALID_INPUT
     int MKL_CBWR_ERR_UNSUPPORTED_BRANCH
     int MKL_CBWR_ERR_MODE_CHANGE_FAILURE
 
-    # int mkl_cbwr_get(int option)
-    # In
-    int MKL_CBWR_BRANCH
-    int MKL_CBWR_ALL
-    # Out
-    int MKL_CBWR_BRANCH_OFF
-
-    # int mkl_enable_instructions(int isa)
-    # In
+    # ISA Constants
     int MKL_ENABLE_AVX512_MIC_E1
     int MKL_ENABLE_AVX512
     int MKL_ENABLE_AVX512_MIC
@@ -85,13 +72,13 @@ cdef extern from "mkl.h":
     int MKL_ENABLE_AVX
     int MKL_ENABLE_SSE4_2
 
+    # MPI Implementation Constants
     int MKL_BLACS_CUSTOM
     int MKL_BLACS_MSMPI
     int MKL_BLACS_INTELMPI
     int MKL_BLACS_MPICH2
 
-    # unsigned int vmlSetMode(unsigned int mode)
-    # In
+    # VML Constants
     int VML_HA
     int VML_LA
     int VML_EP
@@ -103,9 +90,6 @@ cdef extern from "mkl.h":
     int VML_ERRMODE_EXCEPT
     int VML_ERRMODE_CALLBACK
     int VML_ERRMODE_DEFAULT
-
-    # int vmlSetErrStatus(const MKL_INT status)
-    # In
     int VML_STATUS_OK
     int VML_STATUS_ACCURACYWARNING
     int VML_STATUS_BADSIZE
@@ -114,9 +98,6 @@ cdef extern from "mkl.h":
     int VML_STATUS_SING
     int VML_STATUS_OVERFLOW
     int VML_STATUS_UNDERFLOW
-
-    # unsigned int vmlGetMode()
-    # Mask
     int VML_ACCURACY_MASK
     int VML_FTZDAZ_MASK
     int VML_ERRMODE_MASK
