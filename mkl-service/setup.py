@@ -35,6 +35,7 @@ def configuration(parent_package='', top_path=None):
 
     pdir = dirname(__file__)
     mkl_info = get_info('mkl')
+    incl = mkl_info.get('include_dirs')
     libs = mkl_info.get('libraries', ['mkl_rt'])
 
     try:
@@ -52,7 +53,7 @@ def configuration(parent_package='', top_path=None):
         '_py_mkl_service',
         sources=sources,
         depends=[],
-        include_dirs=[],
+        include_dirs=[incl],
         libraries=libs,
         extra_compile_args=[
             '-DNDEBUG',
