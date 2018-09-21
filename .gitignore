@@ -1,3 +1,6 @@
+# Cython
+mkl-service/_mkl_service.c
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
