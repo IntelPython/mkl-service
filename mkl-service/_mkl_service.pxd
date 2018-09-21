@@ -664,27 +664,6 @@ cdef inline __set_mpi(vendor, custom_library_name):
 
 
 # VM Service Functions
-__mkl_vml_mode = {
-    'accuracy': {
-        'ha': VML_HA,
-        'la': VML_LA,
-        'ep': VML_EP,
-    },
-    'ftzdaz': {
-        'on': VML_FTZDAZ_ON,
-        'off': VML_FTZDAZ_OFF,
-    },
-    'errmode': {
-        'ignore': VML_ERRMODE_IGNORE,
-        'errno': VML_ERRMODE_ERRNO,
-        'stderr': VML_ERRMODE_STDERR,
-        'except': VML_ERRMODE_EXCEPT,
-        'callback': VML_ERRMODE_CALLBACK,
-        'default': VML_ERRMODE_DEFAULT,
-    },
-}
-
-
 cdef inline __vml_set_mode(accuracy, ftzdaz, errmode):
     """
     Sets a new mode for VM functions according to the mode parameter and stores the previous VM mode to oldmode.
@@ -719,6 +698,7 @@ cdef inline __vml_set_mode(accuracy, ftzdaz, errmode):
             'ftzdaz': {
                 VML_FTZDAZ_ON: 'on',
                 VML_FTZDAZ_OFF: 'off',
+                0: 'default',
             },
             'errmode': {
                 VML_ERRMODE_IGNORE: 'ignore',
@@ -758,6 +738,7 @@ cdef inline __vml_get_mode():
             'ftzdaz': {
                 VML_FTZDAZ_ON: 'on',
                 VML_FTZDAZ_OFF: 'off',
+                0: 'default',
             },
             'errmode': {
                 VML_ERRMODE_IGNORE: 'ignore',
@@ -873,3 +854,5 @@ cdef inline __vml_clear_err_status():
 
     status = __mkl_int_to_str(mkl_status, __variables['output'])
     return status
+
+cpdef test()

@@ -26,14 +26,12 @@
 
 
 from __future__ import division, print_function, absolute_import
+import re
 
 
-MAJOR = 1
-MINOR = 0
-MICRO = 0
-ISRELEASED = False
+with open('mkl-service/__init__.py', 'rt', encoding='utf8') as file:
+    VERSION = re.search(r'__version__ = \'(.*?)\'', file.read()).group(1)
 
-VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
 CLASSIFIERS = """\
 Development Status :: 5 - Production/Stable
@@ -83,7 +81,7 @@ def setup_package():
         maintainer_email="scripting@intel.com",
         description="MKL Support Functions",
         long_description="""
-            Intel® Math Kernel Library (Intel® MKL) support functions are
+            Intel Math Kernel Library (Intel MKL) support functions are
             subdivided into the following groups according to their purpose:
                 Version Information
                 Threading Control
