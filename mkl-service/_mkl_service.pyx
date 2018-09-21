@@ -36,7 +36,7 @@ cpdef get_version():
     return __get_version()
 
 
-def get_version_string():
+cpdef get_version_string():
     """
     Returns the Intel MKL version in a character string.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-version-string
@@ -45,7 +45,7 @@ def get_version_string():
 
 
 # Threading
-def set_num_threads(num_threads):
+cpdef set_num_threads(num_threads):
     """
     Specifies the number of OpenMP* threads to use.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-num-threads
@@ -53,7 +53,7 @@ def set_num_threads(num_threads):
     return __set_num_threads(num_threads)
 
 
-def domain_set_num_threads(num_threads, domain='all'):
+cpdef domain_set_num_threads(num_threads, domain='all'):
     """
     Specifies the number of OpenMP* threads for a particular function domain.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-domain-set-num-threads
@@ -61,7 +61,7 @@ def domain_set_num_threads(num_threads, domain='all'):
     return __domain_set_num_threads(num_threads, domain)
 
 
-def set_num_threads_local(num_threads):
+cpdef set_num_threads_local(num_threads):
     """
     Specifies the number of OpenMP* threads for all Intel MKL functions on the current execution thread.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-num-threads-local
@@ -69,7 +69,7 @@ def set_num_threads_local(num_threads):
     return __set_num_threads_local(num_threads)
 
 
-def set_dynamic(enable):
+cpdef set_dynamic(enable):
     """
     Enables Intel MKL to dynamically change the number of OpenMP* threads.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-dynamic
@@ -77,7 +77,7 @@ def set_dynamic(enable):
     return __set_dynamic(enable)
 
 
-def get_max_threads():
+cpdef get_max_threads():
     """
     Gets the number of OpenMP* threads targeted for parallelism.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-max-threads
@@ -85,7 +85,7 @@ def get_max_threads():
     return __get_max_threads()
 
 
-def domain_get_max_threads(domain='all'):
+cpdef domain_get_max_threads(domain='all'):
     """
     Gets the number of OpenMP* threads targeted for parallelism for a particular function domain.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-domain-get-max-threads
@@ -93,7 +93,7 @@ def domain_get_max_threads(domain='all'):
     return __domain_get_max_threads(domain)
 
 
-def get_dynamic():
+cpdef get_dynamic():
     """
     Determines whether Intel MKL is enabled to dynamically change the number of OpenMP* threads.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-dynamic
@@ -102,7 +102,7 @@ def get_dynamic():
 
 
 # Timing
-def second():
+cpdef second():
     """
     Returns elapsed time in seconds.
     Use to estimate real time between two calls to this function.
@@ -111,7 +111,7 @@ def second():
     return __second()
 
 
-def dsecnd():
+cpdef dsecnd():
     """
     Returns elapsed time in seconds.
     Use to estimate real time between two calls to this function.
@@ -120,7 +120,7 @@ def dsecnd():
     return __dsecnd()
 
 
-def get_cpu_clocks():
+cpdef get_cpu_clocks():
     """
     Returns elapsed CPU clocks.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-cpu-clocks
@@ -128,7 +128,7 @@ def get_cpu_clocks():
     return __get_cpu_clocks()
 
 
-def get_cpu_frequency():
+cpdef get_cpu_frequency():
     """
     Returns the current CPU frequency value in GHz.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-cpu-frequency
@@ -136,7 +136,7 @@ def get_cpu_frequency():
     return __get_cpu_frequency()
 
 
-def get_max_cpu_frequency():
+cpdef get_max_cpu_frequency():
     """
     Returns the maximum CPU frequency value in GHz.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-max-cpu-frequency
@@ -144,7 +144,7 @@ def get_max_cpu_frequency():
     return __get_max_cpu_frequency()
 
 
-def get_clocks_frequency():
+cpdef get_clocks_frequency():
     """
     Returns the frequency value in GHz based on constant-rate Time Stamp Counter.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-clocks-frequency
@@ -153,7 +153,7 @@ def get_clocks_frequency():
 
 
 # Memory Management. See the Intel MKL Developer Guide for more memory usage information.
-def free_buffers():
+cpdef free_buffers():
     """
     Frees unused memory allocated by the Intel MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-free-buffers
@@ -161,7 +161,7 @@ def free_buffers():
     __free_buffers()
 
 
-def thread_free_buffers():
+cpdef thread_free_buffers():
     """
     Frees unused memory allocated by the Intel MKL Memory Allocator in the current thread.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-thread-free-buffers
@@ -169,7 +169,7 @@ def thread_free_buffers():
     __thread_free_buffers()
 
 
-def disable_fast_mm():
+cpdef disable_fast_mm():
     """
     Turns off the Intel MKL Memory Allocator for Intel MKL functions to directly use the system malloc/free functions.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-disable-fast-mm
@@ -177,7 +177,7 @@ def disable_fast_mm():
     return __disable_fast_mm()
 
 
-def mem_stat():
+cpdef mem_stat():
     """
     Reports the status of the Intel MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-mem-stat
@@ -185,7 +185,7 @@ def mem_stat():
     return __mem_stat()
 
 
-def peak_mem_usage(mem_const):
+cpdef peak_mem_usage(mem_const):
     """
     Reports the peak memory allocated by the Intel MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-peak-mem-usage
@@ -193,7 +193,7 @@ def peak_mem_usage(mem_const):
     return __peak_mem_usage(mem_const)
 
 
-def set_memory_limit(limit):
+cpdef set_memory_limit(limit):
     """
     On Linux, sets the limit of memory that Intel MKL can allocate for a specified type of memory.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-memory-limit
@@ -202,7 +202,7 @@ def set_memory_limit(limit):
 
 
 # Conditional Numerical Reproducibility
-def cbwr_set(branch=None):
+cpdef cbwr_set(branch=None):
     """
     Configures the CNR mode of Intel MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-set
@@ -210,7 +210,7 @@ def cbwr_set(branch=None):
     return __cbwr_set(branch)
 
 
-def cbwr_get(cnr_const=None):
+cpdef cbwr_get(cnr_const=None):
     """
     Returns the current CNR settings.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-get
@@ -218,7 +218,7 @@ def cbwr_get(cnr_const=None):
     return __cbwr_get(cnr_const)
 
 
-def cbwr_get_auto_branch():
+cpdef cbwr_get_auto_branch():
     """
     Automatically detects the CNR code branch for your platform.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-get-auto-branch
@@ -227,7 +227,7 @@ def cbwr_get_auto_branch():
 
 
 # Miscellaneous
-def enable_instructions(isa=None):
+cpdef enable_instructions(isa=None):
     """
     Enables dispatching for new Intel architectures or restricts the set of Intel instruction sets available for dispatching.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-enable-instructions
@@ -235,7 +235,7 @@ def enable_instructions(isa=None):
     return __enable_instructions(isa)
 
 
-def set_env_mode():
+cpdef set_env_mode():
     """
     Sets up the mode that ignores environment settings specific to Intel MKL. See mkl_set_env_mode(1).
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-env-mode
@@ -243,7 +243,7 @@ def set_env_mode():
     return __set_env_mode()
 
 
-def get_env_mode():
+cpdef get_env_mode():
     """
     Query the current environment mode. See mkl_set_env_mode(0).
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-env-mode
@@ -251,7 +251,7 @@ def get_env_mode():
     return __get_env_mode()
 
 
-def verbose(enable):
+cpdef verbose(enable):
     """
     Enables or disables Intel MKL Verbose mode.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-verbose
@@ -259,7 +259,7 @@ def verbose(enable):
     return __verbose(enable)
 
 
-def set_mpi(vendor, custom_library_name):
+cpdef set_mpi(vendor, custom_library_name):
     """
     Sets the implementation of the message-passing interface to be used by Intel MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-mpi
@@ -268,7 +268,7 @@ def set_mpi(vendor, custom_library_name):
 
 
 # VM Service Functions
-def vml_set_mode(accuracy, ftzdaz, errmode):
+cpdef vml_set_mode(accuracy, ftzdaz, errmode):
     """
     Sets a new mode for VM functions according to the mode parameter and stores the previous VM mode to oldmode.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlsetmode
@@ -276,7 +276,7 @@ def vml_set_mode(accuracy, ftzdaz, errmode):
     return __vml_set_mode(accuracy, ftzdaz, errmode)
 
 
-def vml_get_mode():
+cpdef vml_get_mode():
     """
     Gets the VM mode.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlgetmode
@@ -284,7 +284,7 @@ def vml_get_mode():
     return __vml_get_mode()
 
 
-def vml_set_err_status(status):
+cpdef vml_set_err_status(status):
     """
     Sets the new VM Error Status according to err and stores the previous VM Error Status to olderr.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlseterrstatus
@@ -292,7 +292,7 @@ def vml_set_err_status(status):
     return __vml_set_err_status(status)
 
 
-def vml_get_err_status():
+cpdef vml_get_err_status():
     """
     Gets the VM Error Status.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlgeterrstatus
@@ -300,7 +300,7 @@ def vml_get_err_status():
     return __vml_get_err_status()
 
 
-def vml_clear_err_status():
+cpdef vml_clear_err_status():
     """
     Sets the VM Error Status to VML_STATUS_OK and stores the previous VM Error Status to olderr.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlclearerrstatus
