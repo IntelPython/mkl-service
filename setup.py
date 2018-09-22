@@ -26,10 +26,11 @@
 
 
 from __future__ import division, print_function, absolute_import
+import io
 import re
 
 
-with open('mkl-service/__init__.py', 'rt', encoding='utf8') as file:
+with io.open('mkl-service/__init__.py', 'rt', encoding='utf8') as file:
     VERSION = re.search(r'__version__ = \'(.*?)\'', file.read()).group(1)
 
 
