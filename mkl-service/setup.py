@@ -26,6 +26,7 @@
 
 
 from os.path import join, exists, dirname
+from io import open
 
 
 def configuration(parent_package='', top_path=None):
