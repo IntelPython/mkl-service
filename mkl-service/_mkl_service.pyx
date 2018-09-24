@@ -25,6 +25,7 @@
 
 
 cimport _mkl_service as mkl
+import six
 
 
 # Version Information
@@ -318,7 +319,7 @@ cdef inline __mkl_str_to_int(variable, possible_variables_dict):
 
 cdef inline __mkl_int_to_str(mkl_int_variable, possible_variables_dict):
     assert(mkl_int_variable is not None)
-    assert(type(mkl_int_variable) is int)
+    assert(isinstance(mkl_int_variable, six.integer_types))
     assert(possible_variables_dict is not None)
     assert(mkl_int_variable in possible_variables_dict.keys()), 'Variable: <' + str(mkl_int_variable) + '> not in ' + str(possible_variables_dict)
 
@@ -353,11 +354,11 @@ cdef inline __set_num_threads(num_threads):
     Specifies the number of OpenMP* threads to use.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-num-threads
     """
-    assert(type(num_threads) is int)
+    assert(isinstance(num_threads, six.integer_types))
     assert(num_threads > 0)
 
     prev_num_threads = __get_max_threads()
-    assert(type(prev_num_threads) is int)
+    assert(isinstance(prev_num_threads, six.integer_types))
     assert(prev_num_threads > 0)
 
     mkl.mkl_set_num_threads(num_threads)
@@ -383,7 +384,7 @@ cdef inline __domain_set_num_threads(num_threads, domain):
             1: 'success',
         },
     }
-    assert(type(num_threads) is int)
+    assert(isinstance(num_threads, six.integer_types))
     assert(num_threads >= 0)
     mkl_domain = __mkl_str_to_int(domain, __variables['input'])
 
@@ -398,7 +399,7 @@ cdef inline __set_num_threads_local(num_threads):
     Specifies the number of OpenMP* threads for all Intel MKL functions on the current execution thread.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-num-threads-local
     """
-    assert(type(num_threads) is int)
+    assert(isinstance(num_threads, six.integer_types))
     assert(num_threads >= 0)
 
     status = mkl.mkl_set_num_threads_local(num_threads)
@@ -432,7 +433,7 @@ cdef inline __get_max_threads():
     """
     num_threads = mkl.mkl_get_max_threads()
 
-    assert(type(num_threads) is int)
+    assert(isinstance(num_threads, six.integer_types))
     assert(num_threads >= 1)
     return num_threads
 
@@ -456,7 +457,7 @@ cdef inline __domain_get_max_threads(domain='all'):
 
     num_threads = mkl.mkl_domain_get_max_threads(mkl_domain)
 
-    assert(type(num_threads) is int)
+    assert(isinstance(num_threads, six.integer_types))
     assert(num_threads >= 1)
     return num_threads
 
@@ -581,7 +582,7 @@ cdef inline __peak_mem_usage(mem_const):
 
     memory_allocator = mkl.mkl_peak_mem_usage(mkl_mem_const)
 
-    assert(type(memory_allocator) is int)
+    assert(isinstance(memory_allocator, six.integer_types))
     assert(memory_allocator >= -1)
     if memory_allocator == -1:
         memory_allocator = 'error'
