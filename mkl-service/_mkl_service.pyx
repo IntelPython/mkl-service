@@ -311,14 +311,9 @@ cpdef vml_clear_err_status():
 cdef inline __mkl_str_to_int(variable, possible_variables_dict):
     assert(variable is not None)
     assert(possible_variables_dict is not None)
+    assert(variable in possible_variables_dict.keys()), 'Variable: <' + str(variable) + '> not in ' + str(possible_variables_dict)
 
-    variable_type = type(variable)
-
-    if variable_type is str:
-        assert(variable in possible_variables_dict.keys()), 'Variable: <' + str(variable) + '> not in ' + str(possible_variables_dict)
-        mkl_variable = possible_variables_dict[variable]
-
-    return mkl_variable
+    return possible_variables_dict[variable]
 
 
 cdef inline __mkl_int_to_str(mkl_int_variable, possible_variables_dict):
