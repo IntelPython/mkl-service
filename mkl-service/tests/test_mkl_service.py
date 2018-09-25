@@ -24,7 +24,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-import mkl_service as mkl
+import mkl
 
 
 class test_version_information():
@@ -234,17 +234,17 @@ class test_miscellaneous():
     def test_verbose_true(self):
         mkl.verbose(True)
 
-    def test_set_mpi_custom(self):
-        mkl.set_mpi('custom', 'test')
+    # def test_set_mpi_custom(self):
+    #     mkl.set_mpi('custom', 'test')
 
-    def test_set_mpi_msmpi(self):
-        mkl.set_mpi('msmpi', 'test')
+    # def test_set_mpi_msmpi(self):
+    #     mkl.set_mpi('msmpi', 'test')
 
-    def test_set_mpi_intelmpi(self):
-        mkl.set_mpi('intelmpi', 'test')
+    # def test_set_mpi_intelmpi(self):
+    #     mkl.set_mpi('intelmpi', 'test')
 
-    def test_set_mpi_mpich2(self):
-        mkl.set_mpi('mpich2', 'test')
+    # def test_set_mpi_mpich2(self):
+    #     mkl.set_mpi('mpich2', 'test')
 
 
 class test_vm_service_functions():

@@ -31,7 +31,7 @@ from os.path import join, exists, dirname
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration
     from numpy.distutils.system_info import get_info
-    config = Configuration('mkl_service', parent_package, top_path)
+    config = Configuration('mkl', parent_package, top_path)
 
     pdir = dirname(__file__)
     mkl_info = get_info('mkl')
