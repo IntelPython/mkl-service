@@ -800,9 +800,9 @@ cdef inline __set_mpi(vendor, custom_library_name=None):
             -3: 'MPI library cannot be set at this point',
         },
     }
+    assert((vendor is not 'custom' and custom_library_name is None) or
+           (vendor is 'custom' and custom_library_name is not None))
     mkl_vendor = __mkl_str_to_int(vendor, __variables['input'])
-    assert((vendor is 'custom' and custom_library_name is not None) or
-           (vendor is not 'custom' and custom_library_name is None))
 
     cdef bytes c_bytes
     cdef char* c_string = ''
