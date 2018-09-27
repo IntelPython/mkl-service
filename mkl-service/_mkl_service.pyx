@@ -24,8 +24,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-cimport _mkl_service as mkl
 import six
+cimport _mkl_service as mkl
 
 
 # Version Information
@@ -260,7 +260,7 @@ cpdef verbose(enable):
     return __verbose(enable)
 
 
-cpdef set_mpi(vendor, custom_library_name):
+cpdef set_mpi(vendor, custom_library_name=None):
     """
     Sets the implementation of the message-passing interface to be used by Intel MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-mpi
@@ -781,7 +781,7 @@ cdef inline __verbose(enable):
     return bool(mkl.mkl_verbose(enable))
 
 
-cdef inline __set_mpi(vendor, custom_library_name):
+cdef inline __set_mpi(vendor, custom_library_name=None):
     """
     Sets the implementation of the message-passing interface to be used by Intel MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-mpi
@@ -801,9 +801,14 @@ cdef inline __set_mpi(vendor, custom_library_name):
         },
     }
     mkl_vendor = __mkl_str_to_int(vendor, __variables['input'])
+    assert((vendor is 'custom' and custom_library_name is not None) or
+           (vendor is not 'custom' and custom_library_name is None))
 
-    cdef bytes c_bytes = custom_library_name.encode()
-    cdef char* c_string = c_bytes
+    cdef bytes c_bytes
+    cdef char* c_string = ''
+    if custom_library_name is not None:
+        c_bytes = custom_library_name.encode()
+        c_string = c_bytes
     mkl_status = mkl.mkl_set_mpi(mkl_vendor, c_string)
 
     status = __mkl_int_to_str(mkl_status, __variables['output'])
