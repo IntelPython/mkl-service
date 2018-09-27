@@ -159,6 +159,9 @@ class test_memory_management():
 
 class test_conditional_numerical_reproducibility_control:
     # https://software.intel.com/en-us/mkl-developer-reference-c-conditional-numerical-reproducibility-control
+    def test_cbwr_set_off(self):
+        mkl.cbwr_set(branch='off')
+
     def test_cbwr_set_auto(self):
         mkl.cbwr_set(branch='auto')
 

@@ -617,6 +617,7 @@ cdef inline __cbwr_set(branch=None):
     """
     __variables = {
         'input': {
+            'off': mkl.MKL_CBWR_BRANCH_OFF,
             'auto': mkl.MKL_CBWR_AUTO,
             'compatible': mkl.MKL_CBWR_COMPATIBLE,
             'sse2': mkl.MKL_CBWR_SSE2,
@@ -655,6 +656,7 @@ cdef inline __cbwr_get(cnr_const=None):
             'all': mkl.MKL_CBWR_ALL,
         },
         'output': {
+            mkl.MKL_CBWR_BRANCH_OFF: 'off',
             mkl.MKL_CBWR_AUTO: 'auto',
             mkl.MKL_CBWR_COMPATIBLE: 'compatible',
             mkl.MKL_CBWR_SSE2: 'sse2',
@@ -667,7 +669,6 @@ cdef inline __cbwr_get(cnr_const=None):
             mkl.MKL_CBWR_AVX512_MIC: 'avx512_mic',
             mkl.MKL_CBWR_AVX512: 'avx512',
             mkl.MKL_CBWR_SUCCESS: 'success',
-            mkl.MKL_CBWR_BRANCH_OFF: 'branch_off',
             mkl.MKL_CBWR_ERR_INVALID_INPUT: 'err_invalid_input',
         },
     }
