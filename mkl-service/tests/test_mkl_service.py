@@ -237,17 +237,17 @@ class test_miscellaneous():
     def test_verbose_true(self):
         mkl.verbose(True)
 
-    def test_set_mpi_custom(self):
-        mkl.set_mpi('custom', 'custom_library_name')
+    # def test_set_mpi_custom(self):
+    #     mkl.set_mpi('custom', 'custom_library_name')
 
     # def test_set_mpi_msmpi(self):
-    #    mkl.set_mpi('msmpi')
+    #     mkl.set_mpi('msmpi')
 
-    def test_set_mpi_intelmpi(self):
-        mkl.set_mpi('intelmpi')
+    # def test_set_mpi_intelmpi(self):
+    #     mkl.set_mpi('intelmpi')
 
-    def test_set_mpi_mpich2(self):
-        mkl.set_mpi('mpich2')
+    # def test_set_mpi_mpich2(self):
+    #     mkl.set_mpi('mpich2')
 
 
 class test_vm_service_functions():
