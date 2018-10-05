@@ -24,8 +24,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-cimport _mkl_service as mkl
 import six
+cimport _mkl_service as mkl
 
 
 # Version Information
@@ -260,7 +260,7 @@ cpdef verbose(enable):
     return __verbose(enable)
 
 
-cpdef set_mpi(vendor, custom_library_name):
+cpdef set_mpi(vendor, custom_library_name=None):
     """
     Sets the implementation of the message-passing interface to be used by Intel MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-mpi
@@ -617,6 +617,7 @@ cdef inline __cbwr_set(branch=None):
     """
     __variables = {
         'input': {
+            'off': mkl.MKL_CBWR_BRANCH_OFF,
             'auto': mkl.MKL_CBWR_AUTO,
             'compatible': mkl.MKL_CBWR_COMPATIBLE,
             'sse2': mkl.MKL_CBWR_SSE2,
@@ -655,6 +656,7 @@ cdef inline __cbwr_get(cnr_const=None):
             'all': mkl.MKL_CBWR_ALL,
         },
         'output': {
+            mkl.MKL_CBWR_BRANCH_OFF: 'off',
             mkl.MKL_CBWR_AUTO: 'auto',
             mkl.MKL_CBWR_COMPATIBLE: 'compatible',
             mkl.MKL_CBWR_SSE2: 'sse2',
@@ -667,7 +669,6 @@ cdef inline __cbwr_get(cnr_const=None):
             mkl.MKL_CBWR_AVX512_MIC: 'avx512_mic',
             mkl.MKL_CBWR_AVX512: 'avx512',
             mkl.MKL_CBWR_SUCCESS: 'success',
-            mkl.MKL_CBWR_BRANCH_OFF: 'branch_off',
             mkl.MKL_CBWR_ERR_INVALID_INPUT: 'err_invalid_input',
         },
     }
@@ -780,7 +781,7 @@ cdef inline __verbose(enable):
     return bool(mkl.mkl_verbose(enable))
 
 
-cdef inline __set_mpi(vendor, custom_library_name):
+cdef inline __set_mpi(vendor, custom_library_name=None):
     """
     Sets the implementation of the message-passing interface to be used by Intel MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-mpi
@@ -799,10 +800,15 @@ cdef inline __set_mpi(vendor, custom_library_name):
             -3: 'MPI library cannot be set at this point',
         },
     }
+    assert((vendor is not 'custom' and custom_library_name is None) or
+           (vendor is 'custom' and custom_library_name is not None))
     mkl_vendor = __mkl_str_to_int(vendor, __variables['input'])
 
-    cdef bytes c_bytes = custom_library_name.encode()
-    cdef char* c_string = c_bytes
+    cdef bytes c_bytes
+    cdef char* c_string = ''
+    if custom_library_name is not None:
+        c_bytes = custom_library_name.encode()
+        c_string = c_bytes
     mkl_status = mkl.mkl_set_mpi(mkl_vendor, c_string)
 
     status = __mkl_int_to_str(mkl_status, __variables['output'])
