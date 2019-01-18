@@ -35,8 +35,8 @@ def configuration(parent_package='', top_path=None):
 
     pdir = dirname(__file__)
     mkl_info = get_info('mkl')
-    mkl_include_dirs = mkl_info.get('include_dirs')
-    mkl_library_dirs = mkl_info.get('library_dirs')
+    mkl_include_dirs = mkl_info.get('include_dirs', [])
+    mkl_library_dirs = mkl_info.get('library_dirs', [])
     mkl_libraries = mkl_info.get('libraries', ['mkl_rt'])
 
     try:
@@ -58,8 +58,8 @@ def configuration(parent_package='', top_path=None):
         library_dirs=[mkl_library_dirs],
         libraries=mkl_libraries,
         extra_compile_args=[
-            '-DNDEBUG',
-            '-g', '-O2', '-Wall',
+            '-DNDEBUG'
+            # '-g', '-O2', '-Wall',
         ]
     )
 
