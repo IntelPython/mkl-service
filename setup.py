@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2018, Intel Corporation
+# Copyright (c) 2018-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -30,7 +30,7 @@ import io
 import re
 
 
-with io.open('mkl-service/__init__.py', 'rt', encoding='utf8') as file:
+with io.open('mkl/__init__.py', 'rt', encoding='utf8') as file:
     VERSION = re.search(r'__version__ = \'(.*?)\'', file.read()).group(1)
 
 
@@ -66,7 +66,7 @@ def configuration(parent_package='', top_path=None):
                        delegate_options_to_subpackages=True,
                        quiet=True)
 
-    config.add_subpackage('mkl-service')
+    config.add_subpackage('mkl')
 
     config.version = VERSION
 
@@ -82,7 +82,7 @@ def setup_package():
         maintainer_email="scripting@intel.com",
         description="MKL Support Functions",
         long_description="""
-            Intel Math Kernel Library (Intel MKL) support functions are
+            Intel (R) Math Kernel Library (Intel (R) MKL) support functions are
             subdivided into the following groups according to their purpose:
                 Version Information
                 Threading Control

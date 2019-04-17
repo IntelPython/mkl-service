@@ -1,4 +1,4 @@
-# Copyright (c) 2018, Intel Corporation
+# Copyright (c) 2018-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -25,27 +25,56 @@
 
 
 from nose.tools import nottest
+import six
 import mkl
 
 
 class test_version_information():
     # https://software.intel.com/en-us/mkl-developer-reference-c-version-information
     def test_get_version(self):
-        mkl.get_version()
+        v = mkl.get_version()
+        assert(isinstance(v, dict))
+        assert('MajorVersion' in v)
+        assert('MinorVersion' in v)
+        assert('UpdateVersion' in v)
 
     def test_get_version_string(self):
-        mkl.get_version_string()
+        v = mkl.get_version_string()
+        assert(isinstance(v, six.string_types))
+        assert('Math Kernel Library' in v)
 
 
 class test_threading_control():
     # https://software.intel.com/en-us/mkl-developer-reference-c-threading-control
     def test_set_num_threads(self):
+        saved = mkl.get_max_threads()
         mkl.set_num_threads(8)
+        assert(mkl.get_max_threads() == 8)
+        mkl.set_num_threads(saved)
 
     def test_domain_set_num_threads_blas(self):
+        saved_blas_nt = mkl.domain_get_max_threads(domain='blas')
+        saved_fft_nt = mkl.domain_get_max_threads(domain='fft')
+        saved_vml_nt = mkl.domain_get_max_threads(domain='vml')
+        # set
         status = mkl.domain_set_num_threads(4, domain='blas')
         assert(status == 'success')
-
+        status = mkl.domain_set_num_threads(5, domain='fft')
+        assert(status == 'success')
+        status = mkl.domain_set_num_threads(6, domain='vml')
+        assert(status == 'success')
+        # check
+        assert(mkl.domain_get_max_threads(domain='blas') == 4)
+        assert(mkl.domain_get_max_threads(domain='fft') == 5)
+        assert(mkl.domain_get_max_threads(domain='vml') == 6)
+        # restore
+        status = mkl.domain_set_num_threads(saved_blas_nt, domain='blas')
+        assert(status == 'success')
+        status = mkl.domain_set_num_threads(saved_fft_nt, domain='fft')
+        assert(status == 'success')
+        status = mkl.domain_set_num_threads(saved_vml_nt, domain='vml')
+        assert(status == 'success')
+        
     def test_domain_set_num_threads_fft(self):
         status = mkl.domain_set_num_threads(4, domain='fft')
         assert(status == 'success')
