@@ -82,7 +82,7 @@ def setup_package():
         maintainer_email="scripting@intel.com",
         description="MKL Support Functions",
         long_description="""
-            Intel (R) Math Kernel Library (Intel (R) MKL) support functions are
+            Intel(R) Math Kernel Library (Intel(R) MKL) support functions are
             subdivided into the following groups according to their purpose:
                 Version Information
                 Threading Control

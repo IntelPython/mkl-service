@@ -54,7 +54,7 @@ static void _preload_threading_layer() {
      *       
      *       if MKL_THREADING_LAYER is empty
      *            if kmp_calloc (or a suitable symbol identified by Terry) is loaded,
-     *                  we are using Intel (R) OpenMP, i.e. reinterpret as implicit value of INTEL
+     *                  we are using Intel(R) OpenMP, i.e. reinterpret as implicit value of INTEL
      *            otherwise check if other Open MP is loaded by checking get_omp_num_threads symbol
      *                  if not loaded: 
      *                         assume INTEL, and force loading of IOMP5
@@ -73,7 +73,7 @@ static void _preload_threading_layer() {
     const char *mtlayer = getenv("MKL_THREADING_LAYER");
     void *omp = dlsym(RTLD_DEFAULT, "omp_get_num_threads");
     const char *omp_name = "(unidentified)";
-    const char *iomp = NULL; /* non-zero indicates Intel OpenMP is loaded */
+    const char *iomp = NULL; /* non-zero indicates Intel(R) OpenMP is loaded */
     Dl_info omp_info;
 
     if(verbose && (verbose[0] == 0 || atoi(verbose) == 0))
