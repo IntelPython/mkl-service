@@ -102,9 +102,9 @@ cpdef domain_set_num_threads(num_threads, domain='all'):
     __check_positive_num_threads(c_num_threads, 'domain_set_num_threads')
 
     cdef int c_mkl_domain = __domain_to_mkl_domain(domain)
-    cdef int mkl_status = __domain_set_num_threads(c_num_threads, c_mkl_domain)
+    cdef int c_mkl_status = __domain_set_num_threads(c_num_threads, c_mkl_domain)
 
-    return __mkl_status_to_string(mkl_status)
+    return __mkl_status_to_string(c_mkl_status)
 
 
 cpdef set_num_threads_local(num_threads):
@@ -598,7 +598,7 @@ cdef inline MemStatData __mem_stat():
     return mem_stat_data
 
 
-cdef inline __peak_mem_usage(mem_const):
+cdef object __peak_mem_usage(mem_const):
     """
     Reports the peak memory allocated by the Intel(R) MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-peak-mem-usage
@@ -622,7 +622,7 @@ cdef inline __peak_mem_usage(mem_const):
     return memory_allocator
 
 
-cdef inline __set_memory_limit(limit):
+cdef inline object __set_memory_limit(limit):
     """
     On Linux, sets the limit of memory that Intel(R) MKL can allocate for a specified type of memory.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-memory-limit
@@ -634,7 +634,7 @@ cdef inline __set_memory_limit(limit):
 
 
 # Conditional Numerical Reproducibility
-cdef inline __cbwr_set(branch=None):
+cdef object __cbwr_set(branch=None):
     """
     Configures the CNR mode of Intel(R) MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-set
@@ -704,13 +704,12 @@ cdef inline __cbwr_get(cnr_const=None):
     return status
 
 
-cdef inline __cbwr_get_auto_branch():
+cdef object __cbwr_get_auto_branch():
     """
     Automatically detects the CNR code branch for your platform.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-get-auto-branch
     """
     __variables = {
-        'input': None,
         'output': {
             mkl.MKL_CBWR_AUTO: 'auto',
             mkl.MKL_CBWR_COMPATIBLE: 'compatible',
@@ -733,7 +732,7 @@ cdef inline __cbwr_get_auto_branch():
 
 
 # Miscellaneous
-cdef inline __enable_instructions(isa=None):
+cdef object __enable_instructions(isa=None):
     """
     Enables dispatching for new Intel architectures or restricts the set of Intel instruction sets available for dispatching.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-enable-instructions
@@ -747,20 +746,15 @@ cdef inline __enable_instructions(isa=None):
             'avx': mkl.MKL_ENABLE_AVX,
             'sse4_2': mkl.MKL_ENABLE_SSE4_2,
         },
-        'output': {
-            0: 'error',
-            1: 'success',
-        },
     }
-    mkl_isa = __mkl_str_to_int(isa, __variables['input'])
+    cdef int c_mkl_isa = __mkl_str_to_int(isa, __variables['input'])
 
-    mkl_status = mkl.mkl_enable_instructions(mkl_isa)
+    cdef int c_mkl_status = mkl.mkl_enable_instructions(c_mkl_isa)
+    
+    return __mkl_status_to_string(c_mkl_status)
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
-    return status
 
-
-cdef inline __set_env_mode():
+cdef object __set_env_mode():
     """
     Sets up the mode that ignores environment settings specific to Intel(R) MKL. See mkl_set_env_mode(1).
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-env-mode
@@ -772,27 +766,26 @@ cdef inline __set_env_mode():
             1: 'ignore',
         },
     }
-    mkl_status = mkl.mkl_set_env_mode(1)
+    cdef int c_mkl_status = mkl.mkl_set_env_mode(1)
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(c_mkl_status, __variables['output'])
     return status
 
 
-cdef inline __get_env_mode():
+cdef object __get_env_mode():
     """
     Query the current environment mode. See mkl_set_env_mode(0).
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-env-mode
     """
     __variables = {
-        'input': None,
         'output': {
             0: 'default',
             1: 'ignore',
         },
     }
-    mkl_status = mkl.mkl_set_env_mode(0)
+    cdef int c_mkl_status = mkl.mkl_set_env_mode(0)
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(c_mkl_status, __variables['output'])
     return status
 
 
@@ -842,7 +835,7 @@ cdef __set_mpi(vendor, custom_library_name=None):
 
 
 # VM Service Functions
-cdef inline __vml_set_mode(accuracy, ftzdaz, errmode):
+cdef object __vml_set_mode(accuracy, ftzdaz, errmode):
     """
     Sets a new mode for VM functions according to the mode parameter and stores the previous VM mode to oldmode.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlsetmode
@@ -888,25 +881,31 @@ cdef inline __vml_set_mode(accuracy, ftzdaz, errmode):
             },
         },
     }
-    mkl_accuracy = __mkl_str_to_int(accuracy, __variables['input']['accuracy'])
-    mkl_ftzdaz = __mkl_str_to_int(ftzdaz, __variables['input']['ftzdaz'])
-    mkl_errmode = __mkl_str_to_int(errmode, __variables['input']['errmode'])
+    cdef int c_mkl_accuracy = __mkl_str_to_int(accuracy, __variables['input']['accuracy'])
+    cdef int c_mkl_ftzdaz = __mkl_str_to_int(ftzdaz, __variables['input']['ftzdaz'])
+    cdef int c_mkl_errmode = __mkl_str_to_int(errmode, __variables['input']['errmode'])
 
-    status = mkl.vmlSetMode(mkl_accuracy | mkl_ftzdaz | mkl_errmode)
+    cdef int c_mkl_status = mkl.vmlSetMode(c_mkl_accuracy | c_mkl_ftzdaz | c_mkl_errmode)
 
-    accuracy = __mkl_int_to_str(status & mkl.VML_ACCURACY_MASK, __variables['output']['accuracy'])
-    ftzdaz = __mkl_int_to_str(status & mkl.VML_FTZDAZ_MASK, __variables['output']['ftzdaz'])
-    errmode = __mkl_int_to_str(status & mkl.VML_ERRMODE_MASK, __variables['output']['errmode'])
-    return accuracy, ftzdaz, errmode
+    accuracy = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_ACCURACY_MASK,
+        __variables['output']['accuracy'])
+    ftzdaz = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_FTZDAZ_MASK,
+        __variables['output']['ftzdaz'])
+    errmode = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_ERRMODE_MASK,
+        __variables['output']['errmode'])
+
+    return (accuracy, ftzdaz, errmode)
 
 
-cdef inline __vml_get_mode():
+cdef object __vml_get_mode():
     """
     Gets the VM mode.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlgetmode
     """
     __variables = {
-        'input': None,
         'output': {
             'accuracy': {
                 mkl.VML_HA: 'ha',
@@ -929,12 +928,18 @@ cdef inline __vml_get_mode():
         },
     }
 
-    status = mkl.vmlGetMode()
+    cdef int c_mkl_status = mkl.vmlGetMode()
 
-    accuracy = __mkl_int_to_str(status & mkl.VML_ACCURACY_MASK, __variables['output']['accuracy'])
-    ftzdaz = __mkl_int_to_str(status & mkl.VML_FTZDAZ_MASK, __variables['output']['ftzdaz'])
-    errmode = __mkl_int_to_str(status & mkl.VML_ERRMODE_MASK, __variables['output']['errmode'])
-    return accuracy, ftzdaz, errmode
+    accuracy = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_ACCURACY_MASK,
+        __variables['output']['accuracy'])
+    ftzdaz = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_FTZDAZ_MASK,
+        __variables['output']['ftzdaz'])
+    errmode = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_ERRMODE_MASK,
+        __variables['output']['errmode'])
+    return (accuracy, ftzdaz, errmode)
 
 
 __mkl_vml_status = {
@@ -949,7 +954,7 @@ __mkl_vml_status = {
 }
 
 
-cdef inline __vml_set_err_status(status):
+cdef object __vml_set_err_status(status):
     """
     Sets the new VM Error Status according to err and stores the previous VM Error Status to olderr.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlseterrstatus
@@ -976,15 +981,15 @@ cdef inline __vml_set_err_status(status):
             mkl.VML_STATUS_UNDERFLOW: 'underflow',
         },
     }
-    mkl_status_in = __mkl_str_to_int(status, __variables['input'])
+    cdef int mkl_status_in = __mkl_str_to_int(status, __variables['input'])
 
-    mkl_status_out = mkl.vmlSetErrStatus(mkl_status_in)
+    cdef int mkl_status_out = mkl.vmlSetErrStatus(mkl_status_in)
 
     status = __mkl_int_to_str(mkl_status_out, __variables['output'])
     return status
 
 
-cdef inline __vml_get_err_status():
+cdef object __vml_get_err_status():
     """
     Gets the VM Error Status.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlgeterrstatus
@@ -1003,13 +1008,13 @@ cdef inline __vml_get_err_status():
         },
     }
 
-    mkl_status = mkl.vmlGetErrStatus()
+    cdef int mkl_status = mkl.vmlGetErrStatus()
 
     status = __mkl_int_to_str(mkl_status, __variables['output'])
     return status
 
 
-cdef inline __vml_clear_err_status():
+cdef object __vml_clear_err_status():
     """
     Sets the VM Error Status to VML_STATUS_OK and stores the previous VM Error Status to olderr.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlclearerrstatus
@@ -1028,7 +1033,7 @@ cdef inline __vml_clear_err_status():
         },
     }
 
-    mkl_status = mkl.vmlClearErrStatus()
+    cdef int mkl_status = mkl.vmlClearErrStatus()
 
     status = __mkl_int_to_str(mkl_status, __variables['output'])
     return status
