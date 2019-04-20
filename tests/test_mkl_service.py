@@ -48,8 +48,9 @@ class test_threading_control():
     # https://software.intel.com/en-us/mkl-developer-reference-c-threading-control
     def test_set_num_threads(self):
         saved = mkl.get_max_threads()
-        mkl.set_num_threads(8)
-        assert(mkl.get_max_threads() == 8)
+        half_nt = int( 0.5 + saved / 2 ) 
+        mkl.set_num_threads(half_nt)
+        assert(mkl.get_max_threads() == half_nt)
         mkl.set_num_threads(saved)
 
     def test_domain_set_num_threads_blas(self):
@@ -57,16 +58,19 @@ class test_threading_control():
         saved_fft_nt = mkl.domain_get_max_threads(domain='fft')
         saved_vml_nt = mkl.domain_get_max_threads(domain='vml')
         # set
-        status = mkl.domain_set_num_threads(4, domain='blas')
+        blas_nt = int( (3 + saved_blas_nt)/4 )
+        fft_nt = int( (3 + 2*saved_fft_nt)/4 )
+        vml_nt = int( (3 + 3*saved_vml_nt)/4 )
+        status = mkl.domain_set_num_threads(blas_nt, domain='blas')
         assert(status == 'success')
-        status = mkl.domain_set_num_threads(5, domain='fft')
+        status = mkl.domain_set_num_threads(fft_nt, domain='fft')
         assert(status == 'success')
-        status = mkl.domain_set_num_threads(6, domain='vml')
+        status = mkl.domain_set_num_threads(vml_nt, domain='vml')
         assert(status == 'success')
         # check
-        assert(mkl.domain_get_max_threads(domain='blas') == 4)
-        assert(mkl.domain_get_max_threads(domain='fft') == 5)
-        assert(mkl.domain_get_max_threads(domain='vml') == 6)
+        assert(mkl.domain_get_max_threads(domain='blas') == blas_nt)
+        assert(mkl.domain_get_max_threads(domain='fft') == fft_nt)
+        assert(mkl.domain_get_max_threads(domain='vml') == vml_nt)
         # restore
         status = mkl.domain_set_num_threads(saved_blas_nt, domain='blas')
         assert(status == 'success')
