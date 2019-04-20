@@ -43,4 +43,4 @@ install:
   - g++ -v
 
 script:
-  - conda build -c intel -c conda-forge -c defaults $PYVER conda-recipe
+  - conda build -c defaults -c intel $PYVER conda-recipe
