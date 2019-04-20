@@ -48,7 +48,7 @@ class test_threading_control():
     # https://software.intel.com/en-us/mkl-developer-reference-c-threading-control
     def test_set_num_threads(self):
         saved = mkl.get_max_threads()
-        half_nt = int( 0.5 + saved / 2 ) 
+        half_nt = int( (1 + saved) / 2 ) 
         mkl.set_num_threads(half_nt)
         assert(mkl.get_max_threads() == half_nt)
         mkl.set_num_threads(saved)
