@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2018, Intel Corporation
+# Copyright (c) 2018-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -39,6 +39,11 @@ def configuration(parent_package='', top_path=None):
     mkl_library_dirs = mkl_info.get('library_dirs', [])
     mkl_libraries = mkl_info.get('libraries', ['mkl_rt'])
 
+    defs = []
+    if any(['mkl_rt' in li for li in mkl_libraries]):
+        #libs += ['dl'] - by default on Linux
+        defs += [('USING_MKL_RT', None)]
+
     try:
         from Cython.Build import cythonize
         sources = [join(pdir, '_mkl_service.pyx')]
@@ -49,6 +54,19 @@ def configuration(parent_package='', top_path=None):
         if not exists(sources[0]):
             raise ValueError(str(e) + '. ' +
                              'Cython is required to build the initial .c file.')
+
+    config.add_extension(
+        '_mklinit',
+        sources=['_mklinitmodule.c'],
+        define_macros=defs,
+        include_dirs=[mkl_include_dirs],
+        library_dirs=[mkl_library_dirs],
+        libraries=mkl_libraries,
+        extra_compile_args=[
+            '-DNDEBUG'
+            # '-g', '-O2', '-Wall',
+        ]
+    )
 
     config.add_extension(
         '_py_mkl_service',

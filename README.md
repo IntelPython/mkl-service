@@ -11,5 +11,5 @@ A short example, illustrating it use:
 ```python
 import tomopy
 import mkl
-mkl.domain_set_num_threads(1, domain='fft') # Intel (R) MKL FFT functions to run sequentially
+mkl.domain_set_num_threads(1, domain='fft') # Intel(R) MKL FFT functions to run sequentially
 ```

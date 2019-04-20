@@ -1,4 +1,4 @@
-# Copyright (c) 2018, Intel Corporation
+# Copyright (c) 2018-2019, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -25,13 +25,20 @@
 
 
 import six
+import warnings
 cimport _mkl_service as mkl
+
+
+ctypedef struct MemStatData:
+    #  DataAllocatedBytes, AllocatedBuffers
+    mkl.MKL_INT64 allocated_bytes
+    int allocated_buffers
 
 
 # Version Information
 cpdef get_version():
     """
-    Returns the Intel MKL version.
+    Returns the Intel(R) MKL version as a dictionary.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-version
     """
     return __get_version()
@@ -39,7 +46,7 @@ cpdef get_version():
 
 cpdef get_version_string():
     """
-    Returns the Intel MKL version in a character string.
+    Returns the Intel(R) MKL version as a string.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-version-string
     """
     return __get_version_string()
@@ -51,7 +58,39 @@ cpdef set_num_threads(num_threads):
     Specifies the number of OpenMP* threads to use.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-num-threads
     """
-    return __set_num_threads(num_threads)
+    cdef int c_num_threads = __python_obj_to_int(num_threads, 'set_num_threads')
+    __check_positive_num_threads(c_num_threads, 'set_num_threads')
+
+    return __set_num_threads(c_num_threads)
+
+
+cdef int __warn_and_fallback_on_default_domain(domain):
+    warnings.warn("domain={} is expected to be an integer, a string ('blas', 'fft', "
+                  "'vml', 'pardiso', 'all'). "
+		  "Using domain='all' instead.".format(domain))
+    return mkl.MKL_DOMAIN_ALL
+
+
+cdef int __domain_to_mkl_domain(domain):
+    cdef int c_mkl_domain = mkl.MKL_DOMAIN_ALL
+    _mapping = {
+            'blas': mkl.MKL_DOMAIN_BLAS,
+            'fft': mkl.MKL_DOMAIN_FFT,
+            'vml': mkl.MKL_DOMAIN_VML,
+            'pardiso': mkl.MKL_DOMAIN_PARDISO,
+            'all': mkl.MKL_DOMAIN_ALL }
+
+    if isinstance(domain, six.integer_types):
+        c_mkl_domain = domain
+    elif isinstance(domain, six.string_types):
+        if domain not in _mapping:
+            c_mkl_domain = __warn_and_fallback_on_default_domain(domain)
+        else:
+            c_mkl_domain = _mapping[domain]
+    else:
+        c_mkl_domain = __warn_and_fallback_on_default_domain(domain)
+
+    return c_mkl_domain
 
 
 cpdef domain_set_num_threads(num_threads, domain='all'):
@@ -59,23 +98,47 @@ cpdef domain_set_num_threads(num_threads, domain='all'):
     Specifies the number of OpenMP* threads for a particular function domain.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-domain-set-num-threads
     """
-    return __domain_set_num_threads(num_threads, domain)
+    cdef c_num_threads = __python_obj_to_int(num_threads, 'domain_set_num_threads')
+    __check_positive_num_threads(c_num_threads, 'domain_set_num_threads')
+
+    cdef int c_mkl_domain = __domain_to_mkl_domain(domain)
+    cdef int c_mkl_status = __domain_set_num_threads(c_num_threads, c_mkl_domain)
+
+    return __mkl_status_to_string(c_mkl_status)
 
 
 cpdef set_num_threads_local(num_threads):
     """
-    Specifies the number of OpenMP* threads for all Intel MKL functions on the current execution thread.
+    Specifies the number of OpenMP* threads for all Intel(R) MKL functions on the current execution thread.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-num-threads-local
     """
-    return __set_num_threads_local(num_threads)
+    cdef c_num_threads = 0
+    if isinstance(num_threads, six.string_types):
+        if num_threads is not 'global_num_threads':
+            raise ValueError("The argument of set_num_threads_local is expected "
+                             "to be a non-negative integer or a string 'global_num_threads'")
+    else:
+        c_num_threads = __python_obj_to_int(num_threads, 'set_num_threads_local')
+
+    __check_non_negative_num_threads(c_num_threads, 'set_num_threads_local')
+
+    cdef c_prev_num_threads = __set_num_threads_local(c_num_threads)
+    if (c_prev_num_threads == 0):
+        ret_value = 'global_num_threads'
+    else:
+        ret_value = c_prev_num_threads
+
+    return ret_value
 
 
 cpdef set_dynamic(enable):
     """
-    Enables Intel MKL to dynamically change the number of OpenMP* threads.
+    Enables Intel(R) MKL to dynamically change the number of OpenMP* threads.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-dynamic
     """
-    return __set_dynamic(enable)
+    cdef int c_enable = int(enable)
+    # return the number of threads used
+    return __set_dynamic(c_enable)
 
 
 cpdef get_max_threads():
@@ -91,15 +154,16 @@ cpdef domain_get_max_threads(domain='all'):
     Gets the number of OpenMP* threads targeted for parallelism for a particular function domain.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-domain-get-max-threads
     """
-    return __domain_get_max_threads(domain)
+    cdef int c_mkl_domain = __domain_to_mkl_domain(domain)
+    return __domain_get_max_threads(c_mkl_domain)
 
 
 cpdef get_dynamic():
     """
-    Determines whether Intel MKL is enabled to dynamically change the number of OpenMP* threads.
+    Determines whether Intel(R) MKL is enabled to dynamically change the number of OpenMP* threads.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-dynamic
     """
-    return __get_dynamic()
+    return bool(__get_dynamic())
 
 
 # Timing
@@ -153,10 +217,10 @@ cpdef get_clocks_frequency():
     return __get_clocks_frequency()
 
 
-# Memory Management. See the Intel MKL Developer Guide for more memory usage information.
+# Memory Management. See the Intel(R) MKL Developer Guide for more memory usage information.
 cpdef free_buffers():
     """
-    Frees unused memory allocated by the Intel MKL Memory Allocator.
+    Frees unused memory allocated by the Intel(R) MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-free-buffers
     """
     __free_buffers()
@@ -164,7 +228,7 @@ cpdef free_buffers():
 
 cpdef thread_free_buffers():
     """
-    Frees unused memory allocated by the Intel MKL Memory Allocator in the current thread.
+    Frees unused memory allocated by the Intel(R) MKL Memory Allocator in the current thread.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-thread-free-buffers
     """
     __thread_free_buffers()
@@ -172,7 +236,7 @@ cpdef thread_free_buffers():
 
 cpdef disable_fast_mm():
     """
-    Turns off the Intel MKL Memory Allocator for Intel MKL functions to directly use the system malloc/free functions.
+    Turns off the Intel(R) MKL Memory Allocator for Intel(R) MKL functions to directly use the system malloc/free functions.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-disable-fast-mm
     """
     return __disable_fast_mm()
@@ -180,7 +244,7 @@ cpdef disable_fast_mm():
 
 cpdef mem_stat():
     """
-    Reports the status of the Intel MKL Memory Allocator.
+    Reports the status of the Intel(R) MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-mem-stat
     """
     return __mem_stat()
@@ -188,7 +252,7 @@ cpdef mem_stat():
 
 cpdef peak_mem_usage(mem_const):
     """
-    Reports the peak memory allocated by the Intel MKL Memory Allocator.
+    Reports the peak memory allocated by the Intel(R) MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-peak-mem-usage
     """
     return __peak_mem_usage(mem_const)
@@ -196,7 +260,7 @@ cpdef peak_mem_usage(mem_const):
 
 cpdef set_memory_limit(limit):
     """
-    On Linux, sets the limit of memory that Intel MKL can allocate for a specified type of memory.
+    On Linux, sets the limit of memory that Intel(R) MKL can allocate for a specified type of memory.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-memory-limit
     """
     return __set_memory_limit(limit)
@@ -205,7 +269,7 @@ cpdef set_memory_limit(limit):
 # Conditional Numerical Reproducibility
 cpdef cbwr_set(branch=None):
     """
-    Configures the CNR mode of Intel MKL.
+    Configures the CNR mode of Intel(R) MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-set
     """
     return __cbwr_set(branch)
@@ -238,7 +302,7 @@ cpdef enable_instructions(isa=None):
 
 cpdef set_env_mode():
     """
-    Sets up the mode that ignores environment settings specific to Intel MKL. See mkl_set_env_mode(1).
+    Sets up the mode that ignores environment settings specific to Intel(R) MKL. See mkl_set_env_mode(1).
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-env-mode
     """
     return __set_env_mode()
@@ -254,15 +318,16 @@ cpdef get_env_mode():
 
 cpdef verbose(enable):
     """
-    Enables or disables Intel MKL Verbose mode.
+    Enables or disables Intel(R) MKL Verbose mode.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-verbose
     """
-    return __verbose(enable)
+    cdef int c_enable = int(enable)
+    return bool(__verbose(c_enable))
 
 
 cpdef set_mpi(vendor, custom_library_name=None):
     """
-    Sets the implementation of the message-passing interface to be used by Intel MKL.
+    Sets the implementation of the message-passing interface to be used by Intel(R) MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-mpi
     """
     return __set_mpi(vendor, custom_library_name)
@@ -309,27 +374,55 @@ cpdef vml_clear_err_status():
     return __vml_clear_err_status()
 
 
-cdef inline __mkl_str_to_int(variable, possible_variables_dict):
-    assert(variable is not None)
-    assert(possible_variables_dict is not None)
-    assert(variable in possible_variables_dict.keys()), 'Variable: <' + str(variable) + '> not in ' + str(possible_variables_dict)
+cdef __mkl_status_to_string(int mkl_status):
+    if mkl_status == 1:
+        return 'success'
+    else:
+        return 'error'
+
+
+cdef int __python_obj_to_int(obj, func_name):
+    if not isinstance(obj, six.integer_types):
+        raise ValueError("The argument of " + func_name + " is expected to be a positive integer")
+    cdef c_int = obj
+    return c_int
+
+
+cdef void __check_positive_num_threads(int p, func_name):
+    if p <= 0:
+        warnings.warn("Non-positive argument of " + func_name +  " is being ignored, number of threads will not be changed")
+
+
+cdef void __check_non_negative_num_threads(int p, func_name):
+    if p < 0:
+        warnings.warn("Non-positive argument of " + func_name +  " is being ignored, number of threads will not be changed")
+
+
+cdef inline int __mkl_str_to_int(variable, possible_variables_dict):
+    if variable is None:
+        raise ValueError("Variable can not be None")
+    if possible_variables_dict is None:
+        raise RuntimeError("Dictionary mapping possible variable value to internal code is missing")
+    if variable not in possible_variables_dict:
+        raise ValueError('Variable: <' + str(variable) + '> not in ' + str(possible_variables_dict))
 
     return possible_variables_dict[variable]
 
 
-cdef inline __mkl_int_to_str(mkl_int_variable, possible_variables_dict):
-    assert(mkl_int_variable is not None)
-    assert(isinstance(mkl_int_variable, six.integer_types))
-    assert(possible_variables_dict is not None)
-    assert(mkl_int_variable in possible_variables_dict.keys()), 'Variable: <' + str(mkl_int_variable) + '> not in ' + str(possible_variables_dict)
+cdef  __mkl_int_to_str(int mkl_int_variable, possible_variables_dict):
+    if possible_variables_dict is None:
+        raise RuntimeError("Dictionary mapping possible internal code to output string is missing")
+
+    if mkl_int_variable not in possible_variables_dict:
+        raise ValueError('Variable: <' + str(mkl_int_variable) + '> not in ' + str(possible_variables_dict))
 
     return possible_variables_dict[mkl_int_variable]
 
 
 # Version Information
-cdef inline __get_version():
+cdef inline mkl.MKLVersion __get_version():
     """
-    Returns the Intel MKL version.
+    Returns the Intel(R) MKL version.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-version
     """
     cdef mkl.MKLVersion c_mkl_version
@@ -337,9 +430,9 @@ cdef inline __get_version():
     return c_mkl_version
 
 
-cdef inline __get_version_string():
+cdef __get_version_string():
     """
-    Returns the Intel MKL version in a character string.
+    Returns the Intel(R) MKL version in a character string.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-version-string
     """
     cdef int c_string_len = 198
@@ -349,132 +442,74 @@ cdef inline __get_version_string():
 
 
 # Threading
-cdef inline __set_num_threads(num_threads):
+cdef inline int __set_num_threads(int num_threads):
     """
     Specifies the number of OpenMP* threads to use.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-num-threads
     """
-    assert(isinstance(num_threads, six.integer_types))
-    assert(num_threads > 0)
 
-    prev_num_threads = __get_max_threads()
-    assert(isinstance(prev_num_threads, six.integer_types))
-    assert(prev_num_threads > 0)
-
+    cdef int prev_num_threads = __get_max_threads()
     mkl.mkl_set_num_threads(num_threads)
-
     return prev_num_threads
 
 
-cdef inline __domain_set_num_threads(num_threads, domain):
+cdef inline int __domain_set_num_threads(int c_num_threads, int mkl_domain):
     """
     Specifies the number of OpenMP* threads for a particular function domain.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-domain-set-num-threads
     """
-    __variables = {
-        'input': {
-            'blas': mkl.MKL_DOMAIN_BLAS,
-            'fft': mkl.MKL_DOMAIN_FFT,
-            'vml': mkl.MKL_DOMAIN_VML,
-            'pardiso': mkl.MKL_DOMAIN_PARDISO,
-            'all': mkl.MKL_DOMAIN_ALL,
-        },
-        'output': {
-            0: 'error',
-            1: 'success',
-        },
-    }
-    assert(isinstance(num_threads, six.integer_types))
-    assert(num_threads >= 0)
-    mkl_domain = __mkl_str_to_int(domain, __variables['input'])
-
-    mkl_status = mkl.mkl_domain_set_num_threads(num_threads, mkl_domain)
-
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
-    return status
+    cdef int mkl_status = mkl.mkl_domain_set_num_threads(c_num_threads, mkl_domain)
+    return mkl_status
 
 
-cdef inline __set_num_threads_local(num_threads):
+cdef inline int __set_num_threads_local(int c_num_threads):
     """
-    Specifies the number of OpenMP* threads for all Intel MKL functions on the current execution thread.
+    Specifies the number of OpenMP* threads for all Intel(R) MKL functions on the current execution thread.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-num-threads-local
     """
-    assert(isinstance(num_threads, six.integer_types))
-    assert(num_threads >= 0)
 
-    status = mkl.mkl_set_num_threads_local(num_threads)
-
-    assert(status >= 0)
-    if (status == 0):
-        status = 'global_num_threads'
-    return status
+    cdef int c_mkl_status = mkl.mkl_set_num_threads_local(c_num_threads)
+    return c_mkl_status
 
 
-cdef inline __set_dynamic(enable):
+cdef inline int __set_dynamic(int c_enable):
     """
-    Enables Intel MKL to dynamically change the number of OpenMP* threads.
+    Enables Intel(R) MKL to dynamically change the number of OpenMP* threads.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-dynamic
     """
-    assert(type(enable) is bool)
-    if enable:
-        enable = 1
-    else:
-        enable = 0
 
-    mkl.mkl_set_dynamic(enable)
-
+    mkl.mkl_set_dynamic(c_enable)
     return __get_max_threads()
 
 
-cdef inline __get_max_threads():
+cdef inline int __get_max_threads():
     """
     Gets the number of OpenMP* threads targeted for parallelism.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-max-threads
     """
-    num_threads = mkl.mkl_get_max_threads()
-
-    assert(isinstance(num_threads, six.integer_types))
-    assert(num_threads >= 1)
-    return num_threads
+    return mkl.mkl_get_max_threads()
 
 
-cdef inline __domain_get_max_threads(domain='all'):
+cdef inline int __domain_get_max_threads(int c_mkl_domain):
     """
     Gets the number of OpenMP* threads targeted for parallelism for a particular function domain.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-domain-get-max-threads
     """
-    __variables = {
-        'input': {
-            'blas': mkl.MKL_DOMAIN_BLAS,
-            'fft': mkl.MKL_DOMAIN_FFT,
-            'vml': mkl.MKL_DOMAIN_VML,
-            'pardiso': mkl.MKL_DOMAIN_PARDISO,
-            'all': mkl.MKL_DOMAIN_ALL,
-        },
-        'output': None,
-    }
-    mkl_domain = __mkl_str_to_int(domain, __variables['input'])
+    cdef int c_num_threads = mkl.mkl_domain_get_max_threads(c_mkl_domain)
 
-    num_threads = mkl.mkl_domain_get_max_threads(mkl_domain)
-
-    assert(isinstance(num_threads, six.integer_types))
-    assert(num_threads >= 1)
-    return num_threads
+    return c_num_threads
 
 
-cdef inline __get_dynamic():
+cdef inline int __get_dynamic():
     """
-    Determines whether Intel MKL is enabled to dynamically change the number of OpenMP* threads.
+    Determines whether Intel(R) MKL is enabled to dynamically change the number of OpenMP* threads.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-dynamic
     """
-    dynamic_enabled = mkl.mkl_get_dynamic()
-
-    assert((dynamic_enabled == 0) or (dynamic_enabled == 1))
     return mkl.mkl_get_dynamic()
 
 
 # Timing
-cdef inline __second():
+cdef inline float __second():
     """
     Returns elapsed time in seconds.
     Use to estimate real time between two calls to this function.
@@ -483,7 +518,7 @@ cdef inline __second():
     return mkl.second()
 
 
-cdef inline __dsecnd():
+cdef inline double __dsecnd():
     """
     Returns elapsed time in seconds.
     Use to estimate real time between two calls to this function.
@@ -492,7 +527,7 @@ cdef inline __dsecnd():
     return mkl.dsecnd()
 
 
-cdef inline __get_cpu_clocks():
+cdef inline mkl.MKL_UINT64 __get_cpu_clocks():
     """
     Returns elapsed CPU clocks.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-cpu-clocks
@@ -502,7 +537,7 @@ cdef inline __get_cpu_clocks():
     return clocks
 
 
-cdef inline __get_cpu_frequency():
+cdef inline double __get_cpu_frequency():
     """
     Returns the current CPU frequency value in GHz.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-cpu-frequency
@@ -510,7 +545,7 @@ cdef inline __get_cpu_frequency():
     return mkl.mkl_get_cpu_frequency()
 
 
-cdef inline __get_max_cpu_frequency():
+cdef inline double __get_max_cpu_frequency():
     """
     Returns the maximum CPU frequency value in GHz.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-max-cpu-frequency
@@ -518,7 +553,7 @@ cdef inline __get_max_cpu_frequency():
     return mkl.mkl_get_max_cpu_frequency()
 
 
-cdef inline __get_clocks_frequency():
+cdef inline double __get_clocks_frequency():
     """
     Returns the frequency value in GHz based on constant-rate Time Stamp Counter.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-clocks-frequency
@@ -526,47 +561,46 @@ cdef inline __get_clocks_frequency():
     return mkl.mkl_get_clocks_frequency()
 
 
-# Memory Management. See the Intel MKL Developer Guide for more memory usage information.
-cdef inline __free_buffers():
+# Memory Management. See the Intel(R) MKL Developer Guide for more memory usage information.
+cdef inline void __free_buffers():
     """
-    Frees unused memory allocated by the Intel MKL Memory Allocator.
+    Frees unused memory allocated by the Intel(R) MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-free-buffers
     """
     mkl.mkl_free_buffers()
     return
 
 
-cdef inline __thread_free_buffers():
+cdef inline void __thread_free_buffers():
     """
-    Frees unused memory allocated by the Intel MKL Memory Allocator in the current thread.
+    Frees unused memory allocated by the Intel(R) MKL Memory Allocator in the current thread.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-thread-free-buffers
     """
     mkl.mkl_thread_free_buffers()
     return
 
 
-cdef inline __disable_fast_mm():
+cdef inline int __disable_fast_mm():
     """
-    Turns off the Intel MKL Memory Allocator for Intel MKL functions to directly use the system malloc/free functions.
+    Turns off the Intel(R) MKL Memory Allocator for Intel(R) MKL functions to directly use the system malloc/free functions.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-disable-fast-mm
     """
     return mkl.mkl_disable_fast_mm()
 
 
-cdef inline __mem_stat():
+cdef inline MemStatData __mem_stat():
     """
-    Reports the status of the Intel MKL Memory Allocator.
+    Reports the status of the Intel(R) MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-mem-stat
     """
-    cdef int AllocatedBuffers
-    cdef mkl.MKL_INT64 AllocatedBytes
-    AllocatedBytes = mkl.mkl_mem_stat(&AllocatedBuffers)
-    return AllocatedBytes, AllocatedBuffers
+    cdef MemStatData mem_stat_data
+    mem_stat_data.allocated_bytes = mkl.mkl_mem_stat(&mem_stat_data.allocated_buffers)
+    return mem_stat_data
 
 
-cdef inline __peak_mem_usage(mem_const):
+cdef object __peak_mem_usage(mem_const):
     """
-    Reports the peak memory allocated by the Intel MKL Memory Allocator.
+    Reports the peak memory allocated by the Intel(R) MKL Memory Allocator.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-peak-mem-usage
     """
     __variables = {
@@ -575,44 +609,34 @@ cdef inline __peak_mem_usage(mem_const):
             'disable': mkl.MKL_PEAK_MEM_DISABLE,
             'peak_mem': mkl.MKL_PEAK_MEM,
             'peak_mem_reset': mkl.MKL_PEAK_MEM_RESET,
-        },
-        'output': None,
+        }
     }
-    mkl_mem_const = __mkl_str_to_int(mem_const, __variables['input'])
+    cdef int c_mkl_mem_const = __mkl_str_to_int(mem_const, __variables['input'])
 
-    memory_allocator = mkl.mkl_peak_mem_usage(mkl_mem_const)
+    cdef mkl.MKL_INT64 c_memory_allocator = mkl.mkl_peak_mem_usage(c_mkl_mem_const)
 
-    assert(isinstance(memory_allocator, six.integer_types))
-    assert(memory_allocator >= -1)
-    if memory_allocator == -1:
+    if c_memory_allocator == -1:
         memory_allocator = 'error'
+    else:
+        memory_allocator = c_memory_allocator
     return memory_allocator
 
 
-cdef inline __set_memory_limit(limit):
+cdef inline object __set_memory_limit(limit):
     """
-    On Linux, sets the limit of memory that Intel MKL can allocate for a specified type of memory.
+    On Linux, sets the limit of memory that Intel(R) MKL can allocate for a specified type of memory.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-memory-limit
     """
-    __variables = {
-        'input': None,
-        'output': {
-            0: 'error',
-            1: 'success',
-        },
-    }
-    assert(limit >= 0)
+    cdef size_t c_limit = limit
 
-    mkl_status = mkl.mkl_set_memory_limit(mkl.MKL_MEM_MCDRAM, limit)
-
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
-    return status
+    cdef int c_mkl_status = mkl.mkl_set_memory_limit(mkl.MKL_MEM_MCDRAM, c_limit)
+    return __mkl_status_to_string(c_mkl_status)
 
 
 # Conditional Numerical Reproducibility
-cdef inline __cbwr_set(branch=None):
+cdef object __cbwr_set(branch=None):
     """
-    Configures the CNR mode of Intel MKL.
+    Configures the CNR mode of Intel(R) MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-set
     """
     __variables = {
@@ -680,13 +704,12 @@ cdef inline __cbwr_get(cnr_const=None):
     return status
 
 
-cdef inline __cbwr_get_auto_branch():
+cdef object __cbwr_get_auto_branch():
     """
     Automatically detects the CNR code branch for your platform.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-get-auto-branch
     """
     __variables = {
-        'input': None,
         'output': {
             mkl.MKL_CBWR_AUTO: 'auto',
             mkl.MKL_CBWR_COMPATIBLE: 'compatible',
@@ -709,7 +732,7 @@ cdef inline __cbwr_get_auto_branch():
 
 
 # Miscellaneous
-cdef inline __enable_instructions(isa=None):
+cdef object __enable_instructions(isa=None):
     """
     Enables dispatching for new Intel architectures or restricts the set of Intel instruction sets available for dispatching.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-enable-instructions
@@ -723,22 +746,17 @@ cdef inline __enable_instructions(isa=None):
             'avx': mkl.MKL_ENABLE_AVX,
             'sse4_2': mkl.MKL_ENABLE_SSE4_2,
         },
-        'output': {
-            0: 'error',
-            1: 'success',
-        },
     }
-    mkl_isa = __mkl_str_to_int(isa, __variables['input'])
+    cdef int c_mkl_isa = __mkl_str_to_int(isa, __variables['input'])
 
-    mkl_status = mkl.mkl_enable_instructions(mkl_isa)
+    cdef int c_mkl_status = mkl.mkl_enable_instructions(c_mkl_isa)
+    
+    return __mkl_status_to_string(c_mkl_status)
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
-    return status
 
-
-cdef inline __set_env_mode():
+cdef object __set_env_mode():
     """
-    Sets up the mode that ignores environment settings specific to Intel MKL. See mkl_set_env_mode(1).
+    Sets up the mode that ignores environment settings specific to Intel(R) MKL. See mkl_set_env_mode(1).
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-env-mode
     """
     __variables = {
@@ -748,42 +766,40 @@ cdef inline __set_env_mode():
             1: 'ignore',
         },
     }
-    mkl_status = mkl.mkl_set_env_mode(1)
+    cdef int c_mkl_status = mkl.mkl_set_env_mode(1)
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(c_mkl_status, __variables['output'])
     return status
 
 
-cdef inline __get_env_mode():
+cdef object __get_env_mode():
     """
     Query the current environment mode. See mkl_set_env_mode(0).
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-env-mode
     """
     __variables = {
-        'input': None,
         'output': {
             0: 'default',
             1: 'ignore',
         },
     }
-    mkl_status = mkl.mkl_set_env_mode(0)
+    cdef int c_mkl_status = mkl.mkl_set_env_mode(0)
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(c_mkl_status, __variables['output'])
     return status
 
 
-cdef inline __verbose(enable):
+cdef inline int __verbose(int c_enable):
     """
-    Enables or disables Intel MKL Verbose mode.
+    Enables or disables Intel(R) MKL Verbose mode.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-verbose
     """
-    assert(type(enable) is bool)
-    return bool(mkl.mkl_verbose(enable))
+    return mkl.mkl_verbose(c_enable)
 
 
-cdef inline __set_mpi(vendor, custom_library_name=None):
+cdef __set_mpi(vendor, custom_library_name=None):
     """
-    Sets the implementation of the message-passing interface to be used by Intel MKL.
+    Sets the implementation of the message-passing interface to be used by Intel(R) MKL.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-mpi
     """
     __variables = {
@@ -800,8 +816,11 @@ cdef inline __set_mpi(vendor, custom_library_name=None):
             -3: 'MPI library cannot be set at this point',
         },
     }
-    assert((vendor is not 'custom' and custom_library_name is None) or
-           (vendor is 'custom' and custom_library_name is not None))
+    if ((vendor is 'custom' or custom_library_name is not None) and
+        (vendor is not 'custom' or custom_library_name is None)):
+        raise ValueError("Selecting custom MPI for BLACS requires specifying "
+                         "the custom library, and specifying custom library "
+                         "necessitates selecting a custom MPI for BLACS library")
     mkl_vendor = __mkl_str_to_int(vendor, __variables['input'])
 
     cdef bytes c_bytes
@@ -816,7 +835,7 @@ cdef inline __set_mpi(vendor, custom_library_name=None):
 
 
 # VM Service Functions
-cdef inline __vml_set_mode(accuracy, ftzdaz, errmode):
+cdef object __vml_set_mode(accuracy, ftzdaz, errmode):
     """
     Sets a new mode for VM functions according to the mode parameter and stores the previous VM mode to oldmode.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlsetmode
@@ -862,25 +881,31 @@ cdef inline __vml_set_mode(accuracy, ftzdaz, errmode):
             },
         },
     }
-    mkl_accuracy = __mkl_str_to_int(accuracy, __variables['input']['accuracy'])
-    mkl_ftzdaz = __mkl_str_to_int(ftzdaz, __variables['input']['ftzdaz'])
-    mkl_errmode = __mkl_str_to_int(errmode, __variables['input']['errmode'])
+    cdef int c_mkl_accuracy = __mkl_str_to_int(accuracy, __variables['input']['accuracy'])
+    cdef int c_mkl_ftzdaz = __mkl_str_to_int(ftzdaz, __variables['input']['ftzdaz'])
+    cdef int c_mkl_errmode = __mkl_str_to_int(errmode, __variables['input']['errmode'])
 
-    status = mkl.vmlSetMode(mkl_accuracy | mkl_ftzdaz | mkl_errmode)
+    cdef int c_mkl_status = mkl.vmlSetMode(c_mkl_accuracy | c_mkl_ftzdaz | c_mkl_errmode)
 
-    accuracy = __mkl_int_to_str(status & mkl.VML_ACCURACY_MASK, __variables['output']['accuracy'])
-    ftzdaz = __mkl_int_to_str(status & mkl.VML_FTZDAZ_MASK, __variables['output']['ftzdaz'])
-    errmode = __mkl_int_to_str(status & mkl.VML_ERRMODE_MASK, __variables['output']['errmode'])
-    return accuracy, ftzdaz, errmode
+    accuracy = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_ACCURACY_MASK,
+        __variables['output']['accuracy'])
+    ftzdaz = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_FTZDAZ_MASK,
+        __variables['output']['ftzdaz'])
+    errmode = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_ERRMODE_MASK,
+        __variables['output']['errmode'])
+
+    return (accuracy, ftzdaz, errmode)
 
 
-cdef inline __vml_get_mode():
+cdef object __vml_get_mode():
     """
     Gets the VM mode.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlgetmode
     """
     __variables = {
-        'input': None,
         'output': {
             'accuracy': {
                 mkl.VML_HA: 'ha',
@@ -903,12 +928,18 @@ cdef inline __vml_get_mode():
         },
     }
 
-    status = mkl.vmlGetMode()
+    cdef int c_mkl_status = mkl.vmlGetMode()
 
-    accuracy = __mkl_int_to_str(status & mkl.VML_ACCURACY_MASK, __variables['output']['accuracy'])
-    ftzdaz = __mkl_int_to_str(status & mkl.VML_FTZDAZ_MASK, __variables['output']['ftzdaz'])
-    errmode = __mkl_int_to_str(status & mkl.VML_ERRMODE_MASK, __variables['output']['errmode'])
-    return accuracy, ftzdaz, errmode
+    accuracy = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_ACCURACY_MASK,
+        __variables['output']['accuracy'])
+    ftzdaz = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_FTZDAZ_MASK,
+        __variables['output']['ftzdaz'])
+    errmode = __mkl_int_to_str(
+        c_mkl_status & mkl.VML_ERRMODE_MASK,
+        __variables['output']['errmode'])
+    return (accuracy, ftzdaz, errmode)
 
 
 __mkl_vml_status = {
@@ -923,7 +954,7 @@ __mkl_vml_status = {
 }
 
 
-cdef inline __vml_set_err_status(status):
+cdef object __vml_set_err_status(status):
     """
     Sets the new VM Error Status according to err and stores the previous VM Error Status to olderr.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlseterrstatus
@@ -950,15 +981,15 @@ cdef inline __vml_set_err_status(status):
             mkl.VML_STATUS_UNDERFLOW: 'underflow',
         },
     }
-    mkl_status_in = __mkl_str_to_int(status, __variables['input'])
+    cdef int mkl_status_in = __mkl_str_to_int(status, __variables['input'])
 
-    mkl_status_out = mkl.vmlSetErrStatus(mkl_status_in)
+    cdef int mkl_status_out = mkl.vmlSetErrStatus(mkl_status_in)
 
     status = __mkl_int_to_str(mkl_status_out, __variables['output'])
     return status
 
 
-cdef inline __vml_get_err_status():
+cdef object __vml_get_err_status():
     """
     Gets the VM Error Status.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlgeterrstatus
@@ -977,13 +1008,13 @@ cdef inline __vml_get_err_status():
         },
     }
 
-    mkl_status = mkl.vmlGetErrStatus()
+    cdef int mkl_status = mkl.vmlGetErrStatus()
 
     status = __mkl_int_to_str(mkl_status, __variables['output'])
     return status
 
 
-cdef inline __vml_clear_err_status():
+cdef object __vml_clear_err_status():
     """
     Sets the VM Error Status to VML_STATUS_OK and stores the previous VM Error Status to olderr.
     https://software.intel.com/en-us/mkl-developer-reference-c-vmlclearerrstatus
@@ -1002,7 +1033,7 @@ cdef inline __vml_clear_err_status():
         },
     }
 
-    mkl_status = mkl.vmlClearErrStatus()
+    cdef int mkl_status = mkl.vmlClearErrStatus()
 
     status = __mkl_int_to_str(mkl_status, __variables['output'])
     return status
