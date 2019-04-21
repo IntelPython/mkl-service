@@ -23,19 +23,15 @@ static struct PyMethodDef methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-static inline void _set_mkl_ilp64() {
-#ifdef USING_MKL_RT
-    int i = mkl_set_interface_layer(MKL_INTERFACE_ILP64);
+#if defined(_MSC_VER) && (_MSC_VER <= 1500)
+#define MKL_SERVICE_INLINE
+#else
+#define MKL_SERVICE_INLINE inline
 #endif
-    return;
-}
 
-static inline void _set_mkl_lp64() {
-#ifdef USING_MKL_RT
-    int i = mkl_set_interface_layer(MKL_INTERFACE_LP64);
-#endif
-    return;
-}
+static MKL_SERVICE_INLINE void _set_mkl_ilp64();
+static MKL_SERVICE_INLINE void _set_mkl_lp64();
+static MKL_SERVICE_INLINE void _set_mkl_interface();
 
 static void _preload_threading_layer() {
 #if FORCE_PRELOADING
@@ -112,7 +108,21 @@ static void _preload_threading_layer() {
     return;
 }
 
-static inline void _set_mkl_interface() {
+static MKL_SERVICE_INLINE void _set_mkl_ilp64() {
+#ifdef USING_MKL_RT
+    int i = mkl_set_interface_layer(MKL_INTERFACE_ILP64);
+#endif
+    return;
+}
+
+static MKL_SERVICE_INLINE void _set_mkl_lp64() {
+#ifdef USING_MKL_RT
+    int i = mkl_set_interface_layer(MKL_INTERFACE_LP64);
+#endif
+    return;
+}
+
+static MKL_SERVICE_INLINE void _set_mkl_interface() {
     _set_mkl_lp64();
     _preload_threading_layer();
 }
