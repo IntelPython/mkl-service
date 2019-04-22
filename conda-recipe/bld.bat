@@ -1,4 +1,5 @@
-@rem Remember to activate Intel Compiler, or remoe these two lines to ise Microsoft Visual Studio compiler
+
+@rem Remember to activate compiler, if needed
 
 %PYTHON% setup.py build --force install --old-and-unmanageable
 if errorlevel 1 exit 1

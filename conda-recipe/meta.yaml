@@ -20,7 +20,6 @@ requirements:
       - mkl-devel
       - cython
       - numpy 1.11.*
-      - six
     run:
       - python
       - mkl
@@ -37,8 +36,9 @@ test:
 
 about:
     home: http://github.com/IntelPython/mkl-service
-    license: BSD 3-Clause
+    license: BSD-3-Clause
     license_file: LICENSE.txt
+    license_family: BSD
     description:
         Intel(R) Math Kernel Library (Intel(R) MKL) support functions are
         subdivided into the following groups according to their purpose, such as
