@@ -91,9 +91,9 @@ def setup_package():
                 Conditional Numerical Reproducibility Control
                 Miscellaneous
         """,
-        url="https://github.intel.com/SAT/mkl-service",
+        url="https://github.com/IntelPython/mkl-service",
         author="Intel",
-        download_url="https://github.intel.com/SAT/mkl-service",
+        download_url="https://github.com/IntelPython/mkl-service",
         license='BSD',
         classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
         platforms=["Windows", "Linux", "Mac OS-X"],
