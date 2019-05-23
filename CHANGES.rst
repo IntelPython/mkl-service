@@ -23,3 +23,15 @@ The choice of threading layer can be controlled with environment variable `MKL_T
 ====
 
 Work-around for VS 9.0 not having `inline` keyword, allowing the package to build on Windows for Python 2.7
+
+2.0.1
+=====
+
+Re-release, with some changes necessary for public CI builds to work.
+
+2.0.2
+=====
+
+Correction to `setup.py` to not require Cython at the installation time.
+
+
