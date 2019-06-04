@@ -34,13 +34,12 @@ install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda install conda-build
+  - conda update --yes -q conda
+  - conda install --yes conda-build
   # Useful for debugging any issues with conda
   - conda info -a
   - gcc -v
   - g++ -v
 
 script:
-  - conda build --debug -c defaults $PYVER conda-recipe
+  - conda build -c conda-forge $PYVER conda-recipe
