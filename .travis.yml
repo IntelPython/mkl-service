@@ -43,4 +43,4 @@ install:
   - g++ -v
 
 script:
-  - conda build --debug -c defaults -c intel $PYVER conda-recipe
+  - conda build --debug -c defaults $PYVER conda-recipe
