@@ -12,6 +12,7 @@ build:
     number: {{ buildnumber }}
     ignore_run_exports:
       - blas
+      - mkl-service
 
 requirements:
     build:
