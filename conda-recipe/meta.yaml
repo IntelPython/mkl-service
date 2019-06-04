@@ -1,4 +1,4 @@
-{% set version = "2.0.0" %}
+{% set version = "2.0.2" %}
 {% set buildnumber = 0 %}
 
 package:
@@ -19,12 +19,10 @@ requirements:
       - setuptools
       - mkl-devel
       - cython
-      - numpy 1.11.*
     run:
       - python
       - mkl
       - six
-      - {{ pin_compatible('numpy') }}
 
 test:
     commands:

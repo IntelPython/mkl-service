@@ -28,11 +28,13 @@
 from __future__ import division, print_function, absolute_import
 import io
 import re
-
+import os
+from os.path import join, exists, dirname
+import setuptools
+import setuptools.extension
 
 with io.open('mkl/__init__.py', 'rt', encoding='utf8') as file:
     VERSION = re.search(r'__version__ = \'(.*?)\'', file.read()).group(1)
-
 
 CLASSIFIERS = """\
 Development Status :: 5 - Production/Stable
@@ -57,27 +59,80 @@ Operating System :: MacOS
 """
 
 
-def configuration(parent_package='', top_path=None):
-    from numpy.distutils.misc_util import Configuration
+def get_extensions():
+    try:
+        from numpy.distutils.system_info import get_info
+        mkl_info = get_info('mkl')
+    except ImportError:
+        mkl_root = os.environ['MKLROOT']
+        mkl_info = {
+            'include_dirs': [join(mkl_root, 'include')],
+            'library_dirs': [join(mkl_root, 'lib'), join(mkl_root, 'lib', 'intel64')],
+            'libraries': ['mkl_rt']
+        }
 
-    config = Configuration(None, parent_package, top_path)
-    config.set_options(ignore_setup_xxx_py=True,
-                       assume_default_configuration=True,
-                       delegate_options_to_subpackages=True,
-                       quiet=True)
+    mkl_include_dirs = mkl_info.get('include_dirs', [])
+    mkl_library_dirs = mkl_info.get('library_dirs', [])
+    mkl_libraries = mkl_info.get('libraries', ['mkl_rt'])
 
-    config.add_subpackage('mkl')
+    defs = []
+    if any(['mkl_rt' in li for li in mkl_libraries]):
+        #libs += ['dl'] - by default on Linux
+        defs += [('USING_MKL_RT', None)]
 
-    config.version = VERSION
+    pdir = 'mkl'
+    try:
+        from Cython.Build import cythonize
+        sources = [join(pdir, '_mkl_service.pyx')]
+        have_cython = True
+    except ImportError as e:
+        have_cython = False
+        sources = [join(pdir, '_mkl_service.c')]
+        if not exists(sources[0]):
+            raise ValueError(str(e) + '. ' +
+                             'Cython is required to build the initial .c file.')
 
-    return config
+    extensions = []
+    extensions.append(
+        setuptools.extension.Extension(
+            'mkl._mklinit',
+            sources=['mkl/_mklinitmodule.c'],
+            define_macros=defs,
+            include_dirs=mkl_include_dirs,
+            libraries=mkl_libraries,
+            library_dirs=mkl_library_dirs,
+            extra_compile_args=[
+                '-DNDEBUG'
+                # '-g', '-O2', '-Wall',
+            ]
+        )
+    )
+
+    extensions.append(
+        setuptools.extension.Extension(
+            'mkl._py_mkl_service',
+            sources=sources,
+            include_dirs=mkl_include_dirs,
+            library_dirs=mkl_library_dirs,
+            libraries=mkl_libraries,
+            extra_compile_args=[
+                '-DNDEBUG'
+                # '-g', '-O2', '-Wall',
+            ]
+        )
+    )
+
+    if have_cython:
+        extensions = cythonize(extensions, include_path=[join(__file__, pdir)])
+
+    return extensions
 
 
 def setup_package():
     from setuptools import setup
-    from numpy.distutils.core import setup
     metadata = dict(
         name='mkl-service',
+        version=VERSION,
         maintainer="Intel",
         maintainer_email="scripting@intel.com",
         description="MKL Support Functions",
@@ -99,9 +154,10 @@ def setup_package():
         platforms=["Windows", "Linux", "Mac OS-X"],
         test_suite='nose.collector',
         python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
-        setup_requires=['numpy', 'cython'],
+        setup_requires=['setuptools', 'cython'],
         install_requires=['six'],
-        configuration=configuration,
+        packages=setuptools.find_packages(),
+        ext_modules=get_extensions()
     )
     setup(**metadata)
 
