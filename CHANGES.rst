@@ -34,4 +34,9 @@ Re-release, with some changes necessary for public CI builds to work.
 
 Correction to `setup.py` to not require Cython at the installation time.
 
+2.1,9
+=====
 
+Change in setup script to not use `numpy.distutils` thus removing numpy as build-time dependency.
+
+Change in conda-recipe to allow conda build to build the recipe, but ignoring run export on mkl-service coming from mkl-devel metadata. 

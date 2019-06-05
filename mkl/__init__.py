@@ -54,4 +54,4 @@ del sys
 from ._py_mkl_service import *
 
 
-__version__ = '2.0.2'
+__version__ = '2.1.0'
