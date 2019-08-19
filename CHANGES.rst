@@ -34,9 +34,18 @@ Re-release, with some changes necessary for public CI builds to work.
 
 Correction to `setup.py` to not require Cython at the installation time.
 
-2.1,9
+2.1.0
 =====
 
 Change in setup script to not use `numpy.distutils` thus removing numpy as build-time dependency.
 
 Change in conda-recipe to allow conda build to build the recipe, but ignoring run export on mkl-service coming from mkl-devel metadata. 
+
+2.2.0
+=====
+
+Closed issues #8, #7 and #5. 
+
+Extended `mkl.cbwr_set` to recognize `'avx512_e1'`, `'avx512_mic_e1'`, as as strict conditional numerical reproducibility, supported via `'avx2,strict'`, `'avx512,strict'` (see [issue/8](http://github.com/IntelPython/mkl-service/issues/8)).
+
+Extended `mkl.cbwrt_get()` to mean `mkl.cbwr('all')`.
