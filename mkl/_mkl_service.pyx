@@ -275,7 +275,7 @@ cpdef cbwr_set(branch=None):
     return __cbwr_set(branch)
 
 
-cpdef cbwr_get(cnr_const=None):
+cpdef cbwr_get(cnr_const='all'):
     """
     Returns the current CNR settings.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-get
@@ -390,12 +390,14 @@ cdef int __python_obj_to_int(obj, func_name):
 
 cdef void __check_positive_num_threads(int p, func_name):
     if p <= 0:
-        warnings.warn("Non-positive argument of " + func_name +  " is being ignored, number of threads will not be changed")
+        warnings.warn("Non-positive argument of " + func_name +
+                      " is being ignored, number of threads will not be changed")
 
 
 cdef void __check_non_negative_num_threads(int p, func_name):
     if p < 0:
-        warnings.warn("Non-positive argument of " + func_name +  " is being ignored, number of threads will not be changed")
+        warnings.warn("Non-positive argument of " + func_name +
+                      " is being ignored, number of threads will not be changed")
 
 
 cdef inline int __mkl_str_to_int(variable, possible_variables_dict):
@@ -404,7 +406,8 @@ cdef inline int __mkl_str_to_int(variable, possible_variables_dict):
     if possible_variables_dict is None:
         raise RuntimeError("Dictionary mapping possible variable value to internal code is missing")
     if variable not in possible_variables_dict:
-        raise ValueError('Variable: <' + str(variable) + '> not in ' + str(possible_variables_dict))
+        raise ValueError('Variable: <' + str(variable) + '> not in ' +
+                         str(possible_variables_dict.keys()))
 
     return possible_variables_dict[variable]
 
@@ -414,7 +417,8 @@ cdef  __mkl_int_to_str(int mkl_int_variable, possible_variables_dict):
         raise RuntimeError("Dictionary mapping possible internal code to output string is missing")
 
     if mkl_int_variable not in possible_variables_dict:
-        raise ValueError('Variable: <' + str(mkl_int_variable) + '> not in ' + str(possible_variables_dict))
+        raise ValueError('Variable: <' + str(mkl_int_variable) + '> not in ' +
+                         str(possible_variables_dict.keys()))
 
     return possible_variables_dict[mkl_int_variable]
 
@@ -653,6 +657,12 @@ cdef object __cbwr_set(branch=None):
             'avx2': mkl.MKL_CBWR_AVX2,
             'avx512_mic': mkl.MKL_CBWR_AVX512_MIC,
             'avx512': mkl.MKL_CBWR_AVX512,
+            'avx512_e1': mkl.MKL_CBWR_AVX512_E1,
+            'avx512_mic_e1': mkl.MKL_CBWR_AVX512_MIC_E1,
+            'avx2,strict': mkl.MKL_CBWR_AVX2 | mkl.MKL_CBWR_STRICT,
+            'avx512_mic,strict': mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT,
+            'avx512,strict': mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT,
+            'avx512_e1,strict': mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT,
         },
         'output': {
             mkl.MKL_CBWR_SUCCESS: 'success',
@@ -850,6 +860,7 @@ cdef object __vml_set_mode(accuracy, ftzdaz, errmode):
             'ftzdaz': {
                 'on': mkl.VML_FTZDAZ_ON,
                 'off': mkl.VML_FTZDAZ_OFF,
+		'default': 0,
             },
             'errmode': {
                 'ignore': mkl.VML_ERRMODE_IGNORE,

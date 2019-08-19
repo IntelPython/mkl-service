@@ -56,6 +56,9 @@ cdef extern from "mkl.h":
     int MKL_CBWR_AVX2
     int MKL_CBWR_AVX512_MIC
     int MKL_CBWR_AVX512
+    int MKL_CBWR_STRICT
+    int MKL_CBWR_AVX512_E1
+    int MKL_CBWR_AVX512_MIC_E1
     int MKL_CBWR_BRANCH
     int MKL_CBWR_ALL
     int MKL_CBWR_SUCCESS

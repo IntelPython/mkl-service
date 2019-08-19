@@ -287,6 +287,10 @@ class test_miscellaneous():
 
 class test_vm_service_functions():
     # https://software.intel.com/en-us/mkl-developer-reference-c-vm-service-functions
+    def test_vml_set_get_mode_roundtrip(self):
+        saved = mkl.vml_get_mode()
+        mkl.vml_set_mode(*saved) # should not raise errors
+
     def test_vml_set_mode_ha_on_ignore(self):
         mkl.vml_set_mode('ha', 'on', 'ignore')
 
