@@ -850,6 +850,7 @@ cdef object __vml_set_mode(accuracy, ftzdaz, errmode):
             'ftzdaz': {
                 'on': mkl.VML_FTZDAZ_ON,
                 'off': mkl.VML_FTZDAZ_OFF,
+		'default': 0,
             },
             'errmode': {
                 'ignore': mkl.VML_ERRMODE_IGNORE,
