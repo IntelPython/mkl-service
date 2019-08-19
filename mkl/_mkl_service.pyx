@@ -275,7 +275,7 @@ cpdef cbwr_set(branch=None):
     return __cbwr_set(branch)
 
 
-cpdef cbwr_get(cnr_const=None):
+cpdef cbwr_get(cnr_const='all'):
     """
     Returns the current CNR settings.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-cbwr-get
