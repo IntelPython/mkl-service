@@ -390,12 +390,14 @@ cdef int __python_obj_to_int(obj, func_name):
 
 cdef void __check_positive_num_threads(int p, func_name):
     if p <= 0:
-        warnings.warn("Non-positive argument of " + func_name +  " is being ignored, number of threads will not be changed")
+        warnings.warn("Non-positive argument of " + func_name +
+                      " is being ignored, number of threads will not be changed")
 
 
 cdef void __check_non_negative_num_threads(int p, func_name):
     if p < 0:
-        warnings.warn("Non-positive argument of " + func_name +  " is being ignored, number of threads will not be changed")
+        warnings.warn("Non-positive argument of " + func_name +
+                      " is being ignored, number of threads will not be changed")
 
 
 cdef inline int __mkl_str_to_int(variable, possible_variables_dict):
@@ -404,7 +406,8 @@ cdef inline int __mkl_str_to_int(variable, possible_variables_dict):
     if possible_variables_dict is None:
         raise RuntimeError("Dictionary mapping possible variable value to internal code is missing")
     if variable not in possible_variables_dict:
-        raise ValueError('Variable: <' + str(variable) + '> not in ' + str(possible_variables_dict))
+        raise ValueError('Variable: <' + str(variable) + '> not in ' +
+                         str(possible_variables_dict.keys()))
 
     return possible_variables_dict[variable]
 
@@ -414,7 +417,8 @@ cdef  __mkl_int_to_str(int mkl_int_variable, possible_variables_dict):
         raise RuntimeError("Dictionary mapping possible internal code to output string is missing")
 
     if mkl_int_variable not in possible_variables_dict:
-        raise ValueError('Variable: <' + str(mkl_int_variable) + '> not in ' + str(possible_variables_dict))
+        raise ValueError('Variable: <' + str(mkl_int_variable) + '> not in ' +
+                         str(possible_variables_dict.keys()))
 
     return possible_variables_dict[mkl_int_variable]
 
