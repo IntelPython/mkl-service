@@ -653,6 +653,12 @@ cdef object __cbwr_set(branch=None):
             'avx2': mkl.MKL_CBWR_AVX2,
             'avx512_mic': mkl.MKL_CBWR_AVX512_MIC,
             'avx512': mkl.MKL_CBWR_AVX512,
+            'avx512_e1': mkl.MKL_CBWR_AVX512_E1,
+            'avx512_mic_e1': mkl.MKL_CBWR_AVX512_MIC_E1,
+            'avx2,strict': mkl.MKL_CBWR_AVX2 | mkl.MKL_CBWR_STRICT,
+            'avx512_mic,strict': mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT,
+            'avx512,strict': mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT,
+            'avx512_e1,strict': mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT,
         },
         'output': {
             mkl.MKL_CBWR_SUCCESS: 'success',
