@@ -24,7 +24,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from nose.tools import nottest
+from nose.tools import assert_equals, nottest
 import six
 import mkl
 
@@ -193,47 +193,39 @@ class test_memory_management():
 
 class test_conditional_numerical_reproducibility_control:
     # https://software.intel.com/en-us/mkl-developer-reference-c-conditional-numerical-reproducibility-control
-    def test_cbwr_set_off(self):
-        mkl.cbwr_set(branch='off')
+    def test_cbwr(self):
+        branches = [
+            'off',
+            'branch_off',
+            'auto',
+            'compatible',
+            'sse2',
+            'ssse3',
+            'sse4_1',
+            'sse4_2',
+            'avx',
+            'avx2',
+            'avx2_strict',
+            'avx512_mic',
+            'avx512_mic_strict',
+            'avx512',
+            'avx512_strict',
+            'avx512_mic_e1',
+            'avx512_e1',
+            'avx512_e1_strict',
+        ]
+        for branch in branches:
+            yield check_cbwr, branch
 
-    def test_cbwr_set_auto(self):
-        mkl.cbwr_set(branch='auto')
+    def check_cbwr(self, branch):
+        status = mkl.cbwr_set(branch=branch)
+        if status == 'success':
+            assert_equals(mkl.cbwr_get(cnr_const='branch'), branch)
+        elif status != 'err_unsupported_branch':
+            raise AssertionError(status)
 
-    def test_cbwr_set_compatible(self):
-        mkl.cbwr_set(branch='compatible')
-
-    def test_cbwr_set_sse2(self):
-        mkl.cbwr_set(branch='sse2')
-
-    def test_cbwr_set_sse3(self):
-        mkl.cbwr_set(branch='sse3')
-
-    def test_cbwr_set_ssse3(self):
-        mkl.cbwr_set(branch='ssse3')
-
-    def test_cbwr_set_sse4_1(self):
-        mkl.cbwr_set(branch='sse4_1')
-
-    def test_cbwr_set_sse4_2(self):
-        mkl.cbwr_set(branch='sse4_2')
-
-    def test_cbwr_set_avx(self):
-        mkl.cbwr_set(branch='avx')
-
-    def test_cbwr_set_avx2(self):
-        mkl.cbwr_set(branch='avx2')
-
-    def test_cbwr_set_avx512_mic(self):
-        mkl.cbwr_set(branch='avx512_mic')
-
-    def test_cbwr_set_avx512(self):
-        mkl.cbwr_set(branch='avx512')
-
-    def test_cbwr_get(self):
+    def test_cbwr_get_all(self):
         mkl.cbwr_get(cnr_const='all')
-
-    def test_cbwr_get(self):
-        mkl.cbwr_get(cnr_const='branch')
 
     def test_cbwr_get_auto_branch(self):
         mkl.cbwr_get_auto_branch()
