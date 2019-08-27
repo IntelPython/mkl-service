@@ -725,7 +725,6 @@ cdef object __cbwr_get_auto_branch():
     """
     __variables = {
         'output': {
-            mkl.MKL_CBWR_OFF: 'off',
             mkl.MKL_CBWR_BRANCH_OFF: 'branch_off',
             mkl.MKL_CBWR_AUTO: 'auto',
             mkl.MKL_CBWR_COMPATIBLE: 'compatible',
