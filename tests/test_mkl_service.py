@@ -196,6 +196,7 @@ class test_conditional_numerical_reproducibility_control():
     def test_cbwr(self):
         branches = [
             'off',
+            'branch_off',
             'auto',
             'compatible',
             'sse2',
