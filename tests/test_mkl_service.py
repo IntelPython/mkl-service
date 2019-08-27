@@ -196,7 +196,6 @@ class test_conditional_numerical_reproducibility_control():
     def test_cbwr(self):
         branches = [
             'off',
-            'branch_off',
             'auto',
             'compatible',
             'sse2',
@@ -220,7 +219,9 @@ class test_conditional_numerical_reproducibility_control():
     def check_cbwr(self, branch):
         status = mkl.cbwr_set(branch=branch)
         if status == 'success':
-            assert_equals(mkl.cbwr_get(cnr_const='branch'), branch)
+            expected_value = 'branch_off' if branch == 'off' else branch
+            actual_value = mkl.cbwr_get(cnr_const='all')
+            assert_equals(actual_value, expected_value, msg="Round-trip failure for CNR branch '{}'".format(branch))
         elif status != 'err_unsupported_branch':
             raise AssertionError(status)
 
