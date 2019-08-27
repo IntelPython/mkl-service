@@ -20,11 +20,11 @@ requirements:
     host:
       - python
       - setuptools
-      - mkl-devel
+      - mkl-devel >=2019.3
       - cython
     run:
       - python
-      - mkl
+      - mkl >=2019.3
       - six
 
 test:
