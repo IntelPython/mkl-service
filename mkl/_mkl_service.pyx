@@ -646,6 +646,7 @@ cdef object __cbwr_set(branch=None):
     __variables = {
         'input': {
             'off': mkl.MKL_CBWR_OFF,
+            'branch_off': mkl.MKL_CBWR_BRANCH_OFF,
             'auto': mkl.MKL_CBWR_AUTO,
             'compatible': mkl.MKL_CBWR_COMPATIBLE,
             'sse2': mkl.MKL_CBWR_SSE2,
