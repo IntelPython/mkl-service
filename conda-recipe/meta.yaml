@@ -28,12 +28,14 @@ requirements:
       - six
 
 test:
-    commands:
-      - nosetests -v mkl
     requires:
       - nose
     imports:
       - mkl
+    commands:
+      - nosetests -v tests
+    source_files:
+      - tests
 
 about:
     home: http://github.com/IntelPython/mkl-service
