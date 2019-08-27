@@ -131,7 +131,7 @@ class test_threading_control():
         mkl.get_dynamic()
 
 
-class test_timing:
+class test_timing():
     # https://software.intel.com/en-us/mkl-developer-reference-c-timing
     def test_second(self):
         s1 = mkl.second()
@@ -191,7 +191,7 @@ class test_memory_management():
         mkl.set_memory_limit(128)
 
 
-class test_conditional_numerical_reproducibility_control:
+class test_conditional_numerical_reproducibility_control():
     # https://software.intel.com/en-us/mkl-developer-reference-c-conditional-numerical-reproducibility-control
     def test_cbwr(self):
         branches = [
