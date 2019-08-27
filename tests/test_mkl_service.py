@@ -205,14 +205,14 @@ class test_conditional_numerical_reproducibility_control:
             'sse4_2',
             'avx',
             'avx2',
-            'avx2_strict',
+            'avx2,strict',
             'avx512_mic',
-            'avx512_mic_strict',
+            'avx512_mic,strict',
             'avx512',
-            'avx512_strict',
+            'avx512,strict',
             'avx512_mic_e1',
             'avx512_e1',
-            'avx512_e1_strict',
+            'avx512_e1,strict',
         ]
         for branch in branches:
             yield self.check_cbwr, branch
