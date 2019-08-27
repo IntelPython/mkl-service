@@ -215,7 +215,7 @@ class test_conditional_numerical_reproducibility_control:
             'avx512_e1_strict',
         ]
         for branch in branches:
-            yield check_cbwr, branch
+            yield self.check_cbwr, branch
 
     def check_cbwr(self, branch):
         status = mkl.cbwr_set(branch=branch)
