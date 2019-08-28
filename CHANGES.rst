@@ -49,3 +49,9 @@ Closed issues #8, #7 and #5.
 Extended `mkl.cbwr_set` to recognize `'avx512_e1'`, `'avx512_mic_e1'`, as as strict conditional numerical reproducibility, supported via `'avx2,strict'`, `'avx512,strict'` (see [issue/8](http://github.com/IntelPython/mkl-service/issues/8)).
 
 Extended `mkl.cbwrt_get()` to mean `mkl.cbwr('all')`.
+
+2.3.0
+=====
+
+Fixed CI to actually execute tests. Populated CBWR constants to match MKL headers.
+Added tests checking that `cbwr_set` and `cbwr_get` round-trip.

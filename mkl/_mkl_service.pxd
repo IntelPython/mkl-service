@@ -45,10 +45,16 @@ cdef extern from "mkl.h":
     int MKL_MEM_MCDRAM
 
     # CNR Control Constants
+    int MKL_CBWR_BRANCH
+    int MKL_CBWR_ALL
+
+    int MKL_CBWR_STRICT
+
+    int MKL_CBWR_OFF
+    int MKL_CBWR_BRANCH_OFF
     int MKL_CBWR_AUTO
     int MKL_CBWR_COMPATIBLE
     int MKL_CBWR_SSE2
-    int MKL_CBWR_SSE3
     int MKL_CBWR_SSSE3
     int MKL_CBWR_SSE4_1
     int MKL_CBWR_SSE4_2
@@ -56,15 +62,14 @@ cdef extern from "mkl.h":
     int MKL_CBWR_AVX2
     int MKL_CBWR_AVX512_MIC
     int MKL_CBWR_AVX512
-    int MKL_CBWR_STRICT
-    int MKL_CBWR_AVX512_E1
     int MKL_CBWR_AVX512_MIC_E1
-    int MKL_CBWR_BRANCH
-    int MKL_CBWR_ALL
+    int MKL_CBWR_AVX512_E1
+
     int MKL_CBWR_SUCCESS
-    int MKL_CBWR_BRANCH_OFF
+    int MKL_CBWR_ERR_INVALID_SETTINGS
     int MKL_CBWR_ERR_INVALID_INPUT
     int MKL_CBWR_ERR_UNSUPPORTED_BRANCH
+    int MKL_CBWR_ERR_UNKNOWN_BRANCH
     int MKL_CBWR_ERR_MODE_CHANGE_FAILURE
 
     # ISA Constants
