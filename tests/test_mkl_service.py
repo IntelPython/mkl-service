@@ -205,29 +205,32 @@ class test_conditional_numerical_reproducibility_control():
             'sse4_2',
             'avx',
             'avx2',
-            'avx2,strict',
             'avx512_mic',
-            'avx512_mic,strict',
             'avx512',
-            'avx512,strict',
             'avx512_mic_e1',
             'avx512_e1',
+        ]
+        strict = [
+            'avx2,strict',
+            'avx512_mic,strict',
+            'avx512,strict',
             'avx512_e1,strict',
         ]
         for branch in branches:
-            yield self.check_cbwr, branch
+            yield self.check_cbwr, branch, 'branch'
+        for branch in branches + strict:
+            yield self.check_cbwr, branch, 'all'
 
-    def check_cbwr(self, branch):
+    def check_cbwr(self, branch, cnr_const):
         status = mkl.cbwr_set(branch=branch)
         if status == 'success':
             expected_value = 'branch_off' if branch == 'off' else branch
-            actual_value = mkl.cbwr_get(cnr_const='all')
-            assert_equals(actual_value, expected_value, msg="Round-trip failure for CNR branch '{}'".format(branch))
+            actual_value = mkl.cbwr_get(cnr_const=cnr_const)
+            assert_equals(actual_value,
+                          expected_value,
+                          msg="Round-trip failure for CNR branch '{}', CNR const '{}'".format(branch, cnr_const))
         elif status != 'err_unsupported_branch':
             raise AssertionError(status)
-
-    def test_cbwr_get_all(self):
-        mkl.cbwr_get(cnr_const='all')
 
     def test_cbwr_get_auto_branch(self):
         mkl.cbwr_get_auto_branch()
