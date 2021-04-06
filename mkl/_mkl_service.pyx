@@ -99,7 +99,7 @@ cpdef domain_set_num_threads(num_threads, domain='all'):
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-domain-set-num-threads
     """
     cdef c_num_threads = __python_obj_to_int(num_threads, 'domain_set_num_threads')
-    __check_positive_num_threads(c_num_threads, 'domain_set_num_threads')
+    __check_non_negative_num_threads(c_num_threads, 'domain_set_num_threads')
 
     cdef int c_mkl_domain = __domain_to_mkl_domain(domain)
     cdef int c_mkl_status = __domain_set_num_threads(c_num_threads, c_mkl_domain)
@@ -396,7 +396,7 @@ cdef void __check_positive_num_threads(int p, func_name):
 
 cdef void __check_non_negative_num_threads(int p, func_name):
     if p < 0:
-        warnings.warn("Non-positive argument of " + func_name +
+        warnings.warn("Negative argument of " + func_name +
                       " is being ignored, number of threads will not be changed")
 
 
