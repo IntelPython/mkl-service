@@ -23,10 +23,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# distutils: language = c
+# cython: language_level=3
 
-import six
+import numbers
 import warnings
-cimport _mkl_service as mkl
+cimport mkl._mkl_service as mkl
 
 
 ctypedef struct MemStatData:
@@ -80,9 +82,9 @@ cdef int __domain_to_mkl_domain(domain):
             'pardiso': mkl.MKL_DOMAIN_PARDISO,
             'all': mkl.MKL_DOMAIN_ALL }
 
-    if isinstance(domain, six.integer_types):
-        c_mkl_domain = domain
-    elif isinstance(domain, six.string_types):
+    if isinstance(domain, numbers.Integral):
+        c_mkl_domain = <int>domain
+    elif isinstance(domain, str):
         if domain not in _mapping:
             c_mkl_domain = __warn_and_fallback_on_default_domain(domain)
         else:
@@ -113,7 +115,7 @@ cpdef set_num_threads_local(num_threads):
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-set-num-threads-local
     """
     cdef c_num_threads = 0
-    if isinstance(num_threads, six.string_types):
+    if isinstance(num_threads, str):
         if num_threads is not 'global_num_threads':
             raise ValueError("The argument of set_num_threads_local is expected "
                              "to be a non-negative integer or a string 'global_num_threads'")
@@ -382,9 +384,9 @@ cdef __mkl_status_to_string(int mkl_status):
 
 
 cdef int __python_obj_to_int(obj, func_name):
-    if not isinstance(obj, six.integer_types):
+    if not isinstance(obj, numbers.Integral):
         raise ValueError("The argument of " + func_name + " is expected to be a positive integer")
-    cdef c_int = obj
+    cdef int c_int = <int>obj
     return c_int
 
 
@@ -772,7 +774,7 @@ cdef object __enable_instructions(isa=None):
     cdef int c_mkl_isa = __mkl_str_to_int(isa, __variables['input'])
 
     cdef int c_mkl_status = mkl.mkl_enable_instructions(c_mkl_isa)
-    
+
     return __mkl_status_to_string(c_mkl_status)
 
 
