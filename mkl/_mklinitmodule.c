@@ -39,28 +39,29 @@ static const char* verbose;
 
 #if FORCE_PRELOADING
 #define VERBOSE(...) if(verbose) printf("mkl-service + Intel(R) MKL: " __VA_ARGS__)
+
 static void restore_mtlayer(void) {
     if (mtlayer) {
-	VERBOSE("Re-setting Intel(R) MKL_THREADING_LAYER=%s for the forked process\n", mtlayer); \
-	setenv("MKL_THREADING_LAYER", mtlayer, 1);
+        VERBOSE("Re-setting Intel(R) MKL_THREADING_LAYER=%s for the forked process\n", mtlayer);
+        setenv("MKL_THREADING_LAYER", mtlayer, 1);
     } else {
-	VERBOSE("Unsetting Intel(R) MKL_THREADING_LAYER variable for the forked process \n");	\
-	unsetenv("MKL_THREADING_LAYER");
+        VERBOSE("Unsetting Intel(R) MKL_THREADING_LAYER variable for the forked process \n");
+        unsetenv("MKL_THREADING_LAYER");
     }
 }
 #endif
 
 static void _preload_threading_layer(void) {
 #if FORCE_PRELOADING
-#define SET_MTLAYER(L) do {						\
+#define SET_MTLAYER(L) do {                                                  \
             VERBOSE("setting Intel(R) MKL to use " #L " OpenMP runtime\n");  \
-            mkl_set_threading_layer(MKL_THREADING_##L);          \
-            setenv("MKL_THREADING_LAYER", #L, 0);                \
-	    pthread_atfork(NULL, NULL, &restore_mtlayer);        \
+            mkl_set_threading_layer(MKL_THREADING_##L);                      \
+            setenv("MKL_THREADING_LAYER", #L, 0);                            \
+            pthread_atfork(NULL, NULL, &restore_mtlayer);                    \
         } while(0)
-#define PRELOAD(lib) do {                                        \
-            VERBOSE("preloading %s runtime\n", lib);             \
-            dlopen(lib, RTLD_LAZY|RTLD_GLOBAL);                  \
+#define PRELOAD(lib) do {                                                    \
+            VERBOSE("preloading %s runtime\n", lib);                         \
+            dlopen(lib, RTLD_LAZY|RTLD_GLOBAL);                              \
         } while(0)
     /*
      * The following is the pseudo-code skeleton for reinterpreting unset MKL_THREADING_LAYER
