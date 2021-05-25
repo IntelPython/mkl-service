@@ -95,7 +95,7 @@ def get_extensions():
             sources=['mkl/_mklinitmodule.c'],
             define_macros=defs,
             include_dirs=mkl_include_dirs,
-            libraries=mkl_libraries + ["pthread"],
+            libraries=mkl_libraries + (["pthread"] if os.name == "posix" else []),
             library_dirs=mkl_library_dirs,
             extra_compile_args=[
                 '-DNDEBUG'
