@@ -10,6 +10,7 @@
 #define _GNU_SOURCE 1
 #include <dlfcn.h>
 #include <string.h>
+#include <pthread.h>
 #undef _GNU_SOURCE
 #endif
 
@@ -29,30 +30,47 @@ static struct PyMethodDef methods[] = {
 #define MKL_SERVICE_INLINE inline
 #endif
 
-static MKL_SERVICE_INLINE void _set_mkl_ilp64();
-static MKL_SERVICE_INLINE void _set_mkl_lp64();
-static MKL_SERVICE_INLINE void _set_mkl_interface();
+static MKL_SERVICE_INLINE void _set_mkl_ilp64(void);
+static MKL_SERVICE_INLINE void _set_mkl_lp64(void);
+static MKL_SERVICE_INLINE void _set_mkl_interface(void);
 
-static void _preload_threading_layer() {
+static const char* mtlayer;
+static const char* verbose;
+
 #if FORCE_PRELOADING
 #define VERBOSE(...) if(verbose) printf("mkl-service + Intel(R) MKL: " __VA_ARGS__)
-#define SET_MTLAYER(L) do {                                      \
+
+static void restore_mtlayer(void) {
+    if (mtlayer) {
+        VERBOSE("Re-setting Intel(R) MKL_THREADING_LAYER=%s for the forked process\n", mtlayer);
+        setenv("MKL_THREADING_LAYER", mtlayer, 1);
+    } else {
+        VERBOSE("Unsetting Intel(R) MKL_THREADING_LAYER variable for the forked process \n");
+        unsetenv("MKL_THREADING_LAYER");
+    }
+}
+#endif
+
+static void _preload_threading_layer(void) {
+#if FORCE_PRELOADING
+#define SET_MTLAYER(L) do {                                                  \
             VERBOSE("setting Intel(R) MKL to use " #L " OpenMP runtime\n");  \
-            mkl_set_threading_layer(MKL_THREADING_##L);          \
-            setenv("MKL_THREADING_LAYER", #L, 0);                \
+            mkl_set_threading_layer(MKL_THREADING_##L);                      \
+            setenv("MKL_THREADING_LAYER", #L, 0);                            \
+            pthread_atfork(NULL, NULL, &restore_mtlayer);                    \
         } while(0)
-#define PRELOAD(lib) do {                                        \
-            VERBOSE("preloading %s runtime\n", lib);             \
-            dlopen(lib, RTLD_LAZY|RTLD_GLOBAL);                  \
+#define PRELOAD(lib) do {                                                    \
+            VERBOSE("preloading %s runtime\n", lib);                         \
+            dlopen(lib, RTLD_LAZY|RTLD_GLOBAL);                              \
         } while(0)
     /*
      * The following is the pseudo-code skeleton for reinterpreting unset MKL_THREADING_LAYER
-     *       
+     *
      *       if MKL_THREADING_LAYER is empty
      *            if kmp_calloc (or a suitable symbol identified by Terry) is loaded,
      *                  we are using Intel(R) OpenMP, i.e. reinterpret as implicit value of INTEL
      *            otherwise check if other Open MP is loaded by checking get_omp_num_threads symbol
-     *                  if not loaded: 
+     *                  if not loaded:
      *                         assume INTEL, and force loading of IOMP5
      *                  if loaded:
      *                         if Gnu OMP, set MKL_THREADING_LAYER=GNU, and call set_mkl_threading_layer(MKL_THREADING_GNU)
@@ -65,8 +83,14 @@ static void _preload_threading_layer() {
      */
 
     const char *libiomp = "libiomp5.so";
-    const char *verbose = getenv("MKL_VERBOSE");
-    const char *mtlayer = getenv("MKL_THREADING_LAYER");
+    verbose = getenv("MKL_VERBOSE");
+    mtlayer = getenv("MKL_THREADING_LAYER");
+
+    /* Use of RTLD_DEFAULT handler is to indicate that symbol is being lookup-up among symbols
+     * presently known to this process.
+     *
+     * See:  https://pubs.opengroup.org/onlinepubs/9699919799/functions/dlsym.html
+     */
     void *omp = dlsym(RTLD_DEFAULT, "omp_get_num_threads");
     const char *omp_name = "(unidentified)";
     const char *iomp = NULL; /* non-zero indicates Intel(R) OpenMP is loaded */
@@ -108,21 +132,21 @@ static void _preload_threading_layer() {
     return;
 }
 
-static MKL_SERVICE_INLINE void _set_mkl_ilp64() {
+static MKL_SERVICE_INLINE void _set_mkl_ilp64(void) {
 #ifdef USING_MKL_RT
-    int i = mkl_set_interface_layer(MKL_INTERFACE_ILP64);
+    mkl_set_interface_layer(MKL_INTERFACE_ILP64);
 #endif
     return;
 }
 
-static MKL_SERVICE_INLINE void _set_mkl_lp64() {
+static MKL_SERVICE_INLINE void _set_mkl_lp64(void) {
 #ifdef USING_MKL_RT
-    int i = mkl_set_interface_layer(MKL_INTERFACE_LP64);
+    mkl_set_interface_layer(MKL_INTERFACE_LP64);
 #endif
     return;
 }
 
-static MKL_SERVICE_INLINE void _set_mkl_interface() {
+static MKL_SERVICE_INLINE void _set_mkl_interface(void) {
     _set_mkl_lp64();
     _preload_threading_layer();
 }

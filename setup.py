@@ -60,16 +60,12 @@ Operating System :: MacOS
 
 
 def get_extensions():
-    try:
-        from numpy.distutils.system_info import get_info
-        mkl_info = get_info('mkl')
-    except ImportError:
-        mkl_root = os.environ['MKLROOT']
-        mkl_info = {
-            'include_dirs': [join(mkl_root, 'include')],
-            'library_dirs': [join(mkl_root, 'lib'), join(mkl_root, 'lib', 'intel64')],
-            'libraries': ['mkl_rt']
-        }
+    mkl_root = os.environ['MKLROOT']
+    mkl_info = {
+        'include_dirs': [join(mkl_root, 'include')],
+        'library_dirs': [join(mkl_root, 'lib'), join(mkl_root, 'lib', 'intel64')],
+        'libraries': ['mkl_rt']
+    }
 
     mkl_include_dirs = mkl_info.get('include_dirs', [])
     mkl_library_dirs = mkl_info.get('library_dirs', [])
@@ -99,7 +95,7 @@ def get_extensions():
             sources=['mkl/_mklinitmodule.c'],
             define_macros=defs,
             include_dirs=mkl_include_dirs,
-            libraries=mkl_libraries,
+            libraries=mkl_libraries + ["pthread"],
             library_dirs=mkl_library_dirs,
             extra_compile_args=[
                 '-DNDEBUG'
@@ -155,7 +151,7 @@ def setup_package():
         test_suite='nose.collector',
         python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
         setup_requires=['setuptools', 'cython'],
-        install_requires=['six'],
+        install_requires=[],
         packages=setuptools.find_packages(),
         ext_modules=get_extensions()
     )
