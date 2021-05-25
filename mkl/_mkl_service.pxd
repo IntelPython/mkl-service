@@ -73,10 +73,16 @@ cdef extern from "mkl.h":
     int MKL_CBWR_ERR_MODE_CHANGE_FAILURE
 
     # ISA Constants
+    int MKL_SINGLE_PATH_ENABLE
+    int MKL_ENABLE_AVX512_E2
+    int MKL_ENABLE_AVX512_E3
+    int MKL_ENABLE_AVX512_E4
     int MKL_ENABLE_AVX512_MIC_E1
+    int MKL_ENABLE_AVX512_E1
     int MKL_ENABLE_AVX512
     int MKL_ENABLE_AVX512_MIC
     int MKL_ENABLE_AVX2
+    int MKL_ENABLE_AVX2_E1
     int MKL_ENABLE_AVX
     int MKL_ENABLE_SSE4_2
 
@@ -131,6 +137,8 @@ cdef extern from "mkl.h":
     int mkl_get_max_threads()
     int mkl_domain_get_max_threads(int domain)
     int mkl_get_dynamic()
+    int mkl_get_num_stripes()
+    void mkl_set_num_stripes(int)
 
     # Timing
     float second()

@@ -153,7 +153,8 @@ cpdef get_max_threads():
 
 cpdef domain_get_max_threads(domain='all'):
     """
-    Gets the number of OpenMP* threads targeted for parallelism for a particular function domain.
+    Gets the number of OpenMP* threads targeted for parallelism for a particular
+    function domain.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-domain-get-max-threads
     """
     cdef int c_mkl_domain = __domain_to_mkl_domain(domain)
@@ -162,10 +163,45 @@ cpdef domain_get_max_threads(domain='all'):
 
 cpdef get_dynamic():
     """
-    Determines whether Intel(R) MKL is enabled to dynamically change the number of OpenMP* threads.
+    Determines whether Intel(R) MKL is enabled to dynamically change the number
+    of OpenMP* threads.
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-get-dynamic
     """
     return bool(__get_dynamic())
+
+
+cpdef int set_num_stripes(int num_stripes):
+    """
+    Specifies the number of stripes, or partitions along the leading dimension
+    of the output matrix, for the parallel ``?gemm`` functions.
+
+    Setting `num_stripes` argument to zero instructs Intel(R) MKL to default
+    partitioning algorithm. A positive `num_stripes` arguments specifies a hint,
+    and the library may actually use a smaller numbers.
+
+    Returns the number of stripes the library uses, or a zero.
+    """
+    if num_stripes < 0:
+        raise ValueError(
+            "Expected non-negative number of stripes"
+            ", got {}".format(num_stripes)
+        )
+    mkl.mkl_set_num_stripes(num_stripes)
+    return mkl.mkl_get_num_stripes()
+
+
+cpdef int get_num_stripes():
+    """
+    Returns the number of stripes, or partitions along the leading dimension
+    of the output matrix, for the parallel ``?gemm`` functions.
+
+    Non-positive returned value indicates Intel(R) MKL uses default partitioning
+    algorithm.
+
+    Positive returned value is a hint, and the library may actually use a
+    smaller number.
+    """
+    return mkl.mkl_get_num_stripes()
 
 
 # Timing
@@ -759,13 +795,20 @@ cdef object __cbwr_get_auto_branch():
 cdef object __enable_instructions(isa=None):
     """
     Enables dispatching for new Intel architectures or restricts the set of Intel instruction sets available for dispatching.
+
     https://software.intel.com/en-us/mkl-developer-reference-c-mkl-enable-instructions
     """
     __variables = {
         'input': {
+            'single_path': mkl.MKL_SINGLE_PATH_ENABLE,
+            'avx512_e4': mkl.MKL_ENABLE_AVX512_E4,
+            'avx512_e3': mkl.MKL_ENABLE_AVX512_E3,
+            'avx512_e2': mkl.MKL_ENABLE_AVX512_E2,
+            'avx512_e1': mkl.MKL_ENABLE_AVX512_E1,
             'avx512_mic_e1': mkl.MKL_ENABLE_AVX512_MIC_E1,
             'avx512': mkl.MKL_ENABLE_AVX512,
             'avx512_mic': mkl.MKL_ENABLE_AVX512_MIC,
+            'avx2_e1': mkl.MKL_ENABLE_AVX2_E1,
             'avx2': mkl.MKL_ENABLE_AVX2,
             'avx': mkl.MKL_ENABLE_AVX,
             'sse4_2': mkl.MKL_ENABLE_SSE4_2,
