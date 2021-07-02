@@ -3,7 +3,9 @@
 
 See the [blog](https://software.intel.com/en-us/blogs/2018/10/18/mkl-service-package-controlling-mkl-behavior-through-python-interfaces) announcing the release.
 
-To install the package, use `conda install -c intel mkl-service`, or `conda install -c conda-forge mkl-service`.
+To install conda package, use `conda install -c intel mkl-service`, or `conda install -c conda-forge mkl-service`.
+
+To install pypi package, use `python -m pip install mkl-service`
 
 A short example, illustrating it use:
 
