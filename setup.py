@@ -36,6 +36,9 @@ import setuptools.extension
 with io.open('mkl/__init__.py', 'rt', encoding='utf8') as file:
     VERSION = re.search(r'__version__ = \'(.*?)\'', file.read()).group(1)
 
+with open("README.md", "r", encoding="utf-8") as file:
+    long_description = file.read()
+
 CLASSIFIERS = """\
 Development Status :: 5 - Production/Stable
 Intended Audience :: Science/Research
@@ -132,16 +135,8 @@ def setup_package():
         maintainer="Intel",
         maintainer_email="scripting@intel.com",
         description="MKL Support Functions",
-        long_description="""
-            Intel(R) Math Kernel Library (Intel(R) MKL) support functions are
-            subdivided into the following groups according to their purpose:
-                Version Information
-                Threading Control
-                Timing
-                Memory Management
-                Conditional Numerical Reproducibility Control
-                Miscellaneous
-        """,
+        long_description=long_description,
+        long_description_content_type="text/markdown",
         url="https://github.com/IntelPython/mkl-service",
         author="Intel",
         download_url="https://github.com/IntelPython/mkl-service",
