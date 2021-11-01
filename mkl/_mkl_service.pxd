@@ -91,6 +91,7 @@ cdef extern from "mkl.h":
     int MKL_BLACS_MSMPI
     int MKL_BLACS_INTELMPI
     int MKL_BLACS_MPICH2
+    int MKL_BLACS_LASTMPI
 
     # VML Constants
     int VML_HA
