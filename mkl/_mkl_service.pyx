@@ -31,6 +31,14 @@ import warnings
 cimport mkl._mkl_service as mkl
 
 
+cdef extern from *:
+    """
+    /* defind MKL_BLACS_MPICH2 if undefined */
+    #ifndef MKL_BLACS_MPICH2
+    #define MKL_BLACS_MPICH2 -1
+    #endif
+    """
+
 ctypedef struct MemStatData:
     #  DataAllocatedBytes, AllocatedBuffers
     mkl.MKL_INT64 allocated_bytes
@@ -874,7 +882,6 @@ cdef __set_mpi(vendor, custom_library_name=None):
             'custom': mkl.MKL_BLACS_CUSTOM,
             'msmpi': mkl.MKL_BLACS_MSMPI,
             'intelmpi': mkl.MKL_BLACS_INTELMPI,
-            'mpich2': mkl.MKL_BLACS_MPICH2,
         },
         'output': {
             0: 'success',
@@ -883,6 +890,8 @@ cdef __set_mpi(vendor, custom_library_name=None):
             -3: 'MPI library cannot be set at this point',
         },
     }
+    if mkl.MKL_BLACS_LASTMPI > mkl.MKL_BLACS_INTELMPI + 1:
+        __variables['input']['mpich2'] = mkl.MKL_BLACS_MPICH2
     if ((vendor is 'custom' or custom_library_name is not None) and
         (vendor is not 'custom' or custom_library_name is None)):
         raise ValueError("Selecting custom MPI for BLACS requires specifying "
