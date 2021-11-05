@@ -31,6 +31,14 @@ import warnings
 cimport mkl._mkl_service as mkl
 
 
+cdef extern from *:
+    """
+    /* defind MKL_BLACS_MPICH2 if undefined */
+    #ifndef MKL_BLACS_MPICH2
+    #define MKL_BLACS_MPICH2 -1
+    #endif
+    """
+
 ctypedef struct MemStatData:
     #  DataAllocatedBytes, AllocatedBuffers
     mkl.MKL_INT64 allocated_bytes
