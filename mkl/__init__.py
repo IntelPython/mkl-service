@@ -24,6 +24,19 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+import os
+
+
+def add_dll_directory():
+    """mkl package DLL's need to be available so they can be dynamically linked"""
+    path = os.path.join(sys.prefix, "Library\\bin")
+    try:
+        os.add_dll_directory(path)
+    except AttributeError:
+        environ_path = os.environ.get('PATH', '')
+        if path not in environ_path:
+            os.environ['PATH'] = os.pathsep.join((path, environ_path))
+
 
 class RTLD_for_MKL():
     def __init__(self):
@@ -44,6 +57,8 @@ class RTLD_for_MKL():
         if self.saved_rtld:
             sys.setdlopenflags(self.saved_rtld)
             self.saved_rtld = None
+
+add_dll_directory()
 
 with RTLD_for_MKL():
     from . import _mklinit
