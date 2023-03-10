@@ -7,7 +7,7 @@ See the [blog](https://software.intel.com/en-us/blogs/2018/10/18/mkl-service-pac
 
 To install conda package, use `conda install -c intel mkl-service`, or `conda install -c conda-forge mkl-service`.
 
-To install pypi package, use `python -m pip install mkl-service`
+To install pypi package, use `python -m pip install mkl-service`.
 
 ---
 
