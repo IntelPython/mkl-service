@@ -30,7 +30,6 @@ import mkl
 
 
 class test_version_information():
-    # https://software.intel.com/en-us/mkl-developer-reference-c-version-information
     def test_get_version(self):
         v = mkl.get_version()
         assert(isinstance(v, dict))
@@ -45,7 +44,6 @@ class test_version_information():
 
 
 class test_threading_control():
-    # https://software.intel.com/en-us/mkl-developer-reference-c-threading-control
     def test_set_num_threads(self):
         saved = mkl.get_max_threads()
         half_nt = int( (1 + saved) / 2 ) 
@@ -162,7 +160,6 @@ class test_timing():
 
 
 class test_memory_management():
-    # https://software.intel.com/en-us/mkl-developer-reference-c-memory-management
     def test_free_buffers(self):
         mkl.free_buffers()
 
@@ -192,7 +189,6 @@ class test_memory_management():
 
 
 class test_cnr_control():
-    # https://software.intel.com/en-us/mkl-developer-reference-c-conditional-numerical-reproducibility-control
     def test_cbwr(self):
         branches = [
             'off',
@@ -237,7 +233,6 @@ class test_cnr_control():
 
 
 class test_miscellaneous():
-    # https://software.intel.com/en-us/mkl-developer-reference-c-miscellaneous
     def test_enable_instructions_avx512_mic_e1(self):
         mkl.enable_instructions('avx512_mic_e1')
 
@@ -283,7 +278,6 @@ class test_miscellaneous():
 
 
 class test_vm_service_functions():
-    # https://software.intel.com/en-us/mkl-developer-reference-c-vm-service-functions
     def test_vml_set_get_mode_roundtrip(self):
         saved = mkl.vml_get_mode()
         mkl.vml_set_mode(*saved) # should not raise errors
