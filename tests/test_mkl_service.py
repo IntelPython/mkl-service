@@ -24,31 +24,32 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from nose.tools import assert_equals, nottest
+import unittest
+from unittest import skip
 import six
 import mkl
 
 
-class test_version_information():
+class test_version_information(unittest.TestCase):
     def test_get_version(self):
         v = mkl.get_version()
-        assert(isinstance(v, dict))
-        assert('MajorVersion' in v)
-        assert('MinorVersion' in v)
-        assert('UpdateVersion' in v)
+        self.assertIsInstance(v, dict)
+        self.assertIn('MajorVersion', v)
+        self.assertIn('MinorVersion', v)
+        self.assertIn('UpdateVersion', v)
 
     def test_get_version_string(self):
         v = mkl.get_version_string()
-        assert(isinstance(v, six.string_types))
-        assert('Math Kernel Library' in v)
+        self.assertIsInstance(v, six.string_types)
+        self.assertIn('Math Kernel Library', v)
 
 
-class test_threading_control():
+class TestThreadingControl(unittest.TestCase):
     def test_set_num_threads(self):
         saved = mkl.get_max_threads()
         half_nt = int( (1 + saved) / 2 ) 
         mkl.set_num_threads(half_nt)
-        assert(mkl.get_max_threads() == half_nt)
+        self.assertEqual(mkl.get_max_threads(), half_nt)
         mkl.set_num_threads(saved)
 
     def test_domain_set_num_threads_blas(self):
@@ -60,49 +61,49 @@ class test_threading_control():
         fft_nt = int( (3 + 2*saved_fft_nt)/4 )
         vml_nt = int( (3 + 3*saved_vml_nt)/4 )
         status = mkl.domain_set_num_threads(blas_nt, domain='blas')
-        assert(status == 'success')
+        self.assertEqual(status, 'success')
         status = mkl.domain_set_num_threads(fft_nt, domain='fft')
-        assert(status == 'success')
+        self.assertEqual(status, 'success')
         status = mkl.domain_set_num_threads(vml_nt, domain='vml')
-        assert(status == 'success')
+        self.assertEqual(status, 'success')
         # check
-        assert(mkl.domain_get_max_threads(domain='blas') == blas_nt)
-        assert(mkl.domain_get_max_threads(domain='fft') == fft_nt)
-        assert(mkl.domain_get_max_threads(domain='vml') == vml_nt)
+        self.assertEqual(mkl.domain_get_max_threads(domain='blas'), blas_nt)
+        self.assertEqual(mkl.domain_get_max_threads(domain='fft'), fft_nt)
+        self.assertEqual(mkl.domain_get_max_threads(domain='vml'), vml_nt)
         # restore
         status = mkl.domain_set_num_threads(saved_blas_nt, domain='blas')
-        assert(status == 'success')
+        self.assertEqual(status, 'success')
         status = mkl.domain_set_num_threads(saved_fft_nt, domain='fft')
-        assert(status == 'success')
+        self.assertEqual(status, 'success')
         status = mkl.domain_set_num_threads(saved_vml_nt, domain='vml')
-        assert(status == 'success')
-        
+        self.assertEqual(status, 'success')
+
     def test_domain_set_num_threads_fft(self):
         status = mkl.domain_set_num_threads(4, domain='fft')
-        assert(status == 'success')
+        self.assertEqual(status, 'success')
 
     def test_domain_set_num_threads_vml(self):
         status = mkl.domain_set_num_threads(4, domain='vml')
-        assert(status == 'success')
+        self.assertEqual(status, 'success')
 
     def test_domain_set_num_threads_pardiso(self):
         status = mkl.domain_set_num_threads(4, domain='pardiso')
-        assert(status == 'success')
+        self.assertEqual(status, 'success')
 
     def test_domain_set_num_threads_all(self):
         status = mkl.domain_set_num_threads(4, domain='all')
-        assert(status == 'success')
+        self.assertEqual(status, 'success')
 
     def test_set_num_threads_local(self):
         mkl.set_num_threads(1)
         status = mkl.set_num_threads_local(2)
-        assert(status == 'global_num_threads')
+        self.assertEqual(status, 'global_num_threads')
         status = mkl.set_num_threads_local(4)
-        assert(status == 2)
+        self.assertEqual(status, 2)
         status = mkl.set_num_threads_local(0)
-        assert(status == 4)
+        self.assertEqual(status, 4)
         status = mkl.set_num_threads_local(8)
-        assert(status == 'global_num_threads')
+        self.assertEqual(status, 'global_num_threads')
 
     def test_set_dynamic(self):
         mkl.set_dynamic(True)
@@ -129,37 +130,37 @@ class test_threading_control():
         mkl.get_dynamic()
 
 
-class test_timing():
+class test_timing(unittest.TestCase):
     # https://software.intel.com/en-us/mkl-developer-reference-c-timing
     def test_second(self):
         s1 = mkl.second()
         s2 = mkl.second()
         delta = s2 - s1
-        assert(delta >= 0)
+        self.assertGreaterEqual(delta, 0)
 
     def test_dsecnd(self):
         d1 = mkl.dsecnd()
         d2 = mkl.dsecnd()
         delta = d2 - d1
-        assert(delta >= 0)
+        self.assertGreaterEqual(delta, 0)
 
     def test_get_cpu_clocks(self):
         c1 = mkl.get_cpu_clocks()
         c2 = mkl.get_cpu_clocks()
         delta = c2 - c1
-        assert(delta >= 0)
+        self.assertGreaterEqual(delta, 0)
 
     def test_get_cpu_frequency(self):
-        assert(mkl.get_cpu_frequency() > 0)
+        self.assertGreater(mkl.get_cpu_frequency(), 0)
 
     def test_get_max_cpu_frequency(self):
-        assert(mkl.get_max_cpu_frequency() > 0)
+        self.assertGreater(mkl.get_max_cpu_frequency(), 0)
 
     def test_get_clocks_frequency(self):
-        assert(mkl.get_clocks_frequency() > 0)
+        self.assertGreater(mkl.get_clocks_frequency(), 0)
 
 
-class test_memory_management():
+class test_memory_management(unittest.TestCase):
     def test_free_buffers(self):
         mkl.free_buffers()
 
@@ -188,7 +189,7 @@ class test_memory_management():
         mkl.set_memory_limit(128)
 
 
-class test_cnr_control():
+class TestCNRControl(unittest.TestCase):
     def test_cbwr(self):
         branches = [
             'off',
@@ -213,18 +214,20 @@ class test_cnr_control():
             'avx512_e1,strict',
         ]
         for branch in branches:
-            yield self.check_cbwr, branch, 'branch'
+            with self.subTest(branch=branch):
+                self.check_cbwr(branch, 'branch')
         for branch in branches + strict:
-            yield self.check_cbwr, branch, 'all'
+            with self.subTest(branch=branch):
+                self.check_cbwr(branch, 'all')
 
     def check_cbwr(self, branch, cnr_const):
         status = mkl.cbwr_set(branch=branch)
         if status == 'success':
             expected_value = 'branch_off' if branch == 'off' else branch
             actual_value = mkl.cbwr_get(cnr_const=cnr_const)
-            assert_equals(actual_value,
-                          expected_value,
-                          msg="Round-trip failure for CNR branch '{}', CNR const '{}'".format(branch, cnr_const))
+            self.assertEqual(actual_value,
+                             expected_value,
+                             "Round-trip failure for CNR branch '{}', CNR const '{}'".format(branch, cnr_const))
         elif status != 'err_unsupported_branch':
             raise AssertionError(status)
 
@@ -232,7 +235,7 @@ class test_cnr_control():
         mkl.cbwr_get_auto_branch()
 
 
-class test_miscellaneous():
+class test_miscellaneous(unittest.TestCase):
     def test_enable_instructions_avx512_mic_e1(self):
         mkl.enable_instructions('avx512_mic_e1')
 
@@ -266,7 +269,7 @@ class test_miscellaneous():
     #def test_set_mpi_custom(self):
     #    mkl.set_mpi('custom', 'custom_library_name')
 
-    @nottest
+    @skip
     def test_set_mpi_msmpi(self):
         mkl.set_mpi('msmpi')
 
@@ -277,7 +280,7 @@ class test_miscellaneous():
     #    mkl.set_mpi('mpich2')
 
 
-class test_vm_service_functions():
+class test_vm_service_functions(unittest.TestCase):
     def test_vml_set_get_mode_roundtrip(self):
         saved = mkl.vml_get_mode()
         mkl.vml_set_mode(*saved) # should not raise errors
@@ -332,3 +335,6 @@ class test_vm_service_functions():
 
     def test_vml_clear_err_status(self):
         mkl.vml_clear_err_status()
+
+if __name__ == '__main__':
+    unittest.main()

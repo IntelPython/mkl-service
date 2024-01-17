@@ -143,7 +143,6 @@ def setup_package():
         license='BSD',
         classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
         platforms=["Windows", "Linux", "Mac OS-X"],
-        test_suite='nose.collector',
         python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
         setup_requires=['setuptools', 'cython'],
         install_requires=[],

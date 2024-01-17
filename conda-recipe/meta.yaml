@@ -28,12 +28,10 @@ requirements:
       - six
 
 test:
-    requires:
-      - nose
     imports:
       - mkl
     commands:
-      - nosetests -v tests
+      - python tests/test_mkl_service.py -v
     source_files:
       - tests
 
