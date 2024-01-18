@@ -1,5 +1,5 @@
 # Cython
-mkl-service/_mkl_service.c
+mkl/_mkl_service.c
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
