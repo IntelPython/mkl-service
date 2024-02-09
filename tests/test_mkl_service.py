@@ -259,18 +259,21 @@ def test_verbose_false():
 def test_verbose_true():
     mkl.verbose(True)
 
-#def test_set_mpi_custom():
-#    mkl.set_mpi('custom', 'custom_library_name')
+@pytest.mark.skip(reason="Skipping MPI-related test")
+def test_set_mpi_custom():
+    mkl.set_mpi('custom', 'custom_library_name')
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="Skipping MPI-related test")
 def test_set_mpi_msmpi():
     mkl.set_mpi('msmpi')
 
-#def test_set_mpi_intelmpi():
-#    mkl.set_mpi('intelmpi')
+@pytest.mark.skip(reason="Skipping MPI-related test")
+def test_set_mpi_intelmpi():
+    mkl.set_mpi('intelmpi')
 
-#def test_set_mpi_mpich2():
-#    mkl.set_mpi('mpich2')
+@pytest.mark.skip(reason="Skipping MPI-related test")
+def test_set_mpi_mpich2():
+    mkl.set_mpi('mpich2')
 
 
 def test_vml_set_get_mode_roundtrip():
