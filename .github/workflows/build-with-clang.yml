@@ -4,6 +4,8 @@ on:
   push:
     branches: [master]
 
+permissions: read-all
+
 jobs:
   build-with-clang:
     name: Build project with IntelLLVM clang compiler

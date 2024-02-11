@@ -2,6 +2,8 @@ name: Conda package
 
 on: push
 
+permissions: read-all
+
 env:
   PACKAGE_NAME: mkl-service
   MODULE_NAME: mkl
