@@ -25,7 +25,6 @@
 
 
 import pytest
-import six
 import mkl
 
 
@@ -39,7 +38,7 @@ def test_get_version():
 
 def test_get_version_string():
     v = mkl.get_version_string()
-    assert isinstance(v, six.string_types)
+    assert isinstance(v, str)
     assert 'Math Kernel Library' in v
 
 

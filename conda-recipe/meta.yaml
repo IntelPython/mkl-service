@@ -1,5 +1,5 @@
-{% set version = "2.4.0" %}
-{% set buildnumber = 2 %}
+{% set version = "2.4.1" %}
+{% set buildnumber = 0 %}
 
 package:
     name: mkl-service
@@ -25,7 +25,6 @@ requirements:
     run:
       - python
       - mkl >=2019.3
-      - six
 
 test:
     requires:
@@ -33,9 +32,7 @@ test:
     imports:
       - mkl
     commands:
-      - pytest tests/test_mkl_service.py
-    source_files:
-      - tests
+      - pytest -vv --pyargs mkl
 
 about:
     home: http://github.com/IntelPython/mkl-service

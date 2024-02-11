@@ -1,0 +1,234 @@
+name: Conda package
+
+on: push
+
+env:
+  PACKAGE_NAME: mkl-service
+  MODULE_NAME: mkl
+  TEST_ENV_NAME: test_mkl_service
+  VER_SCRIPT1: "import json; f = open('ver.json', 'r'); j = json.load(f); f.close(); "
+  VER_SCRIPT2: "d = j['mkl-service'][0]; print('='.join((d[s] for s in ('version', 'build'))))"
+
+jobs:
+  build_linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set pkgs_dirs
+        run: |
+          echo "pkgs_dirs: [~/.conda/pkgs]" >> ~/.condarc
+      - name: Cache conda packages
+        uses: actions/cache@v4
+        env:
+          CACHE_NUMBER: 0  # Increase to reset cache
+        with:
+          path: ~/.conda/pkgs
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('**/meta.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
+
+      - name: Add conda to system path
+        run: echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install conda-build
+        run: conda install conda-build
+      - name: Build conda package
+        run: |
+          CHANNELS="-c conda-forge -c intel --override-channels"
+          VERSIONS="--python ${{ matrix.python }}"
+          TEST="--no-test"
+
+          conda build \
+            $TEST \
+            $VERSIONS \
+            $CHANNELS \
+            conda-recipe
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+          path: /usr/share/miniconda/conda-bld/linux-64/${{ env.PACKAGE_NAME }}-*.tar.bz2
+
+  build_windows:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        python: ['3.9', '3.10', '3.11', '3.12']
+    env:
+      conda-bld: C:\Miniconda\conda-bld\win-64\
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: true
+          activate-environment: ""
+
+      - name: Cache conda packages
+        uses: actions/cache@v4
+        env:
+          CACHE_NUMBER: 3  # Increase to reset cache
+        with:
+          path: /home/runner/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('**/meta.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
+      - name: Install conda-build
+        run: conda install conda-build
+      - name: Build conda package
+        run: conda build --no-test --python ${{ matrix.python }} -c intel -c conda-forge --override-channels conda-recipe
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+          path: ${{ env.conda-bld }}${{ env.PACKAGE_NAME }}-*.tar.bz2
+
+  test_linux:
+    needs: build_linux
+    runs-on:  ${{ matrix.runner }}
+
+    strategy:
+      matrix:
+        python: ['3.9', '3.10', '3.11', '3.12']
+        experimental: [false]
+        runner: [ubuntu-latest]
+    continue-on-error: ${{ matrix.experimental }}
+    env:
+      CHANNELS: -c conda-forge -c intel --override-channels
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+      - name: Add conda to system path
+        run: echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install conda-build
+        run: conda install conda-build
+      - name: Create conda channel
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/channel/linux-64
+          conda index $GITHUB_WORKSPACE/channel || exit 1
+          mv ${PACKAGE_NAME}-*.tar.bz2 $GITHUB_WORKSPACE/channel/linux-64 || exit 1
+          conda index $GITHUB_WORKSPACE/channel || exit 1
+          # Test channel
+          conda search $PACKAGE_NAME -c $GITHUB_WORKSPACE/channel --override-channels --info --json > $GITHUB_WORKSPACE/ver.json
+          cat ver.json
+      - name: Collect dependencies
+        run: |
+          . $CONDA/etc/profile.d/conda.sh
+          CHANNELS="-c $GITHUB_WORKSPACE/channel ${{ env.CHANNELS }}"
+          export PACKAGE_VERSION=$(python -c "${VER_SCRIPT1} ${VER_SCRIPT2}")
+          conda create -n ${{ env.TEST_ENV_NAME }} $PACKAGE_NAME=${PACKAGE_VERSION} python=${{ matrix.python }} $CHANNELS --only-deps --dry-run > lockfile
+          cat lockfile
+      - name: Set pkgs_dirs
+        run: |
+          echo "pkgs_dirs: [~/.conda/pkgs]" >> ~/.condarc
+      - name: Cache conda packages
+        uses: actions/cache@v4
+        env:
+          CACHE_NUMBER: 0  # Increase to reset cache
+        with:
+          path: ~/.conda/pkgs
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('lockfile') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
+
+      - name: Install mkl-service
+        run: |
+          . $CONDA/etc/profile.d/conda.sh
+          CHANNELS="-c $GITHUB_WORKSPACE/channel ${{ env.CHANNELS }}"
+          export PACKAGE_VERSION=$(python -c "${VER_SCRIPT1} ${VER_SCRIPT2}")
+          conda create -n ${{ env.TEST_ENV_NAME }} $PACKAGE_NAME=${PACKAGE_VERSION} pytest python=${{ matrix.python }} $CHANNELS
+          # Test installed packages
+          conda list
+      - name: Run tests
+        run: |
+          . $CONDA/etc/profile.d/conda.sh
+          conda activate ${{ env.TEST_ENV_NAME }}
+          pytest -vv --pyargs ${{ env.MODULE_NAME }}
+
+  test_windows:
+    needs: build_windows
+    runs-on:  ${{ matrix.runner }}
+
+    strategy:
+      matrix:
+        python: ['3.9', '3.10', '3.11', '3.12']
+        experimental: [false]
+        runner: [windows-latest]
+    continue-on-error: ${{ matrix.experimental }}
+    env:
+      CHANNELS: -c conda-forge -c intel --override-channels
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: true
+          activate-environment: ""
+      - name: Install conda-build
+        # Needed to be able to run conda index
+        run: conda install conda-build
+      - name: Create conda channel
+        run: |
+          mkdir ${{ env.GITHUB_WORKSPACE }}\channel\win-64
+          move ${{ env.PACKAGE_NAME }}-*.tar.bz2 ${{ env.GITHUB_WORKSPACE }}\channel\win-64
+          conda index ${{ env.GITHUB_WORKSPACE }}/channel
+          # Test channel
+          conda search ${{ env.PACKAGE_NAME }} -c ${{ env.GITHUB_WORKSPACE }}/channel --override-channels --info --json > ${{ env.GITHUB_WORKSPACE }}\ver.json
+          more ${{ env.GITHUB_WORKSPACE }}\ver.json
+      - name: Collect dependencies
+        shell: cmd
+        run: |
+          @ECHO ON
+          copy /Y ${{ env.GITHUB_WORKSPACE }}\ver.json .
+          set "SCRIPT=%VER_SCRIPT1% %VER_SCRIPT2%"
+          FOR /F "tokens=* USEBACKQ" %%F IN (`python -c "%SCRIPT%"`) DO (
+             SET PACKAGE_VERSION=%%F
+          )
+          conda create -n ${{ env.TEST_ENV_NAME }} ${{ env.PACKAGE_NAME }}=%PACKAGE_VERSION% python=${{ matrix.python }} -c ${{ env.GITHUB_WORKSPACE }}/channel ${{ env.CHANNELS }} --only-deps --dry-run > lockfile
+          more lockfile
+      - name: Cache conda packages
+        uses: actions/cache@v4
+        env:
+          CACHE_NUMBER: 3  # Increase to reset cache
+        with:
+          path: /home/runner/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('lockfile') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
+      - name: Install mkl-service
+        shell: cmd
+        run: |
+          @ECHO ON
+          copy /Y ${{ env.GITHUB_WORKSPACE }}\ver.json .
+          set "SCRIPT=%VER_SCRIPT1% %VER_SCRIPT2%"
+          FOR /F "tokens=* USEBACKQ" %%F IN (`python -c "%SCRIPT%"`) DO (
+             SET PACKAGE_VERSION=%%F
+          )
+          conda create -n ${{ env.TEST_ENV_NAME }} ${{ env.PACKAGE_NAME }}=%PACKAGE_VERSION% pytest python=${{ matrix.python }} -c ${{ env.GITHUB_WORKSPACE }}/channel ${{ env.CHANNELS }}
+          # Test installed packages
+          conda list
+      - name: Run tests
+        run: |
+          conda activate -n ${{ env.TEST_ENV_NAME }}
+          pytest -v --pyargs ${{ env.MODULE_NAME }}
