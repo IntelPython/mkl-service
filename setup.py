@@ -46,12 +46,10 @@ Intended Audience :: Developers
 License :: OSI Approved
 Programming Language :: C
 Programming Language :: Python
-Programming Language :: Python :: 2
-Programming Language :: Python :: 2.7
-Programming Language :: Python :: 3
-Programming Language :: Python :: 3.5
-Programming Language :: Python :: 3.6
-Programming Language :: Python :: 3.7
+Programming Language :: Python :: 3.9
+Programming Language :: Python :: 3.10
+Programming Language :: Python :: 3.11
+Programming Language :: Python :: 3.12
 Programming Language :: Python :: Implementation :: CPython
 Topic :: Software Development
 Topic :: Utilities
@@ -143,10 +141,17 @@ def setup_package():
         license='BSD',
         classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
         platforms=["Windows", "Linux", "Mac OS-X"],
-        python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
+        python_requires='>=3.9',
         setup_requires=['setuptools', 'cython'],
         install_requires=[],
-        packages=setuptools.find_packages(),
+        packages=[
+            "mkl",
+        ],
+        package_data={
+            "mkl" : [
+                "tests/*.*",
+            ]
+        },
         ext_modules=get_extensions()
     )
     setup(**metadata)

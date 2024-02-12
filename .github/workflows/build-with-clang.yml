@@ -1,0 +1,73 @@
+name: Build mkl-service with clang
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions: read-all
+
+jobs:
+  build-with-clang:
+    name: Build project with IntelLLVM clang compiler
+    runs-on: ubuntu-latest
+
+    env:
+      ONEAPI_ROOT: /opt/intel/oneapi
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Add Intel repository
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
+          sudo apt-get update
+
+      - name: Install Intel OneAPI
+        run: |
+          sudo apt-get install intel-oneapi-compiler-dpcpp-cpp
+          sudo apt-get install intel-oneapi-tbb
+          sudo apt-get install intel-oneapi-mkl-devel
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: x64
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install mkl-service dependencies
+        shell: bash -l {0}
+        run: |
+          pip install numpy cython setuptools pytest pytest-cov
+
+      - name: List oneAPI folder content
+        shell: bash -l {0}
+        run: ls /opt/intel/oneapi/compiler
+
+      - name: Build mkl_random
+        shell: bash -l {0}
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          echo $CMPLR_ROOT
+          export CC=$CMPLR_ROOT/bin/compiler/clang
+          export CXX=$CMPLR_ROOT/bin/compiler/clang++
+          export CFLAGS="${CFLAGS} -fno-fast-math"
+          echo "CC = ${CC}  CXX=${CXX}"
+          ls -l ${CC} ${CXX}
+          python setup.py develop
+
+      - name: Run mkl_random tests
+        shell: bash -l {0}
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          pytest -s -v --pyargs mkl
