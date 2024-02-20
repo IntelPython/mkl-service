@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2019, Intel Corporation
+# Copyright (c) 2018-2024, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -391,33 +391,33 @@ cpdef vml_clear_err_status():
     return __vml_clear_err_status()
 
 
-cdef __mkl_status_to_string(int mkl_status):
+cdef str __mkl_status_to_string(int mkl_status) noexcept:
     if mkl_status == 1:
         return 'success'
     else:
         return 'error'
 
 
-cdef int __python_obj_to_int(obj, func_name):
+cdef int __python_obj_to_int(obj, func_name) except *:
     if not isinstance(obj, numbers.Integral):
         raise ValueError("The argument of " + func_name + " is expected to be a positive integer")
     cdef int c_int = <int>obj
     return c_int
 
 
-cdef void __check_positive_num_threads(int p, func_name):
+cdef void __check_positive_num_threads(int p, func_name) except *:
     if p <= 0:
         warnings.warn("Non-positive argument of " + func_name +
                       " is being ignored, number of threads will not be changed")
 
 
-cdef void __check_non_negative_num_threads(int p, func_name):
+cdef void __check_non_negative_num_threads(int p, func_name) except *:
     if p < 0:
         warnings.warn("Negative argument of " + func_name +
                       " is being ignored, number of threads will not be changed")
 
 
-cdef inline int __mkl_str_to_int(variable, possible_variables_dict):
+cdef inline int __mkl_str_to_int(variable, possible_variables_dict) except *:
     if variable is None:
         raise ValueError("Variable can not be None")
     if possible_variables_dict is None:
@@ -429,7 +429,7 @@ cdef inline int __mkl_str_to_int(variable, possible_variables_dict):
     return possible_variables_dict[variable]
 
 
-cdef  __mkl_int_to_str(int mkl_int_variable, possible_variables_dict):
+cdef  __mkl_int_to_str(int mkl_int_variable, possible_variables_dict) except *:
     if possible_variables_dict is None:
         raise RuntimeError("Dictionary mapping possible internal code to output string is missing")
 
@@ -441,7 +441,7 @@ cdef  __mkl_int_to_str(int mkl_int_variable, possible_variables_dict):
 
 
 # Version Information
-cdef inline mkl.MKLVersion __get_version():
+cdef mkl.MKLVersion __get_version() noexcept:
     """
     Returns the Intel(R) MKL version.
     """
@@ -450,7 +450,7 @@ cdef inline mkl.MKLVersion __get_version():
     return c_mkl_version
 
 
-cdef __get_version_string():
+cdef str __get_version_string() except *:
     """
     Returns the Intel(R) MKL version in a character string.
     """
@@ -461,7 +461,7 @@ cdef __get_version_string():
 
 
 # Threading
-cdef inline int __set_num_threads(int num_threads):
+cdef inline int __set_num_threads(int num_threads) noexcept:
     """
     Specifies the number of OpenMP* threads to use.
     """
@@ -471,7 +471,7 @@ cdef inline int __set_num_threads(int num_threads):
     return prev_num_threads
 
 
-cdef inline int __domain_set_num_threads(int c_num_threads, int mkl_domain):
+cdef inline int __domain_set_num_threads(int c_num_threads, int mkl_domain) noexcept:
     """
     Specifies the number of OpenMP* threads for a particular function domain.
     """
@@ -479,7 +479,7 @@ cdef inline int __domain_set_num_threads(int c_num_threads, int mkl_domain):
     return mkl_status
 
 
-cdef inline int __set_num_threads_local(int c_num_threads):
+cdef inline int __set_num_threads_local(int c_num_threads) noexcept:
     """
     Specifies the number of OpenMP* threads for all Intel(R) MKL functions on the current execution thread.
     """
@@ -488,7 +488,7 @@ cdef inline int __set_num_threads_local(int c_num_threads):
     return c_mkl_status
 
 
-cdef inline int __set_dynamic(int c_enable):
+cdef inline int __set_dynamic(int c_enable) noexcept:
     """
     Enables Intel(R) MKL to dynamically change the number of OpenMP* threads.
     """
@@ -497,14 +497,14 @@ cdef inline int __set_dynamic(int c_enable):
     return __get_max_threads()
 
 
-cdef inline int __get_max_threads():
+cdef inline int __get_max_threads() noexcept:
     """
     Gets the number of OpenMP* threads targeted for parallelism.
     """
     return mkl.mkl_get_max_threads()
 
 
-cdef inline int __domain_get_max_threads(int c_mkl_domain):
+cdef inline int __domain_get_max_threads(int c_mkl_domain) noexcept:
     """
     Gets the number of OpenMP* threads targeted for parallelism for a particular function domain.
     """
@@ -513,7 +513,7 @@ cdef inline int __domain_get_max_threads(int c_mkl_domain):
     return c_num_threads
 
 
-cdef inline int __get_dynamic():
+cdef inline int __get_dynamic() noexcept:
     """
     Determines whether Intel(R) MKL is enabled to dynamically change the number of OpenMP* threads.
     """
@@ -521,7 +521,7 @@ cdef inline int __get_dynamic():
 
 
 # Timing
-cdef inline float __second():
+cdef inline float __second() noexcept:
     """
     Returns elapsed time in seconds.
     Use to estimate real time between two calls to this function.
@@ -530,7 +530,7 @@ cdef inline float __second():
     return mkl.second()
 
 
-cdef inline double __dsecnd():
+cdef inline double __dsecnd() noexcept:
     """
     Returns elapsed time in seconds.
     Use to estimate real time between two calls to this function.
@@ -539,7 +539,7 @@ cdef inline double __dsecnd():
     return mkl.dsecnd()
 
 
-cdef inline mkl.MKL_UINT64 __get_cpu_clocks():
+cdef inline mkl.MKL_UINT64 __get_cpu_clocks() noexcept:
     """
     Returns elapsed CPU clocks.
     """
@@ -548,21 +548,21 @@ cdef inline mkl.MKL_UINT64 __get_cpu_clocks():
     return clocks
 
 
-cdef inline double __get_cpu_frequency():
+cdef inline double __get_cpu_frequency() noexcept:
     """
     Returns the current CPU frequency value in GHz.
     """
     return mkl.mkl_get_cpu_frequency()
 
 
-cdef inline double __get_max_cpu_frequency():
+cdef inline double __get_max_cpu_frequency() noexcept:
     """
     Returns the maximum CPU frequency value in GHz.
     """
     return mkl.mkl_get_max_cpu_frequency()
 
 
-cdef inline double __get_clocks_frequency():
+cdef inline double __get_clocks_frequency() noexcept:
     """
     Returns the frequency value in GHz based on constant-rate Time Stamp Counter.
     """
@@ -570,7 +570,7 @@ cdef inline double __get_clocks_frequency():
 
 
 # Memory Management. See the Intel(R) MKL Developer Guide for more memory usage information.
-cdef inline void __free_buffers():
+cdef inline void __free_buffers() noexcept:
     """
     Frees unused memory allocated by the Intel(R) MKL Memory Allocator.
     """
@@ -578,7 +578,7 @@ cdef inline void __free_buffers():
     return
 
 
-cdef inline void __thread_free_buffers():
+cdef inline void __thread_free_buffers() noexcept:
     """
     Frees unused memory allocated by the Intel(R) MKL Memory Allocator in the current thread.
     """
@@ -586,14 +586,14 @@ cdef inline void __thread_free_buffers():
     return
 
 
-cdef inline int __disable_fast_mm():
+cdef inline int __disable_fast_mm() noexcept:
     """
     Turns off the Intel(R) MKL Memory Allocator for Intel(R) MKL functions to directly use the system malloc/free functions.
     """
     return mkl.mkl_disable_fast_mm()
 
 
-cdef inline MemStatData __mem_stat():
+cdef inline MemStatData __mem_stat() noexcept:
     """
     Reports the status of the Intel(R) MKL Memory Allocator.
     """
@@ -602,7 +602,7 @@ cdef inline MemStatData __mem_stat():
     return mem_stat_data
 
 
-cdef object __peak_mem_usage(mem_const):
+cdef object __peak_mem_usage(mem_const) except *:
     """
     Reports the peak memory allocated by the Intel(R) MKL Memory Allocator.
     """
@@ -625,7 +625,7 @@ cdef object __peak_mem_usage(mem_const):
     return memory_allocator
 
 
-cdef inline object __set_memory_limit(limit):
+cdef inline object __set_memory_limit(limit) except *:
     """
     On Linux, sets the limit of memory that Intel(R) MKL can allocate for a specified type of memory.
     """
@@ -636,7 +636,7 @@ cdef inline object __set_memory_limit(limit):
 
 
 # Conditional Numerical Reproducibility
-cdef object __cbwr_set(branch=None):
+cdef object __cbwr_set(branch=None) except *:
     """
     Configures the CNR mode of Intel(R) MKL.
     """
@@ -676,7 +676,7 @@ cdef object __cbwr_set(branch=None):
     return status
 
 
-cdef inline __cbwr_get(cnr_const=None):
+cdef inline __cbwr_get(cnr_const=None) except *:
     """
     Returns the current CNR settings.
     """
@@ -714,7 +714,7 @@ cdef inline __cbwr_get(cnr_const=None):
     return status
 
 
-cdef object __cbwr_get_auto_branch():
+cdef object __cbwr_get_auto_branch() except *:
     """
     Automatically detects the CNR code branch for your platform.
     """
@@ -749,7 +749,7 @@ cdef object __cbwr_get_auto_branch():
 
 
 # Miscellaneous
-cdef object __enable_instructions(isa=None):
+cdef object __enable_instructions(isa=None) except *:
     """
     Enables dispatching for new Intel architectures or restricts the set of Intel instruction sets available for dispatching.
     """
@@ -776,7 +776,7 @@ cdef object __enable_instructions(isa=None):
     return __mkl_status_to_string(c_mkl_status)
 
 
-cdef object __set_env_mode():
+cdef object __set_env_mode() except *:
     """
     Sets up the mode that ignores environment settings specific to Intel(R) MKL. See mkl_set_env_mode(1).
     """
@@ -793,7 +793,7 @@ cdef object __set_env_mode():
     return status
 
 
-cdef object __get_env_mode():
+cdef object __get_env_mode() except *:
     """
     Query the current environment mode. See mkl_set_env_mode(0).
     """
@@ -809,14 +809,14 @@ cdef object __get_env_mode():
     return status
 
 
-cdef inline int __verbose(int c_enable):
+cdef inline int __verbose(int c_enable) noexcept:
     """
     Enables or disables Intel(R) MKL Verbose mode.
     """
     return mkl.mkl_verbose(c_enable)
 
 
-cdef __set_mpi(vendor, custom_library_name=None):
+cdef __set_mpi(vendor, custom_library_name=None) except *:
     """
     Sets the implementation of the message-passing interface to be used by Intel(R) MKL.
     """
@@ -854,7 +854,7 @@ cdef __set_mpi(vendor, custom_library_name=None):
 
 
 # VM Service Functions
-cdef object __vml_set_mode(accuracy, ftzdaz, errmode):
+cdef object __vml_set_mode(accuracy, ftzdaz, errmode) except *:
     """
     Sets a new mode for VM functions according to the mode parameter and stores the previous VM mode to oldmode.
     """
@@ -919,7 +919,7 @@ cdef object __vml_set_mode(accuracy, ftzdaz, errmode):
     return (accuracy, ftzdaz, errmode)
 
 
-cdef object __vml_get_mode():
+cdef object __vml_get_mode() except *:
     """
     Gets the VM mode.
     """
@@ -972,7 +972,7 @@ __mkl_vml_status = {
 }
 
 
-cdef object __vml_set_err_status(status):
+cdef object __vml_set_err_status(status) except *:
     """
     Sets the new VM Error Status according to err and stores the previous VM Error Status to olderr.
     """
@@ -1006,7 +1006,7 @@ cdef object __vml_set_err_status(status):
     return status
 
 
-cdef object __vml_get_err_status():
+cdef object __vml_get_err_status() except *:
     """
     Gets the VM Error Status.
     """
@@ -1030,7 +1030,7 @@ cdef object __vml_get_err_status():
     return status
 
 
-cdef object __vml_clear_err_status():
+cdef object __vml_clear_err_status() except *:
     """
     Sets the VM Error Status to VML_STATUS_OK and stores the previous VM Error Status to olderr.
     """
