@@ -5,7 +5,17 @@ See the [blog](https://www.intel.com/content/www/us/en/developer/tools/oneapi/on
 
 ---
 
-To install conda package, use `conda install -c intel mkl-service`, or `conda install -c conda-forge mkl-service`.
+To install conda package, use
+
+```
+conda install -c https://software.repos.intel.com/python/conda mkl-service
+```
+
+or
+
+```
+conda install -c conda-forge mkl-service
+```
 
 To install pypi package, use `python -m pip install mkl-service`.
 
