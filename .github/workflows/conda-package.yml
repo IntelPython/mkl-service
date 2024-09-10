@@ -18,7 +18,7 @@ jobs:
       matrix:
         python: ["3.9", "3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
 
@@ -43,7 +43,7 @@ jobs:
         run: conda install conda-build
       - name: Build conda package
         run: |
-          CHANNELS="-c conda-forge -c intel --override-channels"
+          CHANNELS="-c conda-forge -c https://software.repos.intel.com/python/conda --override-channels"
           VERSIONS="--python ${{ matrix.python }}"
           TEST="--no-test"
 
@@ -53,13 +53,13 @@ jobs:
             $CHANNELS \
             conda-recipe
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.4.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: /usr/share/miniconda/conda-bld/linux-64/${{ env.PACKAGE_NAME }}-*.tar.bz2
 
   build_windows:
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     strategy:
       matrix:
@@ -67,7 +67,7 @@ jobs:
     env:
       conda-bld: C:\Miniconda\conda-bld\win-64\
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
       - uses: conda-incubator/setup-miniconda@v3
@@ -89,9 +89,9 @@ jobs:
       - name: Install conda-build
         run: conda install conda-build
       - name: Build conda package
-        run: conda build --no-test --python ${{ matrix.python }} -c intel -c conda-forge --override-channels conda-recipe
+        run: conda build --no-test --python ${{ matrix.python }} -c https://software.repos.intel.com/python/conda -c conda-forge --override-channels conda-recipe
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.4.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: ${{ env.conda-bld }}${{ env.PACKAGE_NAME }}-*.tar.bz2
@@ -107,7 +107,7 @@ jobs:
         runner: [ubuntu-latest]
     continue-on-error: ${{ matrix.experimental }}
     env:
-      CHANNELS: -c conda-forge -c intel --override-channels
+      CHANNELS: -c conda-forge -c https://software.repos.intel.com/python/conda --override-channels
 
     steps:
       - name: Download artifact
@@ -171,10 +171,10 @@ jobs:
       matrix:
         python: ['3.9', '3.10', '3.11', '3.12']
         experimental: [false]
-        runner: [windows-latest]
+        runner: [windows-2019]
     continue-on-error: ${{ matrix.experimental }}
     env:
-      CHANNELS: -c conda-forge -c intel --override-channels
+      CHANNELS: -c conda-forge -c https://software.repos.intel.com/python/conda --override-channels
 
     steps:
       - name: Download artifact
