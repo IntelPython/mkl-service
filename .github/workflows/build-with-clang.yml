@@ -1,8 +1,10 @@
 name: Build mkl-service with clang
+
 on:
-  pull_request:
   push:
-    branches: [master]
+    branches:
+      - master
+  pull_request:
 
 permissions: read-all
 
@@ -54,7 +56,7 @@ jobs:
         shell: bash -l {0}
         run: ls /opt/intel/oneapi/compiler
 
-      - name: Build mkl_random
+      - name: Build mkl-service
         shell: bash -l {0}
         run: |
           source /opt/intel/oneapi/setvars.sh
@@ -66,7 +68,7 @@ jobs:
           ls -l ${CC} ${CXX}
           python setup.py develop
 
-      - name: Run mkl_random tests
+      - name: Run mkl-service tests
         shell: bash -l {0}
         run: |
           source /opt/intel/oneapi/setvars.sh
