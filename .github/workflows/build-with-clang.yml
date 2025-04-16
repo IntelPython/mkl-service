@@ -1,8 +1,10 @@
 name: Build mkl-service with clang
+
 on:
-  pull_request:
   push:
-    branches: [master]
+    branches:
+      - master
+  pull_request:
 
 permissions: read-all
 
