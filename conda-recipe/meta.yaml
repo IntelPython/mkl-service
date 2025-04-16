@@ -19,12 +19,12 @@ requirements:
       - {{ compiler('c') }}
     host:
       - python
-      - setuptools
-      - mkl-devel >=2019.3
+      - setuptools >=77
+      - mkl-devel
       - cython
     run:
       - python
-      - mkl >=2019.3
+      - mkl
 
 test:
     requires:
@@ -40,7 +40,7 @@ about:
     license_file: LICENSE.txt
     license_family: BSD
     description:
-        Intel(R) Math Kernel Library (Intel(R) MKL) support functions are
+        Intel(R) OneAPI Math Kernel Library (OneMKL) support functions are
         subdivided into the following groups according to their purpose, such as
             Version Information
             Threading Control
@@ -48,7 +48,7 @@ about:
             Memory Management
             Conditional Numerical Reproducibility Control
             Miscellaneous
-    summary: Python hooks for Intel(R) Math Kernel Library runtime control settings.
+    summary: Python hooks for Intel(R) OneMKL runtime control settings.
 
 extra:
   recipe-maintainers:

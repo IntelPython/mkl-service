@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (c) 2018, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,139 +24,67 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from __future__ import division, print_function, absolute_import
-import io
-import re
 import os
-from os.path import join, exists, dirname
-import setuptools
-import setuptools.extension
+from os.path import join
 
-with io.open('mkl/__init__.py', 'rt', encoding='utf8') as file:
-    VERSION = re.search(r'__version__ = \'(.*?)\'', file.read()).group(1)
+import Cython.Build
+from setuptools import Extension, setup
 
-with open("README.md", "r", encoding="utf-8") as file:
-    long_description = file.read()
+def extensions():
+    mkl_root = os.environ["MKLROOT"]
+    if mkl_root:
+        mkl_info = {
+            "include_dirs": [join(mkl_root, "include")],
+            "library_dirs": [join(mkl_root, "lib"), join(mkl_root, "lib", "intel64")],
+            "libraries": ["mkl_rt"]
+        }
+    else:
+        raise ValueError("MKLROOT environment variable not set.")
 
-CLASSIFIERS = """\
-Development Status :: 5 - Production/Stable
-Intended Audience :: Science/Research
-Intended Audience :: Developers
-License :: OSI Approved
-Programming Language :: C
-Programming Language :: Python
-Programming Language :: Python :: 3.9
-Programming Language :: Python :: 3.10
-Programming Language :: Python :: 3.11
-Programming Language :: Python :: 3.12
-Programming Language :: Python :: Implementation :: CPython
-Topic :: Software Development
-Topic :: Utilities
-Operating System :: Microsoft :: Windows
-Operating System :: POSIX
-Operating System :: Unix
-Operating System :: MacOS
-"""
-
-
-def get_extensions():
-    mkl_root = os.environ['MKLROOT']
-    mkl_info = {
-        'include_dirs': [join(mkl_root, 'include')],
-        'library_dirs': [join(mkl_root, 'lib'), join(mkl_root, 'lib', 'intel64')],
-        'libraries': ['mkl_rt']
-    }
-
-    mkl_include_dirs = mkl_info.get('include_dirs', [])
-    mkl_library_dirs = mkl_info.get('library_dirs', [])
-    mkl_libraries = mkl_info.get('libraries', ['mkl_rt'])
+    mkl_include_dirs = mkl_info.get("include_dirs", [])
+    mkl_library_dirs = mkl_info.get("library_dirs", [])
+    mkl_libraries = mkl_info.get("libraries", ["mkl_rt"])
 
     defs = []
-    if any(['mkl_rt' in li for li in mkl_libraries]):
-        #libs += ['dl'] - by default on Linux
-        defs += [('USING_MKL_RT', None)]
-
-    pdir = 'mkl'
-    try:
-        from Cython.Build import cythonize
-        sources = [join(pdir, '_mkl_service.pyx')]
-        have_cython = True
-    except ImportError as e:
-        have_cython = False
-        sources = [join(pdir, '_mkl_service.c')]
-        if not exists(sources[0]):
-            raise ValueError(str(e) + '. ' +
-                             'Cython is required to build the initial .c file.')
+    if any(["mkl_rt" in li for li in mkl_libraries]):
+        #libs += ["dl"] - by default on Linux
+        defs += [("USING_MKL_RT", None)]
 
     extensions = []
     extensions.append(
-        setuptools.extension.Extension(
-            'mkl._mklinit',
-            sources=['mkl/_mklinitmodule.c'],
-            define_macros=defs,
+        Extension(
+            "mkl._mklinit",
+            sources=[join("mkl", "_mklinitmodule.c")],
             include_dirs=mkl_include_dirs,
             libraries=mkl_libraries + (["pthread"] if os.name == "posix" else []),
             library_dirs=mkl_library_dirs,
             extra_compile_args=[
-                '-DNDEBUG'
-                # '-g', '-O2', '-Wall',
-            ]
+                "-DNDEBUG"
+                # "-g", "-O2", "-Wall",
+            ],
+            define_macros=defs,            
         )
     )
 
     extensions.append(
-        setuptools.extension.Extension(
-            'mkl._py_mkl_service',
-            sources=sources,
+        Extension(
+            "mkl._py_mkl_service",
+            sources=[join("mkl", "_mkl_service.pyx")],
             include_dirs=mkl_include_dirs,
             library_dirs=mkl_library_dirs,
             libraries=mkl_libraries,
             extra_compile_args=[
-                '-DNDEBUG'
-                # '-g', '-O2', '-Wall',
+                "-DNDEBUG"
+                # "-g", "-O2", "-Wall",
             ]
         )
     )
 
-    if have_cython:
-        extensions = cythonize(extensions, include_path=[join(__file__, pdir)])
-
     return extensions
 
 
-def setup_package():
-    from setuptools import setup
-    metadata = dict(
-        name='mkl-service',
-        version=VERSION,
-        maintainer="Intel",
-        maintainer_email="scripting@intel.com",
-        description="MKL Support Functions",
-        long_description=long_description,
-        long_description_content_type="text/markdown",
-        url="https://github.com/IntelPython/mkl-service",
-        author="Intel",
-        download_url="https://github.com/IntelPython/mkl-service",
-        license='BSD',
-        classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
-        platforms=["Windows", "Linux", "Mac OS-X"],
-        python_requires='>=3.9',
-        setup_requires=['setuptools', 'cython'],
-        install_requires=[],
-        packages=[
-            "mkl",
-        ],
-        package_data={
-            "mkl" : [
-                "tests/*.*",
-            ]
-        },
-        ext_modules=get_extensions()
-    )
-    setup(**metadata)
-
-    return None
-
-
-if __name__ == '__main__':
-    setup_package()
+setup(
+    cmdclass={"build_ext": Cython.Build.build_ext},
+    ext_modules=extensions(),
+    zip_safe=False,
+)
