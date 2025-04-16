@@ -56,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4.6.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
-          path: /usr/share/miniconda/conda-bld/linux-64/${{ env.PACKAGE_NAME }}-*.tar.bz2
+          path: /usr/share/miniconda/conda-bld/linux-64/${{ env.PACKAGE_NAME }}-*.conda
 
   build_windows:
     runs-on: windows-2019
@@ -94,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@v4.6.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
-          path: ${{ env.conda-bld }}${{ env.PACKAGE_NAME }}-*.tar.bz2
+          path: ${{ env.conda-bld }}${{ env.PACKAGE_NAME }}-*.conda
 
   test_linux:
     needs: build_linux
@@ -122,7 +122,7 @@ jobs:
         run: |
           mkdir -p $GITHUB_WORKSPACE/channel/linux-64
           conda index $GITHUB_WORKSPACE/channel || exit 1
-          mv ${PACKAGE_NAME}-*.tar.bz2 $GITHUB_WORKSPACE/channel/linux-64 || exit 1
+          mv ${PACKAGE_NAME}-*.conda $GITHUB_WORKSPACE/channel/linux-64 || exit 1
           conda index $GITHUB_WORKSPACE/channel || exit 1
           # Test channel
           conda search $PACKAGE_NAME -c $GITHUB_WORKSPACE/channel --override-channels --info --json > $GITHUB_WORKSPACE/ver.json
@@ -191,7 +191,7 @@ jobs:
       - name: Create conda channel
         run: |
           mkdir ${{ env.GITHUB_WORKSPACE }}\channel\win-64
-          move ${{ env.PACKAGE_NAME }}-*.tar.bz2 ${{ env.GITHUB_WORKSPACE }}\channel\win-64
+          move ${{ env.PACKAGE_NAME }}-*.conda ${{ env.GITHUB_WORKSPACE }}\channel\win-64
           conda index ${{ env.GITHUB_WORKSPACE }}/channel
           # Test channel
           conda search ${{ env.PACKAGE_NAME }} -c ${{ env.GITHUB_WORKSPACE }}/channel --override-channels --info --json > ${{ env.GITHUB_WORKSPACE }}\ver.json
