@@ -22,6 +22,11 @@ jobs:
       matrix:
         python: ["3.9", "3.10", "3.11", "3.12"]
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
       - uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
@@ -71,6 +76,11 @@ jobs:
     env:
       conda-bld: C:\Miniconda\conda-bld\win-64\
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+              
       - uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
