@@ -1,4 +1,4 @@
-name: Build mkl-service with clang
+name: Build project with IntelLLVM clang compiler
 
 on:
   push:
@@ -10,9 +10,11 @@ permissions: read-all
 
 jobs:
   build-with-clang:
-    name: Build project with IntelLLVM clang compiler
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        python: ["3.10", "3.11", "3.12"]  # 3.9 fails - gh-issue#56
     env:
       ONEAPI_ROOT: /opt/intel/oneapi
 
@@ -39,7 +41,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python }}
           architecture: x64
 
       - name: Checkout repo
@@ -50,26 +52,25 @@ jobs:
       - name: Install mkl-service dependencies
         shell: bash -l {0}
         run: |
-          pip install numpy cython setuptools pytest pytest-cov
+          pip install cython setuptools pytest
 
       - name: List oneAPI folder content
         shell: bash -l {0}
         run: ls /opt/intel/oneapi/compiler
 
-      - name: Build mkl_random
+      - name: Build mkl-service
         shell: bash -l {0}
         run: |
           source /opt/intel/oneapi/setvars.sh
           echo $CMPLR_ROOT
-          export CC=$CMPLR_ROOT/bin/compiler/clang
-          export CXX=$CMPLR_ROOT/bin/compiler/clang++
+          export CC=$CMPLR_ROOT/bin/icx
+          export CXX=$CMPLR_ROOT/bin/icpx
           export CFLAGS="${CFLAGS} -fno-fast-math"
-          echo "CC = ${CC}  CXX=${CXX}"
-          ls -l ${CC} ${CXX}
           python setup.py develop
 
-      - name: Run mkl_random tests
+      - name: Run mkl-service tests
         shell: bash -l {0}
         run: |
           source /opt/intel/oneapi/setvars.sh
+          pip install pytest
           pytest -s -v --pyargs mkl
