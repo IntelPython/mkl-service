@@ -31,7 +31,7 @@ import Cython.Build
 from setuptools import Extension, setup
 
 def extensions():
-    mkl_root = os.environ["MKLROOT"]
+    mkl_root = os.environ.get("MKLROOT", None)
     if mkl_root:
         mkl_info = {
             "include_dirs": [join(mkl_root, "include")],
