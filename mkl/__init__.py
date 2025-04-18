@@ -52,6 +52,4 @@ del RTLD_for_MKL
 del sys
 
 from ._py_mkl_service import *
-
-
-__version__ = '2.4.2'
+from ._version import __version__

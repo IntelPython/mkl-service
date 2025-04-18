@@ -59,7 +59,7 @@ jobs:
         with:
           packages: |
             cython
-            setuptools
+            setuptools>=77
             pytest
 
       - name: List oneAPI folder content
