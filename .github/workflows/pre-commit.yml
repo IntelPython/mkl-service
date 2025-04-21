@@ -1,0 +1,33 @@
+name: pre-commit
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions: read-all
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4.2.2
+
+    - name: Set up python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - uses: BSFishy/pip-action@v1
+      with:
+        packages: |
+          pylint
+
+    - name: Version of clang-format
+      run: |
+        clang-format --version
+
+    - name: Run pre-commit checks
+      uses: pre-commit/action@v3.0.1

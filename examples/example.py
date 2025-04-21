@@ -23,39 +23,45 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# pylint: disable=no-member
+
+import re
 
 import mkl
-import re
 
 
 def enable_best_instructions_set():
-    for instructions_set in ['avx512', 'avx2', 'avx', 'sse4_2']:
-        if mkl.enable_instructions(instructions_set) == 'success':
+    for instructions_set in ["avx512", "avx2", "avx", "sse4_2"]:
+        if mkl.enable_instructions(instructions_set) == "success":
             result = instructions_set
             break
     else:
-        result = 'error'
+        result = "error"
 
     return result
 
 
 def is_max_supported_instructions_set(instructions_set):
     result = False
-    if re.search(instructions_set.replace('4_2', '4.2'), mkl.get_version()['Processor'].decode(), re.IGNORECASE):
+    if re.search(
+        instructions_set.replace("4_2", "4.2"),
+        mkl.get_version()["Processor"].decode(),
+        re.IGNORECASE,
+    ):
         result = True
 
     return result
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     time_begin = mkl.dsecnd()
     print(mkl.get_version_string())
 
     instructions_set = enable_best_instructions_set()
-    print('Enable snstructions set: ' + str(instructions_set))
+    print("Enable snstructions set: " + str(instructions_set))
 
     is_max = is_max_supported_instructions_set(instructions_set)
-    print('Is the best supported instructions set: ' + str(is_max))
+    print("Is the best supported instructions set: " + str(is_max))
 
     time_end = mkl.dsecnd()
-    print('Execution time: ' + str(time_end - time_begin))
+    print("Execution time: " + str(time_end - time_begin))

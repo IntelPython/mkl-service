@@ -73,7 +73,7 @@ jobs:
           export CFLAGS="${CFLAGS} -fno-fast-math"
           python setup.py develop
 
-      - name: Run mkl-service tests    
+      - name: Run mkl-service tests
         run: |
           source ${{ env.ONEAPI_ROOT }}/setvars.sh
           pytest -s -v --pyargs mkl

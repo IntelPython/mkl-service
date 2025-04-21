@@ -30,13 +30,14 @@ from os.path import join
 import Cython.Build
 from setuptools import Extension, setup
 
+
 def extensions():
     mkl_root = os.environ.get("MKLROOT", None)
     if mkl_root:
         mkl_info = {
             "include_dirs": [join(mkl_root, "include")],
             "library_dirs": [join(mkl_root, "lib"), join(mkl_root, "lib", "intel64")],
-            "libraries": ["mkl_rt"]
+            "libraries": ["mkl_rt"],
         }
     else:
         raise ValueError("MKLROOT environment variable not set.")
@@ -47,7 +48,7 @@ def extensions():
 
     defs = []
     if any(["mkl_rt" in li for li in mkl_libraries]):
-        #libs += ["dl"] - by default on Linux
+        # libs += ["dl"] - by default on Linux
         defs += [("USING_MKL_RT", None)]
 
     extensions = []
@@ -62,7 +63,7 @@ def extensions():
                 "-DNDEBUG"
                 # "-g", "-O2", "-Wall",
             ],
-            define_macros=defs,            
+            define_macros=defs,
         )
     )
 
@@ -76,7 +77,7 @@ def extensions():
             extra_compile_args=[
                 "-DNDEBUG"
                 # "-g", "-O2", "-Wall",
-            ]
+            ],
         )
     )
 

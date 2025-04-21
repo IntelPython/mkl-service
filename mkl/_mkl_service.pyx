@@ -33,7 +33,7 @@ cimport mkl._mkl_service as mkl
 
 cdef extern from *:
     """
-    /* defind MKL_BLACS_MPICH2 if undefined */
+    /* define MKL_BLACS_MPICH2 if undefined */
     #ifndef MKL_BLACS_MPICH2
     #define MKL_BLACS_MPICH2 -1
     #endif
@@ -65,27 +65,29 @@ cpdef set_num_threads(num_threads):
     """
     Specifies the number of OpenMP* threads to use.
     """
-    cdef int c_num_threads = __python_obj_to_int(num_threads, 'set_num_threads')
-    __check_positive_num_threads(c_num_threads, 'set_num_threads')
+    cdef int c_num_threads = __python_obj_to_int(num_threads, "set_num_threads")
+    __check_positive_num_threads(c_num_threads, "set_num_threads")
 
     return __set_num_threads(c_num_threads)
 
 
 cdef int __warn_and_fallback_on_default_domain(domain):
-    warnings.warn("domain={} is expected to be an integer, a string ('blas', 'fft', "
-                  "'vml', 'pardiso', 'all'). "
-		  "Using domain='all' instead.".format(domain))
+    warnings.warn(
+        f"domain={domain} is expected to be an integer, a string ('blas', "
+        "'fft', 'vml', 'pardiso', 'all'). Uing domain='all' instead."
+    )
     return mkl.MKL_DOMAIN_ALL
 
 
 cdef int __domain_to_mkl_domain(domain):
     cdef int c_mkl_domain = mkl.MKL_DOMAIN_ALL
     _mapping = {
-            'blas': mkl.MKL_DOMAIN_BLAS,
-            'fft': mkl.MKL_DOMAIN_FFT,
-            'vml': mkl.MKL_DOMAIN_VML,
-            'pardiso': mkl.MKL_DOMAIN_PARDISO,
-            'all': mkl.MKL_DOMAIN_ALL }
+        "blas": mkl.MKL_DOMAIN_BLAS,
+        "fft": mkl.MKL_DOMAIN_FFT,
+        "vml": mkl.MKL_DOMAIN_VML,
+        "pardiso": mkl.MKL_DOMAIN_PARDISO,
+        "all": mkl.MKL_DOMAIN_ALL
+    }
 
     if isinstance(domain, numbers.Integral):
         c_mkl_domain = <int>domain
@@ -100,12 +102,12 @@ cdef int __domain_to_mkl_domain(domain):
     return c_mkl_domain
 
 
-cpdef domain_set_num_threads(num_threads, domain='all'):
+cpdef domain_set_num_threads(num_threads, domain="all"):
     """
     Specifies the number of OpenMP* threads for a particular function domain.
     """
-    cdef c_num_threads = __python_obj_to_int(num_threads, 'domain_set_num_threads')
-    __check_non_negative_num_threads(c_num_threads, 'domain_set_num_threads')
+    cdef c_num_threads = __python_obj_to_int(num_threads, "domain_set_num_threads")
+    __check_non_negative_num_threads(c_num_threads, "domain_set_num_threads")
 
     cdef int c_mkl_domain = __domain_to_mkl_domain(domain)
     cdef int c_mkl_status = __domain_set_num_threads(c_num_threads, c_mkl_domain)
@@ -115,21 +117,24 @@ cpdef domain_set_num_threads(num_threads, domain='all'):
 
 cpdef set_num_threads_local(num_threads):
     """
-    Specifies the number of OpenMP* threads for all Intel(R) MKL functions on the current execution thread.
+    Specifies the number of OpenMP* threads for all Intel(R) MKL functions on the
+    current execution thread.
     """
     cdef c_num_threads = 0
     if isinstance(num_threads, str):
-        if num_threads is not 'global_num_threads':
-            raise ValueError("The argument of set_num_threads_local is expected "
-                             "to be a non-negative integer or a string 'global_num_threads'")
+        if num_threads is not "global_num_threads":
+            raise ValueError(
+                "The argument of set_num_threads_local is expected "
+                "to be a non-negative integer or a string 'global_num_threads'"
+            )
     else:
-        c_num_threads = __python_obj_to_int(num_threads, 'set_num_threads_local')
+        c_num_threads = __python_obj_to_int(num_threads, "set_num_threads_local")
 
-    __check_non_negative_num_threads(c_num_threads, 'set_num_threads_local')
+    __check_non_negative_num_threads(c_num_threads, "set_num_threads_local")
 
     cdef c_prev_num_threads = __set_num_threads_local(c_num_threads)
     if (c_prev_num_threads == 0):
-        ret_value = 'global_num_threads'
+        ret_value = "global_num_threads"
     else:
         ret_value = c_prev_num_threads
 
@@ -152,7 +157,7 @@ cpdef get_max_threads():
     return __get_max_threads()
 
 
-cpdef domain_get_max_threads(domain='all'):
+cpdef domain_get_max_threads(domain="all"):
     """
     Gets the number of OpenMP* threads targeted for parallelism for a particular
     function domain.
@@ -248,12 +253,13 @@ cpdef get_max_cpu_frequency():
 cpdef get_clocks_frequency():
     """
     Returns the frequency value in GHz based on constant-rate Time Stamp Counter.
-    
+
     """
     return __get_clocks_frequency()
 
 
-# Memory Management. See the Intel(R) MKL Developer Guide for more memory usage information.
+# Memory Management. See the Intel(R) MKL Developer Guide for more memory usage
+# information.
 cpdef free_buffers():
     """
     Frees unused memory allocated by the Intel(R) MKL Memory Allocator.
@@ -263,14 +269,16 @@ cpdef free_buffers():
 
 cpdef thread_free_buffers():
     """
-    Frees unused memory allocated by the Intel(R) MKL Memory Allocator in the current thread.
+    Frees unused memory allocated by the Intel(R) MKL Memory Allocator in the current
+    thread.
     """
     __thread_free_buffers()
 
 
 cpdef disable_fast_mm():
     """
-    Turns off the Intel(R) MKL Memory Allocator for Intel(R) MKL functions to directly use the system malloc/free functions.
+    Turns off the Intel(R) MKL Memory Allocator for Intel(R) MKL functions to directly
+    use the system malloc/free functions.
     """
     return __disable_fast_mm()
 
@@ -291,7 +299,8 @@ cpdef peak_mem_usage(mem_const):
 
 cpdef set_memory_limit(limit):
     """
-    On Linux, sets the limit of memory that Intel(R) MKL can allocate for a specified type of memory.
+    On Linux, sets the limit of memory that Intel(R) MKL can allocate for a specified
+    type of memory.
     """
     return __set_memory_limit(limit)
 
@@ -304,7 +313,7 @@ cpdef cbwr_set(branch=None):
     return __cbwr_set(branch)
 
 
-cpdef cbwr_get(cnr_const='all'):
+cpdef cbwr_get(cnr_const="all"):
     """
     Returns the current CNR settings.
     """
@@ -321,14 +330,16 @@ cpdef cbwr_get_auto_branch():
 # Miscellaneous
 cpdef enable_instructions(isa=None):
     """
-    Enables dispatching for new Intel architectures or restricts the set of Intel instruction sets available for dispatching.
+    Enables dispatching for new Intel architectures or restricts the set of Intel
+    instruction sets available for dispatching.
     """
     return __enable_instructions(isa)
 
 
 cpdef set_env_mode():
     """
-    Sets up the mode that ignores environment settings specific to Intel(R) MKL. See mkl_set_env_mode(1).
+    Sets up the mode that ignores environment settings specific to Intel(R) MKL.
+    See mkl_set_env_mode(1).
     """
     return __set_env_mode()
 
@@ -358,7 +369,8 @@ cpdef set_mpi(vendor, custom_library_name=None):
 # VM Service Functions
 cpdef vml_set_mode(accuracy, ftzdaz, errmode):
     """
-    Sets a new mode for VM functions according to the mode parameter and stores the previous VM mode to oldmode.
+    Sets a new mode for VM functions according to the mode parameter and stores the
+    previous VM mode to oldmode.
     """
     return __vml_set_mode(accuracy, ftzdaz, errmode)
 
@@ -372,7 +384,8 @@ cpdef vml_get_mode():
 
 cpdef vml_set_err_status(status):
     """
-    Sets the new VM Error Status according to err and stores the previous VM Error Status to olderr.
+    Sets the new VM Error Status according to err and stores the previous VM Error
+    Status to olderr.
     """
     return __vml_set_err_status(status)
 
@@ -386,21 +399,25 @@ cpdef vml_get_err_status():
 
 cpdef vml_clear_err_status():
     """
-    Sets the VM Error Status to VML_STATUS_OK and stores the previous VM Error Status to olderr.
+    Sets the VM Error Status to VML_STATUS_OK and stores the previous VM Error Status
+    to olderr.
     """
     return __vml_clear_err_status()
 
 
 cdef str __mkl_status_to_string(int mkl_status) noexcept:
     if mkl_status == 1:
-        return 'success'
+        return "success"
     else:
-        return 'error'
+        return "error"
 
 
 cdef int __python_obj_to_int(obj, func_name) except *:
     if not isinstance(obj, numbers.Integral):
-        raise ValueError("The argument of " + func_name + " is expected to be a positive integer")
+        raise ValueError(
+            "The argument of " + func_name + " is expected to be a positive "
+            "integer"
+        )
     cdef int c_int = <int>obj
     return c_int
 
@@ -421,9 +438,12 @@ cdef inline int __mkl_str_to_int(variable, possible_variables_dict) except *:
     if variable is None:
         raise ValueError("Variable can not be None")
     if possible_variables_dict is None:
-        raise RuntimeError("Dictionary mapping possible variable value to internal code is missing")
+        raise RuntimeError(
+            "Dictionary mapping possible variable value to internal code is "
+            "missing"
+        )
     if variable not in possible_variables_dict:
-        raise ValueError('Variable: <' + str(variable) + '> not in ' +
+        raise ValueError("Variable: <" + str(variable) + "> not in " +
                          str(possible_variables_dict.keys()))
 
     return possible_variables_dict[variable]
@@ -431,10 +451,13 @@ cdef inline int __mkl_str_to_int(variable, possible_variables_dict) except *:
 
 cdef  __mkl_int_to_str(int mkl_int_variable, possible_variables_dict) except *:
     if possible_variables_dict is None:
-        raise RuntimeError("Dictionary mapping possible internal code to output string is missing")
+        raise RuntimeError(
+            "Dictionary mapping possible internal code to output string is "
+            "missing"
+        )
 
     if mkl_int_variable not in possible_variables_dict:
-        raise ValueError('Variable: <' + str(mkl_int_variable) + '> not in ' +
+        raise ValueError("Variable: <" + str(mkl_int_variable) + "> not in " +
                          str(possible_variables_dict.keys()))
 
     return possible_variables_dict[mkl_int_variable]
@@ -481,7 +504,8 @@ cdef inline int __domain_set_num_threads(int c_num_threads, int mkl_domain) noex
 
 cdef inline int __set_num_threads_local(int c_num_threads) noexcept:
     """
-    Specifies the number of OpenMP* threads for all Intel(R) MKL functions on the current execution thread.
+    Specifies the number of OpenMP* threads for all Intel(R) MKL functions on the
+    current execution thread.
     """
 
     cdef int c_mkl_status = mkl.mkl_set_num_threads_local(c_num_threads)
@@ -506,7 +530,8 @@ cdef inline int __get_max_threads() noexcept:
 
 cdef inline int __domain_get_max_threads(int c_mkl_domain) noexcept:
     """
-    Gets the number of OpenMP* threads targeted for parallelism for a particular function domain.
+    Gets the number of OpenMP* threads targeted for parallelism for a particular
+    function domain.
     """
     cdef int c_num_threads = mkl.mkl_domain_get_max_threads(c_mkl_domain)
 
@@ -515,7 +540,8 @@ cdef inline int __domain_get_max_threads(int c_mkl_domain) noexcept:
 
 cdef inline int __get_dynamic() noexcept:
     """
-    Determines whether Intel(R) MKL is enabled to dynamically change the number of OpenMP* threads.
+    Determines whether Intel(R) MKL is enabled to dynamically change the number of
+    OpenMP* threads.
     """
     return mkl.mkl_get_dynamic()
 
@@ -569,7 +595,8 @@ cdef inline double __get_clocks_frequency() noexcept:
     return mkl.mkl_get_clocks_frequency()
 
 
-# Memory Management. See the Intel(R) MKL Developer Guide for more memory usage information.
+# Memory Management. See the Intel(R) MKL Developer Guide for more memory usage
+# information.
 cdef inline void __free_buffers() noexcept:
     """
     Frees unused memory allocated by the Intel(R) MKL Memory Allocator.
@@ -580,7 +607,8 @@ cdef inline void __free_buffers() noexcept:
 
 cdef inline void __thread_free_buffers() noexcept:
     """
-    Frees unused memory allocated by the Intel(R) MKL Memory Allocator in the current thread.
+    Frees unused memory allocated by the Intel(R) MKL Memory Allocator in the current
+    thread.
     """
     mkl.mkl_thread_free_buffers()
     return
@@ -588,7 +616,8 @@ cdef inline void __thread_free_buffers() noexcept:
 
 cdef inline int __disable_fast_mm() noexcept:
     """
-    Turns off the Intel(R) MKL Memory Allocator for Intel(R) MKL functions to directly use the system malloc/free functions.
+    Turns off the Intel(R) MKL Memory Allocator for Intel(R) MKL functions to directly
+    use the system malloc/free functions.
     """
     return mkl.mkl_disable_fast_mm()
 
@@ -607,19 +636,19 @@ cdef object __peak_mem_usage(mem_const) except *:
     Reports the peak memory allocated by the Intel(R) MKL Memory Allocator.
     """
     __variables = {
-        'input': {
-            'enable': mkl.MKL_PEAK_MEM_ENABLE,
-            'disable': mkl.MKL_PEAK_MEM_DISABLE,
-            'peak_mem': mkl.MKL_PEAK_MEM,
-            'peak_mem_reset': mkl.MKL_PEAK_MEM_RESET,
+        "input": {
+            "enable": mkl.MKL_PEAK_MEM_ENABLE,
+            "disable": mkl.MKL_PEAK_MEM_DISABLE,
+            "peak_mem": mkl.MKL_PEAK_MEM,
+            "peak_mem_reset": mkl.MKL_PEAK_MEM_RESET,
         }
     }
-    cdef int c_mkl_mem_const = __mkl_str_to_int(mem_const, __variables['input'])
+    cdef int c_mkl_mem_const = __mkl_str_to_int(mem_const, __variables["input"])
 
     cdef mkl.MKL_INT64 c_memory_allocator = mkl.mkl_peak_mem_usage(c_mkl_mem_const)
 
     if c_memory_allocator == -1:
-        memory_allocator = 'error'
+        memory_allocator = "error"
     else:
         memory_allocator = c_memory_allocator
     return memory_allocator
@@ -627,7 +656,8 @@ cdef object __peak_mem_usage(mem_const) except *:
 
 cdef inline object __set_memory_limit(limit) except *:
     """
-    On Linux, sets the limit of memory that Intel(R) MKL can allocate for a specified type of memory.
+    On Linux, sets the limit of memory that Intel(R) MKL can allocate for a specified
+    type of memory.
     """
     cdef size_t c_limit = limit
 
@@ -641,38 +671,38 @@ cdef object __cbwr_set(branch=None) except *:
     Configures the CNR mode of Intel(R) MKL.
     """
     __variables = {
-        'input': {
-            'off': mkl.MKL_CBWR_OFF,
-            'branch_off': mkl.MKL_CBWR_BRANCH_OFF,
-            'auto': mkl.MKL_CBWR_AUTO,
-            'compatible': mkl.MKL_CBWR_COMPATIBLE,
-            'sse2': mkl.MKL_CBWR_SSE2,
-            'ssse3': mkl.MKL_CBWR_SSSE3,
-            'sse4_1': mkl.MKL_CBWR_SSE4_1,
-            'sse4_2': mkl.MKL_CBWR_SSE4_2,
-            'avx': mkl.MKL_CBWR_AVX,
-            'avx2': mkl.MKL_CBWR_AVX2,
-            'avx2,strict': mkl.MKL_CBWR_AVX2 | mkl.MKL_CBWR_STRICT,
-            'avx512_mic': mkl.MKL_CBWR_AVX512_MIC,
-            'avx512_mic,strict': mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT,
-            'avx512': mkl.MKL_CBWR_AVX512,
-            'avx512,strict': mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT,
-            'avx512_mic_e1': mkl.MKL_CBWR_AVX512_MIC_E1,
-            'avx512_e1': mkl.MKL_CBWR_AVX512_E1,
-            'avx512_e1,strict': mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT,
+        "input": {
+            "off": mkl.MKL_CBWR_OFF,
+            "branch_off": mkl.MKL_CBWR_BRANCH_OFF,
+            "auto": mkl.MKL_CBWR_AUTO,
+            "compatible": mkl.MKL_CBWR_COMPATIBLE,
+            "sse2": mkl.MKL_CBWR_SSE2,
+            "ssse3": mkl.MKL_CBWR_SSSE3,
+            "sse4_1": mkl.MKL_CBWR_SSE4_1,
+            "sse4_2": mkl.MKL_CBWR_SSE4_2,
+            "avx": mkl.MKL_CBWR_AVX,
+            "avx2": mkl.MKL_CBWR_AVX2,
+            "avx2,strict": mkl.MKL_CBWR_AVX2 | mkl.MKL_CBWR_STRICT,
+            "avx512_mic": mkl.MKL_CBWR_AVX512_MIC,
+            "avx512_mic,strict": mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT,
+            "avx512": mkl.MKL_CBWR_AVX512,
+            "avx512,strict": mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT,
+            "avx512_mic_e1": mkl.MKL_CBWR_AVX512_MIC_E1,
+            "avx512_e1": mkl.MKL_CBWR_AVX512_E1,
+            "avx512_e1,strict": mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT,
         },
-        'output': {
-            mkl.MKL_CBWR_SUCCESS: 'success',
-            mkl.MKL_CBWR_ERR_INVALID_INPUT: 'err_invalid_input',
-            mkl.MKL_CBWR_ERR_UNSUPPORTED_BRANCH: 'err_unsupported_branch',
-            mkl.MKL_CBWR_ERR_MODE_CHANGE_FAILURE: 'err_mode_change_failure',
+        "output": {
+            mkl.MKL_CBWR_SUCCESS: "success",
+            mkl.MKL_CBWR_ERR_INVALID_INPUT: "err_invalid_input",
+            mkl.MKL_CBWR_ERR_UNSUPPORTED_BRANCH: "err_unsupported_branch",
+            mkl.MKL_CBWR_ERR_MODE_CHANGE_FAILURE: "err_mode_change_failure",
         },
     }
-    mkl_branch = __mkl_str_to_int(branch, __variables['input'])
+    mkl_branch = __mkl_str_to_int(branch, __variables["input"])
 
     mkl_status = mkl.mkl_cbwr_set(mkl_branch)
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(mkl_status, __variables["output"])
     return status
 
 
@@ -681,36 +711,36 @@ cdef inline __cbwr_get(cnr_const=None) except *:
     Returns the current CNR settings.
     """
     __variables = {
-        'input': {
-            'branch': mkl.MKL_CBWR_BRANCH,
-            'all': mkl.MKL_CBWR_ALL,
+        "input": {
+            "branch": mkl.MKL_CBWR_BRANCH,
+            "all": mkl.MKL_CBWR_ALL,
         },
-        'output': {
-            mkl.MKL_CBWR_BRANCH_OFF: 'branch_off',
-            mkl.MKL_CBWR_AUTO: 'auto',
-            mkl.MKL_CBWR_COMPATIBLE: 'compatible',
-            mkl.MKL_CBWR_SSE2: 'sse2',
-            mkl.MKL_CBWR_SSSE3: 'ssse3',
-            mkl.MKL_CBWR_SSE4_1: 'sse4_1',
-            mkl.MKL_CBWR_SSE4_2: 'sse4_2',
-            mkl.MKL_CBWR_AVX: 'avx',
-            mkl.MKL_CBWR_AVX2: 'avx2',
-            mkl.MKL_CBWR_AVX2 | mkl.MKL_CBWR_STRICT: 'avx2,strict',
-            mkl.MKL_CBWR_AVX512_MIC: 'avx512_mic',
-            mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT: 'avx512_mic,strict',
-            mkl.MKL_CBWR_AVX512: 'avx512',
-            mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT: 'avx512,strict',
-            mkl.MKL_CBWR_AVX512_MIC_E1: 'avx512_mic_e1',
-            mkl.MKL_CBWR_AVX512_E1: 'avx512_e1',
-            mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT: 'avx512_e1,strict',
-            mkl.MKL_CBWR_ERR_INVALID_INPUT: 'err_invalid_input',
+        "output": {
+            mkl.MKL_CBWR_BRANCH_OFF: "branch_off",
+            mkl.MKL_CBWR_AUTO: "auto",
+            mkl.MKL_CBWR_COMPATIBLE: "compatible",
+            mkl.MKL_CBWR_SSE2: "sse2",
+            mkl.MKL_CBWR_SSSE3: "ssse3",
+            mkl.MKL_CBWR_SSE4_1: "sse4_1",
+            mkl.MKL_CBWR_SSE4_2: "sse4_2",
+            mkl.MKL_CBWR_AVX: "avx",
+            mkl.MKL_CBWR_AVX2: "avx2",
+            mkl.MKL_CBWR_AVX2 | mkl.MKL_CBWR_STRICT: "avx2,strict",
+            mkl.MKL_CBWR_AVX512_MIC: "avx512_mic",
+            mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT: "avx512_mic,strict",
+            mkl.MKL_CBWR_AVX512: "avx512",
+            mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT: "avx512,strict",
+            mkl.MKL_CBWR_AVX512_MIC_E1: "avx512_mic_e1",
+            mkl.MKL_CBWR_AVX512_E1: "avx512_e1",
+            mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT: "avx512_e1,strict",
+            mkl.MKL_CBWR_ERR_INVALID_INPUT: "err_invalid_input",
         },
     }
-    mkl_cnr_const = __mkl_str_to_int(cnr_const, __variables['input'])
+    mkl_cnr_const = __mkl_str_to_int(cnr_const, __variables["input"])
 
     mkl_status = mkl.mkl_cbwr_get(mkl_cnr_const)
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(mkl_status, __variables["output"])
     return status
 
 
@@ -719,57 +749,58 @@ cdef object __cbwr_get_auto_branch() except *:
     Automatically detects the CNR code branch for your platform.
     """
     __variables = {
-        'output': {
-            mkl.MKL_CBWR_BRANCH_OFF: 'branch_off',
-            mkl.MKL_CBWR_AUTO: 'auto',
-            mkl.MKL_CBWR_COMPATIBLE: 'compatible',
-            mkl.MKL_CBWR_SSE2: 'sse2',
-            mkl.MKL_CBWR_SSSE3: 'ssse3',
-            mkl.MKL_CBWR_SSE4_1: 'sse4_1',
-            mkl.MKL_CBWR_SSE4_2: 'sse4_2',
-            mkl.MKL_CBWR_AVX: 'avx',
-            mkl.MKL_CBWR_AVX2: 'avx2',
-            mkl.MKL_CBWR_AVX2 | mkl.MKL_CBWR_STRICT: 'avx2,strict',
-            mkl.MKL_CBWR_AVX512_MIC: 'avx512_mic',
-            mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT: 'avx512_mic,strict',
-            mkl.MKL_CBWR_AVX512: 'avx512',
-            mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT: 'avx512,strict',
-            mkl.MKL_CBWR_AVX512_MIC_E1: 'avx512_mic_e1',
-            mkl.MKL_CBWR_AVX512_E1: 'avx512_e1',
-            mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT: 'avx512_e1,strict',
-            mkl.MKL_CBWR_SUCCESS: 'success',
-            mkl.MKL_CBWR_ERR_INVALID_INPUT: 'err_invalid_input',
+        "output": {
+            mkl.MKL_CBWR_BRANCH_OFF: "branch_off",
+            mkl.MKL_CBWR_AUTO: "auto",
+            mkl.MKL_CBWR_COMPATIBLE: "compatible",
+            mkl.MKL_CBWR_SSE2: "sse2",
+            mkl.MKL_CBWR_SSSE3: "ssse3",
+            mkl.MKL_CBWR_SSE4_1: "sse4_1",
+            mkl.MKL_CBWR_SSE4_2: "sse4_2",
+            mkl.MKL_CBWR_AVX: "avx",
+            mkl.MKL_CBWR_AVX2: "avx2",
+            mkl.MKL_CBWR_AVX2 | mkl.MKL_CBWR_STRICT: "avx2,strict",
+            mkl.MKL_CBWR_AVX512_MIC: "avx512_mic",
+            mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT: "avx512_mic,strict",
+            mkl.MKL_CBWR_AVX512: "avx512",
+            mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT: "avx512,strict",
+            mkl.MKL_CBWR_AVX512_MIC_E1: "avx512_mic_e1",
+            mkl.MKL_CBWR_AVX512_E1: "avx512_e1",
+            mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT: "avx512_e1,strict",
+            mkl.MKL_CBWR_SUCCESS: "success",
+            mkl.MKL_CBWR_ERR_INVALID_INPUT: "err_invalid_input",
         },
     }
 
     mkl_status = mkl.mkl_cbwr_get_auto_branch()
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(mkl_status, __variables["output"])
     return status
 
 
 # Miscellaneous
 cdef object __enable_instructions(isa=None) except *:
     """
-    Enables dispatching for new Intel architectures or restricts the set of Intel instruction sets available for dispatching.
+    Enables dispatching for new Intel architectures or restricts the set of Intel
+    instruction sets available for dispatching.
     """
     __variables = {
-        'input': {
-            'single_path': mkl.MKL_SINGLE_PATH_ENABLE,
-            'avx512_e4': mkl.MKL_ENABLE_AVX512_E4,
-            'avx512_e3': mkl.MKL_ENABLE_AVX512_E3,
-            'avx512_e2': mkl.MKL_ENABLE_AVX512_E2,
-            'avx512_e1': mkl.MKL_ENABLE_AVX512_E1,
-            'avx512_mic_e1': mkl.MKL_ENABLE_AVX512_MIC_E1,
-            'avx512': mkl.MKL_ENABLE_AVX512,
-            'avx512_mic': mkl.MKL_ENABLE_AVX512_MIC,
-            'avx2_e1': mkl.MKL_ENABLE_AVX2_E1,
-            'avx2': mkl.MKL_ENABLE_AVX2,
-            'avx': mkl.MKL_ENABLE_AVX,
-            'sse4_2': mkl.MKL_ENABLE_SSE4_2,
+        "input": {
+            "single_path": mkl.MKL_SINGLE_PATH_ENABLE,
+            "avx512_e4": mkl.MKL_ENABLE_AVX512_E4,
+            "avx512_e3": mkl.MKL_ENABLE_AVX512_E3,
+            "avx512_e2": mkl.MKL_ENABLE_AVX512_E2,
+            "avx512_e1": mkl.MKL_ENABLE_AVX512_E1,
+            "avx512_mic_e1": mkl.MKL_ENABLE_AVX512_MIC_E1,
+            "avx512": mkl.MKL_ENABLE_AVX512,
+            "avx512_mic": mkl.MKL_ENABLE_AVX512_MIC,
+            "avx2_e1": mkl.MKL_ENABLE_AVX2_E1,
+            "avx2": mkl.MKL_ENABLE_AVX2,
+            "avx": mkl.MKL_ENABLE_AVX,
+            "sse4_2": mkl.MKL_ENABLE_SSE4_2,
         },
     }
-    cdef int c_mkl_isa = __mkl_str_to_int(isa, __variables['input'])
+    cdef int c_mkl_isa = __mkl_str_to_int(isa, __variables["input"])
 
     cdef int c_mkl_status = mkl.mkl_enable_instructions(c_mkl_isa)
 
@@ -778,18 +809,19 @@ cdef object __enable_instructions(isa=None) except *:
 
 cdef object __set_env_mode() except *:
     """
-    Sets up the mode that ignores environment settings specific to Intel(R) MKL. See mkl_set_env_mode(1).
+    Sets up the mode that ignores environment settings specific to Intel(R) MKL.
+    See mkl_set_env_mode(1).
     """
     __variables = {
-        'input': None,
-        'output': {
-            0: 'default',
-            1: 'ignore',
+        "input": None,
+        "output": {
+            0: "default",
+            1: "ignore",
         },
     }
     cdef int c_mkl_status = mkl.mkl_set_env_mode(1)
 
-    status = __mkl_int_to_str(c_mkl_status, __variables['output'])
+    status = __mkl_int_to_str(c_mkl_status, __variables["output"])
     return status
 
 
@@ -798,14 +830,14 @@ cdef object __get_env_mode() except *:
     Query the current environment mode. See mkl_set_env_mode(0).
     """
     __variables = {
-        'output': {
-            0: 'default',
-            1: 'ignore',
+        "output": {
+            0: "default",
+            1: "ignore",
         },
     }
     cdef int c_mkl_status = mkl.mkl_set_env_mode(0)
 
-    status = __mkl_int_to_str(c_mkl_status, __variables['output'])
+    status = __mkl_int_to_str(c_mkl_status, __variables["output"])
     return status
 
 
@@ -821,100 +853,107 @@ cdef __set_mpi(vendor, custom_library_name=None) except *:
     Sets the implementation of the message-passing interface to be used by Intel(R) MKL.
     """
     __variables = {
-        'input': {
-            'custom': mkl.MKL_BLACS_CUSTOM,
-            'msmpi': mkl.MKL_BLACS_MSMPI,
-            'intelmpi': mkl.MKL_BLACS_INTELMPI,
+        "input": {
+            "custom": mkl.MKL_BLACS_CUSTOM,
+            "msmpi": mkl.MKL_BLACS_MSMPI,
+            "intelmpi": mkl.MKL_BLACS_INTELMPI,
         },
-        'output': {
-            0: 'success',
-            -1: 'vendor_invalid',
-            -2: 'custom_library_name_invalid',
-            -3: 'MPI library cannot be set at this point',
+        "output": {
+            0: "success",
+            -1: "vendor_invalid",
+            -2: "custom_library_name_invalid",
+            -3: "MPI library cannot be set at this point",
         },
     }
     if mkl.MKL_BLACS_LASTMPI > mkl.MKL_BLACS_INTELMPI + 1:
-        __variables['input']['mpich2'] = mkl.MKL_BLACS_MPICH2
-    if ((vendor is 'custom' or custom_library_name is not None) and
-        (vendor is not 'custom' or custom_library_name is None)):
+        __variables["input"]["mpich2"] = mkl.MKL_BLACS_MPICH2
+    if (
+        (vendor is "custom" or custom_library_name is not None)
+        and (vendor is not "custom" or custom_library_name is None)
+    ):
         raise ValueError("Selecting custom MPI for BLACS requires specifying "
                          "the custom library, and specifying custom library "
                          "necessitates selecting a custom MPI for BLACS library")
-    mkl_vendor = __mkl_str_to_int(vendor, __variables['input'])
+    mkl_vendor = __mkl_str_to_int(vendor, __variables["input"])
 
     cdef bytes c_bytes
-    cdef char* c_string = ''
+    cdef char* c_string = ""
     if custom_library_name is not None:
         c_bytes = custom_library_name.encode()
         c_string = c_bytes
     mkl_status = mkl.mkl_set_mpi(mkl_vendor, c_string)
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(mkl_status, __variables["output"])
     return status
 
 
 # VM Service Functions
 cdef object __vml_set_mode(accuracy, ftzdaz, errmode) except *:
     """
-    Sets a new mode for VM functions according to the mode parameter and stores the previous VM mode to oldmode.
+    Sets a new mode for VM functions according to the mode parameter and stores the
+    previous VM mode to oldmode.
     """
     __variables = {
-        'input': {
-            'accuracy': {
-                'ha': mkl.VML_HA,
-                'la': mkl.VML_LA,
-                'ep': mkl.VML_EP,
+        "input": {
+            "accuracy": {
+                "ha": mkl.VML_HA,
+                "la": mkl.VML_LA,
+                "ep": mkl.VML_EP,
             },
-            'ftzdaz': {
-                'on': mkl.VML_FTZDAZ_ON,
-                'off': mkl.VML_FTZDAZ_OFF,
-		'default': 0,
+            "ftzdaz": {
+                "on": mkl.VML_FTZDAZ_ON,
+                "off": mkl.VML_FTZDAZ_OFF,
+                "default": 0,
             },
-            'errmode': {
-                'ignore': mkl.VML_ERRMODE_IGNORE,
-                'errno': mkl.VML_ERRMODE_ERRNO,
-                'stderr': mkl.VML_ERRMODE_STDERR,
-                'except': mkl.VML_ERRMODE_EXCEPT,
-                'callback': mkl.VML_ERRMODE_CALLBACK,
-                'default': mkl.VML_ERRMODE_DEFAULT,
+            "errmode": {
+                "ignore": mkl.VML_ERRMODE_IGNORE,
+                "errno": mkl.VML_ERRMODE_ERRNO,
+                "stderr": mkl.VML_ERRMODE_STDERR,
+                "except": mkl.VML_ERRMODE_EXCEPT,
+                "callback": mkl.VML_ERRMODE_CALLBACK,
+                "default": mkl.VML_ERRMODE_DEFAULT,
             },
         },
-        'output': {
-            'accuracy': {
-                mkl.VML_HA: 'ha',
-                mkl.VML_LA: 'la',
-                mkl.VML_EP: 'ep',
+        "output": {
+            "accuracy": {
+                mkl.VML_HA: "ha",
+                mkl.VML_LA: "la",
+                mkl.VML_EP: "ep",
             },
-            'ftzdaz': {
-                mkl.VML_FTZDAZ_ON: 'on',
-                mkl.VML_FTZDAZ_OFF: 'off',
-                0: 'default',
+            "ftzdaz": {
+                mkl.VML_FTZDAZ_ON: "on",
+                mkl.VML_FTZDAZ_OFF: "off",
+                0: "default",
             },
-            'errmode': {
-                mkl.VML_ERRMODE_IGNORE: 'ignore',
-                mkl.VML_ERRMODE_ERRNO: 'errno',
-                mkl.VML_ERRMODE_STDERR: 'stderr',
-                mkl.VML_ERRMODE_EXCEPT: 'except',
-                mkl.VML_ERRMODE_CALLBACK: 'callback',
-                mkl.VML_ERRMODE_DEFAULT: 'default',
+            "errmode": {
+                mkl.VML_ERRMODE_IGNORE: "ignore",
+                mkl.VML_ERRMODE_ERRNO: "errno",
+                mkl.VML_ERRMODE_STDERR: "stderr",
+                mkl.VML_ERRMODE_EXCEPT: "except",
+                mkl.VML_ERRMODE_CALLBACK: "callback",
+                mkl.VML_ERRMODE_DEFAULT: "default",
             },
         },
     }
-    cdef int c_mkl_accuracy = __mkl_str_to_int(accuracy, __variables['input']['accuracy'])
-    cdef int c_mkl_ftzdaz = __mkl_str_to_int(ftzdaz, __variables['input']['ftzdaz'])
-    cdef int c_mkl_errmode = __mkl_str_to_int(errmode, __variables['input']['errmode'])
+    cdef int c_mkl_accuracy = __mkl_str_to_int(
+        accuracy, __variables["input"]["accuracy"]
+    )
+    cdef int c_mkl_ftzdaz = __mkl_str_to_int(ftzdaz, __variables["input"]["ftzdaz"])
+    cdef int c_mkl_errmode = __mkl_str_to_int(errmode, __variables["input"]["errmode"])
 
-    cdef int c_mkl_status = mkl.vmlSetMode(c_mkl_accuracy | c_mkl_ftzdaz | c_mkl_errmode)
+    cdef int c_mkl_status = mkl.vmlSetMode(
+        c_mkl_accuracy | c_mkl_ftzdaz | c_mkl_errmode
+    )
 
     accuracy = __mkl_int_to_str(
         c_mkl_status & mkl.VML_ACCURACY_MASK,
-        __variables['output']['accuracy'])
+        __variables["output"]["accuracy"])
     ftzdaz = __mkl_int_to_str(
         c_mkl_status & mkl.VML_FTZDAZ_MASK,
-        __variables['output']['ftzdaz'])
+        __variables["output"]["ftzdaz"])
     errmode = __mkl_int_to_str(
         c_mkl_status & mkl.VML_ERRMODE_MASK,
-        __variables['output']['errmode'])
+        __variables["output"]["errmode"])
 
     return (accuracy, ftzdaz, errmode)
 
@@ -924,24 +963,24 @@ cdef object __vml_get_mode() except *:
     Gets the VM mode.
     """
     __variables = {
-        'output': {
-            'accuracy': {
-                mkl.VML_HA: 'ha',
-                mkl.VML_LA: 'la',
-                mkl.VML_EP: 'ep',
+        "output": {
+            "accuracy": {
+                mkl.VML_HA: "ha",
+                mkl.VML_LA: "la",
+                mkl.VML_EP: "ep",
             },
-            'ftzdaz': {
-                mkl.VML_FTZDAZ_ON: 'on',
-                mkl.VML_FTZDAZ_OFF: 'off',
-                0: 'default',
+            "ftzdaz": {
+                mkl.VML_FTZDAZ_ON: "on",
+                mkl.VML_FTZDAZ_OFF: "off",
+                0: "default",
             },
-            'errmode': {
-                mkl.VML_ERRMODE_IGNORE: 'ignore',
-                mkl.VML_ERRMODE_ERRNO: 'errno',
-                mkl.VML_ERRMODE_STDERR: 'stderr',
-                mkl.VML_ERRMODE_EXCEPT: 'except',
-                mkl.VML_ERRMODE_CALLBACK: 'callback',
-                mkl.VML_ERRMODE_DEFAULT: 'default',
+            "errmode": {
+                mkl.VML_ERRMODE_IGNORE: "ignore",
+                mkl.VML_ERRMODE_ERRNO: "errno",
+                mkl.VML_ERRMODE_STDERR: "stderr",
+                mkl.VML_ERRMODE_EXCEPT: "except",
+                mkl.VML_ERRMODE_CALLBACK: "callback",
+                mkl.VML_ERRMODE_DEFAULT: "default",
             },
         },
     }
@@ -950,59 +989,60 @@ cdef object __vml_get_mode() except *:
 
     accuracy = __mkl_int_to_str(
         c_mkl_status & mkl.VML_ACCURACY_MASK,
-        __variables['output']['accuracy'])
+        __variables["output"]["accuracy"])
     ftzdaz = __mkl_int_to_str(
         c_mkl_status & mkl.VML_FTZDAZ_MASK,
-        __variables['output']['ftzdaz'])
+        __variables["output"]["ftzdaz"])
     errmode = __mkl_int_to_str(
         c_mkl_status & mkl.VML_ERRMODE_MASK,
-        __variables['output']['errmode'])
+        __variables["output"]["errmode"])
     return (accuracy, ftzdaz, errmode)
 
 
 __mkl_vml_status = {
-    'ok': mkl.VML_STATUS_OK,
-    'accuracywarning': mkl.VML_STATUS_ACCURACYWARNING,
-    'badsize': mkl.VML_STATUS_BADSIZE,
-    'badmem': mkl.VML_STATUS_BADMEM,
-    'errdom': mkl.VML_STATUS_ERRDOM,
-    'sing': mkl.VML_STATUS_SING,
-    'overflow': mkl.VML_STATUS_OVERFLOW,
-    'underflow': mkl.VML_STATUS_UNDERFLOW,
+    "ok": mkl.VML_STATUS_OK,
+    "accuracywarning": mkl.VML_STATUS_ACCURACYWARNING,
+    "badsize": mkl.VML_STATUS_BADSIZE,
+    "badmem": mkl.VML_STATUS_BADMEM,
+    "errdom": mkl.VML_STATUS_ERRDOM,
+    "sing": mkl.VML_STATUS_SING,
+    "overflow": mkl.VML_STATUS_OVERFLOW,
+    "underflow": mkl.VML_STATUS_UNDERFLOW,
 }
 
 
 cdef object __vml_set_err_status(status) except *:
     """
-    Sets the new VM Error Status according to err and stores the previous VM Error Status to olderr.
+    Sets the new VM Error Status according to err and stores the previous VM Error
+    Status to olderr.
     """
     __variables = {
-        'input': {
-            'ok': mkl.VML_STATUS_OK,
-            'accuracywarning': mkl.VML_STATUS_ACCURACYWARNING,
-            'badsize': mkl.VML_STATUS_BADSIZE,
-            'badmem': mkl.VML_STATUS_BADMEM,
-            'errdom': mkl.VML_STATUS_ERRDOM,
-            'sing': mkl.VML_STATUS_SING,
-            'overflow': mkl.VML_STATUS_OVERFLOW,
-            'underflow': mkl.VML_STATUS_UNDERFLOW,
+        "input": {
+            "ok": mkl.VML_STATUS_OK,
+            "accuracywarning": mkl.VML_STATUS_ACCURACYWARNING,
+            "badsize": mkl.VML_STATUS_BADSIZE,
+            "badmem": mkl.VML_STATUS_BADMEM,
+            "errdom": mkl.VML_STATUS_ERRDOM,
+            "sing": mkl.VML_STATUS_SING,
+            "overflow": mkl.VML_STATUS_OVERFLOW,
+            "underflow": mkl.VML_STATUS_UNDERFLOW,
         },
-        'output': {
-            mkl.VML_STATUS_OK: 'ok',
-            mkl.VML_STATUS_ACCURACYWARNING: 'accuracywarning',
-            mkl.VML_STATUS_BADSIZE: 'badsize',
-            mkl.VML_STATUS_BADMEM: 'badmem',
-            mkl.VML_STATUS_ERRDOM: 'errdom',
-            mkl.VML_STATUS_SING: 'sing',
-            mkl.VML_STATUS_OVERFLOW: 'overflow',
-            mkl.VML_STATUS_UNDERFLOW: 'underflow',
+        "output": {
+            mkl.VML_STATUS_OK: "ok",
+            mkl.VML_STATUS_ACCURACYWARNING: "accuracywarning",
+            mkl.VML_STATUS_BADSIZE: "badsize",
+            mkl.VML_STATUS_BADMEM: "badmem",
+            mkl.VML_STATUS_ERRDOM: "errdom",
+            mkl.VML_STATUS_SING: "sing",
+            mkl.VML_STATUS_OVERFLOW: "overflow",
+            mkl.VML_STATUS_UNDERFLOW: "underflow",
         },
     }
-    cdef int mkl_status_in = __mkl_str_to_int(status, __variables['input'])
+    cdef int mkl_status_in = __mkl_str_to_int(status, __variables["input"])
 
     cdef int mkl_status_out = mkl.vmlSetErrStatus(mkl_status_in)
 
-    status = __mkl_int_to_str(mkl_status_out, __variables['output'])
+    status = __mkl_int_to_str(mkl_status_out, __variables["output"])
     return status
 
 
@@ -1011,44 +1051,45 @@ cdef object __vml_get_err_status() except *:
     Gets the VM Error Status.
     """
     __variables = {
-        'input': None,
-        'output': {
-            mkl.VML_STATUS_OK: 'ok',
-            mkl.VML_STATUS_ACCURACYWARNING: 'accuracywarning',
-            mkl.VML_STATUS_BADSIZE: 'badsize',
-            mkl.VML_STATUS_BADMEM: 'badmem',
-            mkl.VML_STATUS_ERRDOM: 'errdom',
-            mkl.VML_STATUS_SING: 'sing',
-            mkl.VML_STATUS_OVERFLOW: 'overflow',
-            mkl.VML_STATUS_UNDERFLOW: 'underflow',
+        "input": None,
+        "output": {
+            mkl.VML_STATUS_OK: "ok",
+            mkl.VML_STATUS_ACCURACYWARNING: "accuracywarning",
+            mkl.VML_STATUS_BADSIZE: "badsize",
+            mkl.VML_STATUS_BADMEM: "badmem",
+            mkl.VML_STATUS_ERRDOM: "errdom",
+            mkl.VML_STATUS_SING: "sing",
+            mkl.VML_STATUS_OVERFLOW: "overflow",
+            mkl.VML_STATUS_UNDERFLOW: "underflow",
         },
     }
 
     cdef int mkl_status = mkl.vmlGetErrStatus()
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(mkl_status, __variables["output"])
     return status
 
 
 cdef object __vml_clear_err_status() except *:
     """
-    Sets the VM Error Status to VML_STATUS_OK and stores the previous VM Error Status to olderr.
+    Sets the VM Error Status to VML_STATUS_OK and stores the previous VM Error Status
+    to olderr.
     """
     __variables = {
-        'input': None,
-        'output': {
-            mkl.VML_STATUS_OK: 'ok',
-            mkl.VML_STATUS_ACCURACYWARNING: 'accuracywarning',
-            mkl.VML_STATUS_BADSIZE: 'badsize',
-            mkl.VML_STATUS_BADMEM: 'badmem',
-            mkl.VML_STATUS_ERRDOM: 'errdom',
-            mkl.VML_STATUS_SING: 'sing',
-            mkl.VML_STATUS_OVERFLOW: 'overflow',
-            mkl.VML_STATUS_UNDERFLOW: 'underflow',
+        "input": None,
+        "output": {
+            mkl.VML_STATUS_OK: "ok",
+            mkl.VML_STATUS_ACCURACYWARNING: "accuracywarning",
+            mkl.VML_STATUS_BADSIZE: "badsize",
+            mkl.VML_STATUS_BADMEM: "badmem",
+            mkl.VML_STATUS_ERRDOM: "errdom",
+            mkl.VML_STATUS_SING: "sing",
+            mkl.VML_STATUS_OVERFLOW: "overflow",
+            mkl.VML_STATUS_UNDERFLOW: "underflow",
         },
     }
 
     cdef int mkl_status = mkl.vmlClearErrStatus()
 
-    status = __mkl_int_to_str(mkl_status, __variables['output'])
+    status = __mkl_int_to_str(mkl_status, __variables["output"])
     return status
