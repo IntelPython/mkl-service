@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ["3.9", "3.10", "3.11", "3.12"]
+        python: ['3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - name: Cancel Previous Runs
@@ -78,7 +78,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.9', '3.10', '3.11', '3.12']
+        python: ['3.9', '3.10', '3.11', '3.12', '3.13']
     env:
       conda-bld: C:\Miniconda\conda-bld\win-64\
 
@@ -127,7 +127,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.9', '3.10', '3.11', '3.12']
+        python: ['3.9', '3.10', '3.11', '3.12', '3.13']
         experimental: [false]
         runner: [ubuntu-latest]
     continue-on-error: ${{ matrix.experimental }}
@@ -201,7 +201,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.9', '3.10', '3.11', '3.12']
+        python: ['3.9', '3.10', '3.11', '3.12', '3.13']
         experimental: [false]
         runner: [windows-2019]
     continue-on-error: ${{ matrix.experimental }}

@@ -1,10 +1,18 @@
 `mkl-service` changelog
 =======================
 
+[dev] (MM/DD/YY)
+================
+
+Migrated from `setup.py` to `pyproject.toml`
+
+Added support for python 3.13
+
 2.3.0
 =====
 
 Fixed CI to actually execute tests. Populated CBWR constants to match MKL headers.
+
 Added tests checking that `cbwr_set` and `cbwr_get` round-trip.
 
 2.2.0
