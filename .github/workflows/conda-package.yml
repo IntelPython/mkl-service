@@ -87,7 +87,7 @@ jobs:
         uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
-              
+
       - uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
@@ -114,7 +114,7 @@ jobs:
 
       - name: Build conda package
         run: conda build --no-test --python ${{ matrix.python }} -c https://software.repos.intel.com/python/conda -c conda-forge --override-channels conda-recipe
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4.6.2
         with:
@@ -254,9 +254,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
-            
+
         # add intel-openmp as an explicit dependency
-        # to avoid it being missed when package version is specified exactly            
+        # to avoid it being missed when package version is specified exactly
       - name: Install mkl-service
         shell: cmd
         run: |

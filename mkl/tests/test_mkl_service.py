@@ -23,76 +23,78 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# pylint: disable=no-member
 
 import pytest
+
 import mkl
 
 
 def test_set_num_threads():
     saved = mkl.get_max_threads()
-    half_nt = int( (1 + saved) / 2 )
+    half_nt = int((1 + saved) / 2)
     mkl.set_num_threads(half_nt)
     assert mkl.get_max_threads() == half_nt
     mkl.set_num_threads(saved)
 
 
 def test_domain_set_num_threads_blas():
-    saved_blas_nt = mkl.domain_get_max_threads(domain='blas')
-    saved_fft_nt = mkl.domain_get_max_threads(domain='fft')
-    saved_vml_nt = mkl.domain_get_max_threads(domain='vml')
+    saved_blas_nt = mkl.domain_get_max_threads(domain="blas")
+    saved_fft_nt = mkl.domain_get_max_threads(domain="fft")
+    saved_vml_nt = mkl.domain_get_max_threads(domain="vml")
     # set
-    blas_nt = int( (3 + saved_blas_nt)/4 )
-    fft_nt = int( (3 + 2*saved_fft_nt)/4 )
-    vml_nt = int( (3 + 3*saved_vml_nt)/4 )
-    status = mkl.domain_set_num_threads(blas_nt, domain='blas')
-    assert status == 'success'
-    status = mkl.domain_set_num_threads(fft_nt, domain='fft')
-    assert status == 'success'
-    status = mkl.domain_set_num_threads(vml_nt, domain='vml')
-    assert status == 'success'
+    blas_nt = int((3 + saved_blas_nt) / 4)
+    fft_nt = int((3 + 2 * saved_fft_nt) / 4)
+    vml_nt = int((3 + 3 * saved_vml_nt) / 4)
+    status = mkl.domain_set_num_threads(blas_nt, domain="blas")
+    assert status == "success"
+    status = mkl.domain_set_num_threads(fft_nt, domain="fft")
+    assert status == "success"
+    status = mkl.domain_set_num_threads(vml_nt, domain="vml")
+    assert status == "success"
     # check
-    assert mkl.domain_get_max_threads(domain='blas') == blas_nt
-    assert mkl.domain_get_max_threads(domain='fft') == fft_nt
-    assert mkl.domain_get_max_threads(domain='vml') == vml_nt
+    assert mkl.domain_get_max_threads(domain="blas") == blas_nt
+    assert mkl.domain_get_max_threads(domain="fft") == fft_nt
+    assert mkl.domain_get_max_threads(domain="vml") == vml_nt
     # restore
-    status = mkl.domain_set_num_threads(saved_blas_nt, domain='blas')
-    assert status == 'success'
-    status = mkl.domain_set_num_threads(saved_fft_nt, domain='fft')
-    assert status == 'success'
-    status = mkl.domain_set_num_threads(saved_vml_nt, domain='vml')
-    assert status == 'success'
+    status = mkl.domain_set_num_threads(saved_blas_nt, domain="blas")
+    assert status == "success"
+    status = mkl.domain_set_num_threads(saved_fft_nt, domain="fft")
+    assert status == "success"
+    status = mkl.domain_set_num_threads(saved_vml_nt, domain="vml")
+    assert status == "success"
 
 
 def test_domain_set_num_threads_fft():
-    status = mkl.domain_set_num_threads(4, domain='fft')
-    assert status == 'success'
+    status = mkl.domain_set_num_threads(4, domain="fft")
+    assert status == "success"
 
 
 def test_domain_set_num_threads_vml():
-    status = mkl.domain_set_num_threads(4, domain='vml')
-    assert status == 'success'
+    status = mkl.domain_set_num_threads(4, domain="vml")
+    assert status == "success"
 
 
 def test_domain_set_num_threads_pardiso():
-    status = mkl.domain_set_num_threads(4, domain='pardiso')
-    assert status == 'success'
+    status = mkl.domain_set_num_threads(4, domain="pardiso")
+    assert status == "success"
 
 
 def test_domain_set_num_threads_all():
-    status = mkl.domain_set_num_threads(4, domain='all')
-    assert status == 'success'
+    status = mkl.domain_set_num_threads(4, domain="all")
+    assert status == "success"
 
 
 def test_set_num_threads_local():
     mkl.set_num_threads(1)
     status = mkl.set_num_threads_local(2)
-    assert status == 'global_num_threads'
+    assert status == "global_num_threads"
     status = mkl.set_num_threads_local(4)
     assert status == 2
     status = mkl.set_num_threads_local(0)
     assert status == 4
     status = mkl.set_num_threads_local(8)
-    assert status == 'global_num_threads'
+    assert status == "global_num_threads"
 
 
 def test_set_dynamic():
@@ -104,23 +106,23 @@ def test_get_max_threads():
 
 
 def test_domain_get_max_threads_blas():
-    mkl.domain_get_max_threads(domain='blas')
+    mkl.domain_get_max_threads(domain="blas")
 
 
 def test_domain_get_max_threads_fft():
-    mkl.domain_get_max_threads(domain='fft')
+    mkl.domain_get_max_threads(domain="fft")
 
 
 def test_domain_get_max_threads_vml():
-    mkl.domain_get_max_threads(domain='vml')
+    mkl.domain_get_max_threads(domain="vml")
 
 
 def test_domain_get_max_threads_pardiso():
-    mkl.domain_get_max_threads(domain='pardiso')
+    mkl.domain_get_max_threads(domain="pardiso")
 
 
 def test_domain_get_max_threads_all():
-    mkl.domain_get_max_threads(domain='all')
+    mkl.domain_get_max_threads(domain="all")
 
 
 def test_get_dynamic():
@@ -178,19 +180,19 @@ def test_mem_stat():
 
 
 def test_peak_mem_usage_enable():
-    mkl.peak_mem_usage('enable')
+    mkl.peak_mem_usage("enable")
 
 
 def test_peak_mem_usage_disable():
-    mkl.peak_mem_usage('disable')
+    mkl.peak_mem_usage("disable")
 
 
 def test_peak_mem_usage_peak_mem():
-    mkl.peak_mem_usage('peak_mem')
+    mkl.peak_mem_usage("peak_mem")
 
 
 def test_peak_mem_usage_peak_mem_reset():
-    mkl.peak_mem_usage('peak_mem_reset')
+    mkl.peak_mem_usage("peak_mem_reset")
 
 
 def test_set_memory_limit():
@@ -199,51 +201,52 @@ def test_set_memory_limit():
 
 def check_cbwr(branch, cnr_const):
     status = mkl.cbwr_set(branch=branch)
-    if status == 'success':
-        expected_value = 'branch_off' if branch == 'off' else branch
+    if status == "success":
+        expected_value = "branch_off" if branch == "off" else branch
         actual_value = mkl.cbwr_get(cnr_const=cnr_const)
-        assert actual_value == expected_value, \
-            f"Round-trip failure for CNR branch '{branch}', CNR const '{cnr_const}"
-    elif status not in ['err_unsupported_branch', 'err_mode_change_failure']:
+        assert (
+            actual_value == expected_value
+        ), f"Round-trip failure for CNR branch '{branch}', CNR const '{cnr_const}"
+    elif status not in ["err_unsupported_branch", "err_mode_change_failure"]:
         # if MKL has been initialized already,
         # setting CBWR will error with mode_change_failure
         pytest.fail(status)
 
 
 branches = [
-    'off',
-    'branch_off',
-    'auto',
-    'compatible',
-    'sse2',
-    'ssse3',
-    'sse4_1',
-    'sse4_2',
-    'avx',
-    'avx2',
-    'avx512_mic',
-    'avx512',
-    'avx512_mic_e1',
-    'avx512_e1',
+    "off",
+    "branch_off",
+    "auto",
+    "compatible",
+    "sse2",
+    "ssse3",
+    "sse4_1",
+    "sse4_2",
+    "avx",
+    "avx2",
+    "avx512_mic",
+    "avx512",
+    "avx512_mic_e1",
+    "avx512_e1",
 ]
 
 
 strict = [
-    'avx2,strict',
-    'avx512_mic,strict',
-    'avx512,strict',
-    'avx512_e1,strict',
+    "avx2,strict",
+    "avx512_mic,strict",
+    "avx512,strict",
+    "avx512_e1,strict",
 ]
 
 
-@pytest.mark.parametrize('branch', branches)
+@pytest.mark.parametrize("branch", branches)
 def test_cbwr_branch(branch):
-    check_cbwr(branch, 'branch')
+    check_cbwr(branch, "branch")
 
 
-@pytest.mark.parametrize('branch', branches + strict)
+@pytest.mark.parametrize("branch", branches + strict)
 def test_cbwr_all(branch):
-    check_cbwr(branch, 'all')
+    check_cbwr(branch, "all")
 
 
 def test_cbwr_get_auto_branch():
@@ -251,27 +254,27 @@ def test_cbwr_get_auto_branch():
 
 
 def test_enable_instructions_avx512_mic_e1():
-    mkl.enable_instructions('avx512_mic_e1')
+    mkl.enable_instructions("avx512_mic_e1")
 
 
 def test_enable_instructions_avx512():
-    mkl.enable_instructions('avx512')
+    mkl.enable_instructions("avx512")
 
 
 def test_enable_instructions_avx512_mic():
-    mkl.enable_instructions('avx512_mic')
+    mkl.enable_instructions("avx512_mic")
 
 
 def test_enable_instructions_avx2():
-    mkl.enable_instructions('avx2')
+    mkl.enable_instructions("avx2")
 
 
 def test_enable_instructions_avx():
-    mkl.enable_instructions('avx')
+    mkl.enable_instructions("avx")
 
 
 def test_enable_instructions_sse4_2():
-    mkl.enable_instructions('sse4_2')
+    mkl.enable_instructions("sse4_2")
 
 
 def test_set_env_mode():
@@ -292,51 +295,51 @@ def test_verbose_true():
 
 @pytest.mark.skip(reason="Skipping MPI-related test")
 def test_set_mpi_custom():
-    mkl.set_mpi('custom', 'custom_library_name')
+    mkl.set_mpi("custom", "custom_library_name")
 
 
 @pytest.mark.skip(reason="Skipping MPI-related test")
 def test_set_mpi_msmpi():
-    mkl.set_mpi('msmpi')
+    mkl.set_mpi("msmpi")
 
 
 @pytest.mark.skip(reason="Skipping MPI-related test")
 def test_set_mpi_intelmpi():
-    mkl.set_mpi('intelmpi')
+    mkl.set_mpi("intelmpi")
 
 
 @pytest.mark.skip(reason="Skipping MPI-related test")
 def test_set_mpi_mpich2():
-    mkl.set_mpi('mpich2')
+    mkl.set_mpi("mpich2")
 
 
 def test_vml_set_get_mode_roundtrip():
     saved = mkl.vml_get_mode()
-    mkl.vml_set_mode(*saved) # should not raise errors
+    mkl.vml_set_mode(*saved)  # should not raise errors
 
 
 def test_vml_set_mode_ha_on_ignore():
-    mkl.vml_set_mode('ha', 'on', 'ignore')
+    mkl.vml_set_mode("ha", "on", "ignore")
 
 
 def test_vml_set_mode_ha_on_errno():
-    mkl.vml_set_mode('ha', 'on', 'errno')
+    mkl.vml_set_mode("ha", "on", "errno")
 
 
 def test_vml_set_mode_la_on_stderr():
-    mkl.vml_set_mode('la', 'on', 'stderr')
+    mkl.vml_set_mode("la", "on", "stderr")
 
 
 def test_vml_set_mode_la_off_except():
-    mkl.vml_set_mode('la', 'off', 'except')
+    mkl.vml_set_mode("la", "off", "except")
 
 
 def test_vml_set_mode_op_off_callback():
-    mkl.vml_set_mode('ep', 'off', 'callback')
+    mkl.vml_set_mode("ep", "off", "callback")
 
 
 def test_vml_set_mode_ep_off_default():
-    mkl.vml_set_mode('ep', 'off', 'default')
+    mkl.vml_set_mode("ep", "off", "default")
 
 
 def test_vml_get_mode():
@@ -344,35 +347,35 @@ def test_vml_get_mode():
 
 
 def test_vml_set_err_status_ok():
-    mkl.vml_set_err_status('ok')
+    mkl.vml_set_err_status("ok")
 
 
 def test_vml_set_err_status_accuracywarning():
-    mkl.vml_set_err_status('accuracywarning')
+    mkl.vml_set_err_status("accuracywarning")
 
 
 def test_vml_set_err_status_badsize():
-    mkl.vml_set_err_status('badsize')
+    mkl.vml_set_err_status("badsize")
 
 
 def test_vml_set_err_status_badmem():
-    mkl.vml_set_err_status('badmem')
+    mkl.vml_set_err_status("badmem")
 
 
 def test_vml_set_err_status_errdom():
-    mkl.vml_set_err_status('errdom')
+    mkl.vml_set_err_status("errdom")
 
 
 def test_vml_set_err_status_sing():
-    mkl.vml_set_err_status('sing')
+    mkl.vml_set_err_status("sing")
 
 
 def test_vml_set_err_status_overflow():
-    mkl.vml_set_err_status('overflow')
+    mkl.vml_set_err_status("overflow")
 
 
 def test_vml_set_err_status_underflow():
-    mkl.vml_set_err_status('underflow')
+    mkl.vml_set_err_status("underflow")
 
 
 def test_vml_get_err_status():
@@ -393,12 +396,12 @@ def test_get_version():
     """
     v = mkl.get_version()
     assert isinstance(v, dict)
-    assert 'MajorVersion' in v
-    assert 'MinorVersion' in v
-    assert 'UpdateVersion' in v
+    assert "MajorVersion" in v
+    assert "MinorVersion" in v
+    assert "UpdateVersion" in v
 
 
 def test_get_version_string():
     v = mkl.get_version_string()
     assert isinstance(v, str)
-    assert 'Math Kernel Library' in v
+    assert "Math Kernel Library" in v
