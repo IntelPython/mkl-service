@@ -23,7 +23,9 @@ Intel® OneMKL support functions are subdivided into the following groups accord
 A short example, illustrating its use:
 
 ```python
-import tomopy
-import mkl
-mkl.domain_set_num_threads(1, domain='fft') # Intel(R) MKL FFT functions to run sequentially
+>>> import mkl
+>>> mkl.domain_set_num_threads(1, domain="fft") # OneMKL FFT functions to run sequentially
+# 'success'
 ```
+
+For more information about the usage of support functions see [Developer Reference for Intel® oneAPI Math Kernel Library for C](https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2025-1/support-functions.html).
