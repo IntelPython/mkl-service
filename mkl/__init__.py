@@ -24,6 +24,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+from . import _init_helper
 
 
 class RTLD_for_MKL:
@@ -57,3 +58,5 @@ del sys
 
 from ._py_mkl_service import *
 from ._version import __version__
+
+del _init_helper
