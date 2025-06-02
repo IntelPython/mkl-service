@@ -25,6 +25,8 @@
 
 import sys
 
+from . import _init_helper
+
 
 class RTLD_for_MKL:
     def __init__(self):
@@ -57,3 +59,5 @@ del sys
 
 from ._py_mkl_service import *
 from ._version import __version__
+
+del _init_helper
