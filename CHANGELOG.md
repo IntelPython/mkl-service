@@ -1,17 +1,43 @@
 # changelog
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.5.0] (05/DD/2025)
 
 ### Added
 * Added support for python 3.13 [gh-72](github.com/IntelPython/mkl-service/pull/72)
+* Added support in virtual environment out of the box [gh-79](github.com/IntelPython/mkl-service/pull/79)
 
 ### Changed
 * Migrated from `setup.py` to `pyproject.toml` [gh-66](github.com/IntelPython/mkl-service/pull/66)
 
+## [2.4.2] (10/12/2024)
+
+Tests checking library version moved to the end of the test suite, as after it is run, the state of the library is finalized, and tests that modify that state may fail.
+
+Updated installation instructions.
+
+## [2.4.1]
+
+Transition from `nose` to `unittest` and then to `pytest` to enable support for Python 3.12.
+
+Added Github Actions CI.
+
+Removed `six` as a dependency.
+
+## [2.4.0.post1]
+
+Update description for PyPI package installation
+
+## [2.4.0]
+
+Fixed issue [#14](https://github.com/IntelPython/mkl-service/issues/14).
+
+Added [`mkl.set_num_stripes`](https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/support-functions/threading-control/mkl-set-num-stripes.html) and [`mkl.get_num_stripes`](https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/support-functions/threading-control/mkl-get-num-stripes.html)
+
+Also expanded support `isa` keyword argument values in `mkl.enable_instructions(isa=isa)` function per recent [Intel(R) oneMKL](https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/support-functions/miscellaneous/mkl-enable-instructions.html) support.
 
 ## [2.3.0]
 
