@@ -39,7 +39,9 @@ def extensions():
             "include_dirs": [join(mkl_root, "include")],
             "library_dirs": [join(mkl_root, "lib"), join(mkl_root, "lib", "intel64")],
             "libraries": ["mkl_rt"],
-            "rpaths" : ["$ORIGIN/../..", "$ORIGIN/../../.."] if sys.platform != 'win32' else [],
+            "rpaths": (
+                ["$ORIGIN/../..", "$ORIGIN/../../.."] if sys.platform != "win32" else []
+            ),
         }
     else:
         raise ValueError("MKLROOT environment variable not set.")
