@@ -58,7 +58,7 @@ jobs:
       - name: Store conda paths as envs
         shell: bash -el {0}
         run: |
-          echo "CONDA_BLD=$CONDA_PREFIX/conda-bld/linux-64/" >> $GITHUB_ENV
+          echo "CONDA_BLD=/usr/share/miniconda/conda-bld/linux-64/" >> $GITHUB_ENV
           echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE/" >> $GITHUB_ENV
 
       - name: Build conda package
@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
-          path: ${{ env.WHEELS_OUTPUT_FOLDER }}${{ env.PACKAGE_NAME }}-*.whl
+          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   build_windows:
     runs-on: windows-latest
@@ -128,8 +128,8 @@ jobs:
       - name: Store conda paths as envs
         shell: bash -el {0}
         run: |
-          echo "CONDA_BLD=$CONDA_PREFIX\conda-bld\win-64\" >> $GITHUB_ENV
-          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE\" >> $GITHUB_ENV
+          echo "CONDA_BLD=C:\\Miniconda\\conda-bld\\win-64\\" >> $GITHUB_ENV
+          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE\\" >> $GITHUB_ENV
 
       - name: Build conda package
         run: conda build --no-test --python ${{ matrix.python }} -c https://software.repos.intel.com/python/conda -c conda-forge --override-channels conda-recipe
@@ -144,7 +144,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
-          path: ${{ env.WHEELS_OUTPUT_FOLDER }}${{ env.PACKAGE_NAME }}-*.whl
+          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   test_linux:
     needs: build_linux
