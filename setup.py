@@ -59,6 +59,7 @@ def extensions():
             include_dirs=mkl_include_dirs,
             libraries=mkl_libraries + (["pthread"] if os.name == "posix" else []),
             library_dirs=mkl_library_dirs,
+            runtime_library_dirs=["$ORIGIN/../..", "$ORIGIN/../../.."],
             extra_compile_args=[
                 "-DNDEBUG"
                 # "-g", "-O2", "-Wall",
