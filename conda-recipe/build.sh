@@ -14,7 +14,7 @@ export VERBOSE=1
 # -wnx flags mean: --wheel --no-isolation --skip-dependency-check
 ${PYTHON} -m build -w -n -x
 
-${PYTHON} -m wheel tags --remove --build "$GIT_DESCRIBE_NUMBER" \
+${PYTHON} -m wheel tags --remove \
     --platform-tag "manylinux_${GLIBC_MAJOR}_${GLIBC_MINOR}_x86_64" \
     dist/mkl_service*.whl
 

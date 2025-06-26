@@ -16,7 +16,7 @@ if %ERRORLEVEL% neq 0 exit 1
 :: `pip install dist\numpy*.whl` does not work on windows,
 :: so use a loop; there's only one wheel in dist/ anyway
 for /f %%f in ('dir /b /S .\dist') do (
-  %PYTHON% -m wheel tags --remove --build %GIT_DESCRIBE_NUMBER% %%f
+  %PYTHON% -m wheel tags --remove %%f
   if %ERRORLEVEL% neq 0 exit 1
 )
 

@@ -1,12 +1,15 @@
+{% set version = "2.5.1" %}
+{% set buildnumber = 0 %}
+
 package:
     name: mkl-service
-    version: {{ GIT_DESCRIBE_TAG }}
+    version: {{ version }}
 
 source:
     path: ..
 
 build:
-    number: {{ GIT_DESCRIBE_NUMBER }}
+    number: {{ buildnumber }}
     script_env:
       - WHEELS_OUTPUT_FOLDER
     ignore_run_exports:
