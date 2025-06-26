@@ -1,15 +1,14 @@
-{% set version = "2.5.0" %}
-{% set buildnumber = 0 %}
-
 package:
     name: mkl-service
-    version: {{ version }}
+    version: {{ GIT_DESCRIBE_TAG }}
 
 source:
     path: ..
 
 build:
-    number: {{ buildnumber }}
+    number: {{ GIT_DESCRIBE_NUMBER }}
+    script_env:
+      - WHEELS_OUTPUT_FOLDER
     ignore_run_exports:
       - blas
       - mkl-service
@@ -19,12 +18,15 @@ requirements:
       - {{ compiler('c') }}
     host:
       - python
+      - pip >=25.0
       - setuptools >=77
       - mkl-devel
       - cython
+      - wheel >=0.45.1
+      - python-build >=1.2.2
     run:
       - python
-      - mkl
+      - {{ pin_compatible('mkl') }}
 
 test:
     requires:
