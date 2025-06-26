@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] (06/27/2025)
+
+### Fixed
+* Resolved import issue in the virtual environment which broke loading of MKL libs [gh-85](github.com/IntelPython/mkl-service/pull/85)
+
 ## [2.5.0] (06/03/2025)
 
 ### Added
