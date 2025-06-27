@@ -1,4 +1,4 @@
-{% set version = "2.5.0" %}
+{% set version = "2.5.1" %}
 {% set buildnumber = 0 %}
 
 package:
@@ -10,6 +10,8 @@ source:
 
 build:
     number: {{ buildnumber }}
+    script_env:
+      - WHEELS_OUTPUT_FOLDER
     ignore_run_exports:
       - blas
       - mkl-service
@@ -17,14 +19,18 @@ build:
 requirements:
     build:
       - {{ compiler('c') }}
+      - {{ stdlib('c') }}
     host:
       - python
+      - pip >=25.0
       - setuptools >=77
       - mkl-devel
       - cython
+      - wheel >=0.45.1
+      - python-build >=1.2.2
     run:
       - python
-      - mkl
+      - {{ pin_compatible('mkl') }}
 
 test:
     requires:

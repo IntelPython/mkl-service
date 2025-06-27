@@ -25,6 +25,7 @@
 
 
 import os
+import sys
 from os.path import join
 
 import Cython.Build
@@ -42,9 +43,13 @@ def extensions():
     else:
         raise ValueError("MKLROOT environment variable not set.")
 
+    if sys.platform != "win32":
+        mkl_info["rpaths"] = ["$ORIGIN/../..", "$ORIGIN/../../.."]
+
     mkl_include_dirs = mkl_info.get("include_dirs", [])
     mkl_library_dirs = mkl_info.get("library_dirs", [])
     mkl_libraries = mkl_info.get("libraries", ["mkl_rt"])
+    mkl_rpaths = mkl_info.get("rpaths", [])
 
     defs = []
     if any(["mkl_rt" in li for li in mkl_libraries]):
@@ -59,6 +64,7 @@ def extensions():
             include_dirs=mkl_include_dirs,
             libraries=mkl_libraries + (["pthread"] if os.name == "posix" else []),
             library_dirs=mkl_library_dirs,
+            runtime_library_dirs=mkl_rpaths,
             extra_compile_args=[
                 "-DNDEBUG"
                 # "-g", "-O2", "-Wall",
@@ -74,6 +80,7 @@ def extensions():
             include_dirs=mkl_include_dirs,
             library_dirs=mkl_library_dirs,
             libraries=mkl_libraries,
+            runtime_library_dirs=mkl_rpaths,
             extra_compile_args=[
                 "-DNDEBUG"
                 # "-g", "-O2", "-Wall",

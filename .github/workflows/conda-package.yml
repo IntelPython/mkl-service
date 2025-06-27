@@ -55,6 +55,12 @@ jobs:
       - name: Install conda-build
         run: conda install conda-build
 
+      - name: Store conda paths as envs
+        shell: bash -el {0}
+        run: |
+          echo "CONDA_BLD=/usr/share/miniconda/conda-bld/linux-64/" >> $GITHUB_ENV
+          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE/" >> $GITHUB_ENV
+
       - name: Build conda package
         run: |
           CHANNELS="-c conda-forge -c https://software.repos.intel.com/python/conda --override-channels"
@@ -71,7 +77,13 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
-          path: /usr/share/miniconda/conda-bld/linux-64/${{ env.PACKAGE_NAME }}-*.conda
+          path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
+
+      - name: Upload wheels artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
+          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   build_windows:
     runs-on: windows-latest
@@ -79,8 +91,6 @@ jobs:
     strategy:
       matrix:
         python: ['3.9', '3.10', '3.11', '3.12', '3.13']
-    env:
-      conda-bld: C:\Miniconda\conda-bld\win-64\
 
     steps:
       - name: Cancel Previous Runs
@@ -115,6 +125,12 @@ jobs:
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
+      - name: Store conda paths as envs
+        shell: bash -el {0}
+        run: |
+          echo "CONDA_BLD=C:\\Miniconda\\conda-bld\\win-64\\" >> $GITHUB_ENV
+          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE\\" >> $GITHUB_ENV
+
       - name: Build conda package
         run: conda build --no-test --python ${{ matrix.python }} -c https://software.repos.intel.com/python/conda -c conda-forge --override-channels conda-recipe
 
@@ -122,7 +138,13 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
-          path: ${{ env.conda-bld }}${{ env.PACKAGE_NAME }}-*.conda
+          path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
+
+      - name: Upload wheels artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
+          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   test_linux:
     needs: build_linux

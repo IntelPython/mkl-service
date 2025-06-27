@@ -25,7 +25,7 @@
 
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=77", "Cython"]
+requires = ["setuptools>=77", "Cython", "wheel>=0.45.1", "build>=1.2.2"]
 
 [project]
 authors = [
