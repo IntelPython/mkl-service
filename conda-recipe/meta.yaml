@@ -44,17 +44,16 @@ about:
     home: http://github.com/IntelPython/mkl-service
     license: BSD-3-Clause
     license_file: LICENSE.txt
-    license_family: BSD
-    description:
-        Intel(R) OneAPI Math Kernel Library (OneMKL) support functions are
-        subdivided into the following groups according to their purpose, such as
-            Version Information
-            Threading Control
-            Timing
-            Memory Management
-            Conditional Numerical Reproducibility Control
-            Miscellaneous
-    summary: Python hooks for Intel(R) OneMKL runtime control settings.
+    summary: Python hooks for Intel® oneAPI Math Kernel Library (oneMKL) runtime control settings
+    description: |
+        <strong>LEGAL NOTICE: Use of this software package is subject to the
+        software license agreement (as set forth above, in the license section of
+        the installed Conda package and/or the README file) and all notices,
+        disclaimers or license terms for third party or open source software
+        included in or with the software.</strong>
+        <br/><br/>
+        EULA: <a href="https://opensource.org/licenses/BSD-3-Clause" target="_blank">BSD-3-Clause</a>
+        <br/><br/>
 
 extra:
   recipe-maintainers:
