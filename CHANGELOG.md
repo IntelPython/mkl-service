@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.2] (07/01/2025)
+
+### Fixed
+* Updated `meta.yaml` with proper license description to pass the validation rules [gh-87](github.com/IntelPython/mkl-service/pull/87)
+
 ## [2.5.1] (06/27/2025)
 
 ### Fixed
@@ -42,7 +47,7 @@ Fixed issue [#14](https://github.com/IntelPython/mkl-service/issues/14).
 
 Added [`mkl.set_num_stripes`](https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/support-functions/threading-control/mkl-set-num-stripes.html) and [`mkl.get_num_stripes`](https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/support-functions/threading-control/mkl-get-num-stripes.html)
 
-Also expanded support `isa` keyword argument values in `mkl.enable_instructions(isa=isa)` function per recent [Intel(R) oneMKL](https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/support-functions/miscellaneous/mkl-enable-instructions.html) support.
+Also expanded support `isa` keyword argument values in `mkl.enable_instructions(isa=isa)` function per recent [Intel® oneAPI Math Kernel Library (oneMKL)](https://www.intel.com/content/www/us/en/docs/onemkl/developer-guide-linux/2025-2/instruction-set-specific-dispatch-on-intel-archs.html) support.
 
 ## [2.3.0]
 
