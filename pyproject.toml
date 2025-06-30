@@ -51,7 +51,7 @@ classifiers = [
   "Operating System :: Unix"
 ]
 dependencies = []
-description = "Python hooks for Intel® OneAPI Math Kernel Library (OneMKL) runtime control settings"
+description = "Python hooks for Intel® oneAPI Math Kernel Library (oneMKL) runtime control settings"
 dynamic = ["version"]
 keywords = ["MKL"]
 license = "BSD-3-Clause"
