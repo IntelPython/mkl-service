@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [dev] (MM/DD/YYYY)
+## [2.6.0] (10/06/2025)
 
 ### Added
 * Enabled support of Python 3.14 [gh-100](https://github.com/IntelPython/mkl-service/pull/100)
+
+### Changed
+* Used `GIT_DESCRIBE_TAG` and `GIT_DESCRIBE_NUMBER` in `meta.yaml` instead of manual stepping the numbers [gh-98](github.com/IntelPython/mkl-service/pull/98)
 
 ## [2.5.2] (07/01/2025)
 
