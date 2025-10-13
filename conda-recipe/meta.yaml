@@ -19,6 +19,7 @@ requirements:
       - {{ stdlib('c') }}
     host:
       - python
+      - python-gil     # [py>=314]
       - pip >=25.0
       - setuptools >=77
       - mkl-devel
@@ -27,6 +28,7 @@ requirements:
       - python-build >=1.2.2
     run:
       - python
+      - python-gil     # [py>=314]
       - {{ pin_compatible('mkl') }}
 
 test:
