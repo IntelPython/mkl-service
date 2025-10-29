@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ["3.10", "3.11", "3.12", "3.13"]  # 3.9 fails - gh-issue#56
+        python: ["3.10", "3.11", "3.12", "3.13"]
 
     env:
       ONEAPI_ROOT: /opt/intel/oneapi
