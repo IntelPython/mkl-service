@@ -103,9 +103,11 @@ jobs:
           fetch-depth: 0
       - uses: conda-incubator/setup-miniconda@835234971496cad1653abb28a638a281cf32541f # v3.2.0
         with:
-          conda-remove-defaults: true
-          auto-activate-base: true
-          activate-environment: ""
+          miniforge-version: latest
+          use-mamba: 'true'
+          conda-remove-defaults: 'true'
+          activate-environment: 'build'
+          python-version: ${{ matrix.python }}
 
       - name: Cache conda packages
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -240,18 +242,21 @@ jobs:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
       - uses: conda-incubator/setup-miniconda@835234971496cad1653abb28a638a281cf32541f # v3.2.0
         with:
-          conda-remove-defaults: true
-          auto-activate-base: true
-          activate-environment: ""
+          miniforge-version: latest
+          use-mamba: 'true'
+          conda-remove-defaults: 'true'
+          activate-environment: 'test'
+          python-version: ${{ matrix.python }}
 
-      - name: Install conda-build
-        run: conda install conda-build
+      - name: Install conda-index
+        run: conda install conda-index
 
       - name: Create conda channel
         run: |
           mkdir ${{ env.GITHUB_WORKSPACE }}\channel\win-64
           move ${{ env.PACKAGE_NAME }}-*.conda ${{ env.GITHUB_WORKSPACE }}\channel\win-64
-          conda index ${{ env.GITHUB_WORKSPACE }}/channel
+          python -m conda_index ${{ env.GITHUB_WORKSPACE }}/channel
+
           # Test channel
           conda search ${{ env.PACKAGE_NAME }} -c ${{ env.GITHUB_WORKSPACE }}/channel --override-channels --info --json > ${{ env.GITHUB_WORKSPACE }}\ver.json
           more ${{ env.GITHUB_WORKSPACE }}\ver.json
