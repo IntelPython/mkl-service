@@ -107,7 +107,7 @@ jobs:
           use-mamba: 'true'
           conda-remove-defaults: 'true'
           activate-environment: 'build'
-          python-version: ${{ matrix.python }}
+          python-version: '3.13' # no python 3.14 support by conda-build
 
       - name: Cache conda packages
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -246,7 +246,7 @@ jobs:
           use-mamba: 'true'
           conda-remove-defaults: 'true'
           activate-environment: 'test'
-          python-version: ${{ matrix.python }}
+          python-version: '3.13' # no python 3.14 support by conda-index
 
       - name: Install conda-index
         run: conda install conda-index
