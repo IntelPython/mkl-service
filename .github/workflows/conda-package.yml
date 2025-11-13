@@ -127,7 +127,7 @@ jobs:
       - name: Store conda paths as envs
         shell: bash -el {0}
         run: |
-          echo "CONDA_BLD=C:\\Miniconda\\conda-bld\\win-64\\" >> $GITHUB_ENV
+          echo "CONDA_BLD=$CONDA_PREFIX\\conda-bld\\win-64\\" >> $GITHUB_ENV
           echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE\\" >> $GITHUB_ENV
 
       - name: Build conda package
