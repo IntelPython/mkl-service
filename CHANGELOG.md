@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 * Dropped support for Python 3.9 [gh-118](https://github.com/IntelPython/mkl-service/pull/118)
 
+## [2.6.1] (11/25/2025)
+
+### Fixed
+* Fixed the run-time dependencies of `mkl-service` package to explicitly depend on a non–free-threaded (GIL-enabled) Python [gh-111](github.com/IntelPython/mkl-service/pull/111)
+
 ## [2.6.0] (10/06/2025)
 
 ### Added
