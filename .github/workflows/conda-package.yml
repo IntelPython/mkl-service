@@ -38,7 +38,7 @@ jobs:
           echo "pkgs_dirs: [~/.conda/pkgs]" >> ~/.condarc
 
       - name: Cache conda packages
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         env:
           CACHE_NUMBER: 0  # Increase to reset cache
         with:
@@ -110,7 +110,7 @@ jobs:
           python-version: '3.13' # no python 3.14 support by conda-build
 
       - name: Cache conda packages
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         env:
           CACHE_NUMBER: 3  # Increase to reset cache
         with:
@@ -193,7 +193,7 @@ jobs:
           echo "pkgs_dirs: [~/.conda/pkgs]" >> ~/.condarc
 
       - name: Cache conda packages
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         env:
           CACHE_NUMBER: 0  # Increase to reset cache
         with:
@@ -271,7 +271,7 @@ jobs:
           more lockfile
 
       - name: Cache conda packages
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         env:
           CACHE_NUMBER: 3  # Increase to reset cache
         with:
