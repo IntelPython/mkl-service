@@ -3,14 +3,14 @@
 CI/CD workflows, automation, security scanning, and package distribution.
 
 ## Workflows
-- **conda-package.yml** — main build/test pipeline (Linux/Windows/macOS, Python 3.10-3.14)
-- **build-with-clang.yml** — Clang compiler compatibility validation
+- **conda-package.yml** — main build/test pipeline (Linux/Windows, Python 3.10-3.14)
+- **build-with-clang.yml** — Linux Clang compiler compatibility validation
 - **pre-commit.yml** — code quality checks (flake8, etc.)
 - **openssf-scorecard.yml** — security posture scanning
 
 ## CI/CD policy
 - Keep build matrix (Python versions, platforms) in workflow files only
-- Required checks: conda build + test on all supported Python versions
+- Required checks: conda build + test on supported Python versions/platforms in CI
 - Artifact naming: `$PACKAGE_NAME $OS Python $VERSION`
 - Channels: `conda-forge`, `conda-forge/label/python_rc`, Intel channel
 
@@ -21,8 +21,7 @@ CI/CD workflows, automation, security scanning, and package distribution.
 
 ## Platform specifics
 - **Linux:** RTLD_GLOBAL handling for MKL library loading
-- **Windows:** DLL search path configuration
-- **macOS:** dylib loading and rpath setup
+- **Windows:** DLL search path configuration for venv/runtime loading
 
 ## Notes
 - Workflow/job renames are breaking for downstream tooling

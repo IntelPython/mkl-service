@@ -10,7 +10,7 @@ Unit tests for MKL runtime control API.
 - Version: `get_version`, `get_version_string` format validation
 - Memory: `peak_mem_usage`, `mem_stat` (if supported by MKL build)
 - CNR: Conditional Numerical Reproducibility flags
-- Edge cases: invalid domains, negative thread counts, thread-local settings
+- Edge cases currently covered: thread-local settings and API round-trips
 
 ## Running tests
 ```bash
@@ -18,9 +18,9 @@ pytest mkl/tests/
 ```
 
 ## CI integration
-- Tests run in conda-package.yml workflow
-- Separate test jobs per Python version and platform
-- Linux + Windows + macOS coverage
+- Tests run in `conda-package.yml` workflow
+- Separate test jobs per Python version and CI platform
+- CI coverage: Linux + Windows
 
 ## Adding tests
 - New API functions → add to `test_mkl_service.py` with validation

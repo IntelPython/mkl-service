@@ -3,14 +3,12 @@
 Usage examples for mkl-service runtime control API.
 
 ## Files
-- **example.py** — basic usage: threading control, version info, timing
+- **example.py** — basic usage: MKL version query, instruction dispatch control, and timing
 
 ## Examples cover
-- Setting global thread count with `mkl.set_num_threads()`
-- Domain-specific threading (FFT, BLAS, etc.)
-- Querying MKL version and build info
-- Memory usage statistics
-- Timing functions for benchmarking
+- Querying MKL version/build info (`get_version()`, `get_version_string()`)
+- Controlling instruction dispatch with `enable_instructions()`
+- Using `dsecnd()` for simple timing
 
 ## Running examples
 ```bash
@@ -19,5 +17,5 @@ python examples/example.py
 
 ## Notes
 - Examples assume MKL is installed (conda: `mkl` package)
-- Threading changes affect all MKL-backed libraries in the process
-- Useful for verifying mkl-service installation and MKL availability
+- Example is intended as a lightweight installation/runtime sanity check
+- Threading/domain APIs are available in `mkl-service` but not exercised in this example

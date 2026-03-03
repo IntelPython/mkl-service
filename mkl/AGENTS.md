@@ -6,8 +6,8 @@ Core Python/Cython implementation: MKL support function wrappers and runtime con
 - `__init__.py` — public API, RTLD_GLOBAL context manager, module initialization
 - `_mkl_service.pyx` — Cython wrappers for MKL support functions
 - `_mkl_service.pxd` — Cython declarations (C function signatures)
-- `_mklinitmodule.c` — C extension for MKL library initialization
-- `_init_helper.py` — loading helpers and diagnostics
+- `_mklinitmodule.c` — C extension for Linux-side MKL runtime preloading/init
+- `_init_helper.py` — Windows loading helper (DLL path setup in venv)
 - `_version.py` — version string (dynamic via setuptools)
 - `tests/` — unit tests for API functionality
 
@@ -38,17 +38,19 @@ Core Python/Cython implementation: MKL support function wrappers and runtime con
 - **Thread safety:** All threading functions must be thread-safe
 - **API stability:** Preserve function signatures (widely used in ecosystem)
 - **MKL dependency:** Assumes MKL is available at runtime (conda: mkl package)
-- **RTLD_GLOBAL:** Required on Linux; handled by `RTLD_for_MKL` context manager in `__init__.py`
+- **RTLD_GLOBAL preload path:** Linux preload is handled in `_mklinitmodule.c`; Windows DLL setup is in `_init_helper.py`
 
 ## Cython details
 - `_mkl_service.pyx` → generates `_py_mkl_service` extension module
 - `.pxd` file declares external C functions from MKL headers
-- Cython build requires MKL headers (mkl-devel)
+- Cython build requires MKL headers (`mkl-devel`)
 
 ## C init module
 - `_mklinitmodule.c` → `_mklinit` extension
-- Ensures MKL library is loaded with correct flags before Cython extension
-- Platform-specific: Windows uses `LoadLibrary`, Linux uses `dlopen`
+- Ensures MKL runtime is initialized with correct flags before Cython extension
+- Platform-specific behavior in current code:
+  - Linux: `dlopen(..., RTLD_GLOBAL)` preload path (when applicable)
+  - Windows: runtime DLL loading support is handled by `_init_helper.py`
 
 ## Notes
 - Domain strings: "fft", "vml", "pardiso", "blas", etc. (see MKL docs)
