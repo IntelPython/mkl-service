@@ -1,0 +1,61 @@
+package:
+    name: mkl-service
+    version: {{ GIT_DESCRIBE_TAG }}
+
+source:
+    path: ..
+
+build:
+    number: {{ GIT_DESCRIBE_NUMBER }}
+    script_env:
+      - WHEELS_OUTPUT_FOLDER
+    ignore_run_exports:
+      - blas
+      - mkl-service
+
+requirements:
+    build:
+      - {{ compiler('c') }}
+      - {{ stdlib('c') }}
+    host:
+      - python
+      - python-gil     # [py>=314]
+      - pip >=25.0
+      - setuptools >=77
+      - mkl-devel
+      - cython
+      - wheel >=0.45.1
+      - python-build >=1.2.2
+    run:
+      - python
+      - python-gil     # [py>=314]
+      - {{ pin_compatible('mkl') }}
+
+test:
+    requires:
+      - pytest
+    imports:
+      - mkl
+    commands:
+      - pytest -vv --pyargs mkl
+
+about:
+    home: http://github.com/IntelPython/mkl-service
+    license: BSD-3-Clause
+    license_file: LICENSE.txt
+    summary: Python hooks for Intel® oneAPI Math Kernel Library (oneMKL) runtime control settings
+    description: |
+        <strong>LEGAL NOTICE: Use of this software package is subject to the
+        software license agreement (as set forth above, in the license section of
+        the installed Conda package and/or the README file) and all notices,
+        disclaimers or license terms for third party or open source software
+        included in or with the software.</strong>
+        <br/><br/>
+        EULA: <a href="https://opensource.org/licenses/BSD-3-Clause" target="_blank">BSD-3-Clause</a>
+        <br/><br/>
+
+extra:
+  recipe-maintainers:
+     - ndgrigorian
+     - antonwolfy
+     - xaleryb
