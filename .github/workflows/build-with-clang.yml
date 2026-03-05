@@ -68,8 +68,8 @@ jobs:
       - name: Build mkl-service
         run: |
           source ${{ env.ONEAPI_ROOT }}/setvars.sh
-          echo $CMPLR_ROOT
-          export CC=$CMPLR_ROOT/bin/icx
+          echo "$CMPLR_ROOT"
+          export CC="$CMPLR_ROOT/bin/icx"
           export CFLAGS="${CFLAGS} -fno-fast-math"
           python setup.py develop
 
