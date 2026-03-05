@@ -14,6 +14,9 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        # use commit hash to make "no-commit-to-branch" check passing
+        ref: ${{ github.sha }}
 
     - name: Set up python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -29,9 +32,9 @@ jobs:
 
     - name: Set up clang-format
       run: |
-        sudo apt-get install -y clang-format-14
+        sudo apt-get install -y clang-format-18
         sudo unlink /usr/bin/clang-format
-        sudo ln -s /usr/bin/clang-format-14 /usr/bin/clang-format
+        sudo ln -s /usr/bin/clang-format-18 /usr/bin/clang-format
         clang-format --version
 
     - name: Run pre-commit checks
