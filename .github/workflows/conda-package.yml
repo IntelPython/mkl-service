@@ -50,7 +50,7 @@ jobs:
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
 
       - name: Add conda to system path
-        run: echo $CONDA/bin >> $GITHUB_PATH
+        run: echo "$CONDA/bin" >> "$GITHUB_PATH"
 
       - name: Install conda-build
         run: conda install conda-build
@@ -58,29 +58,29 @@ jobs:
       - name: Store conda paths as envs
         shell: bash -el {0}
         run: |
-          echo "CONDA_BLD=/usr/share/miniconda/conda-bld/linux-64/" >> $GITHUB_ENV
-          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE/" >> $GITHUB_ENV
+          echo "CONDA_BLD=/usr/share/miniconda/conda-bld/linux-64/" >> "$GITHUB_ENV"
+          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE/" >> "$GITHUB_ENV"
 
       - name: Build conda package
         run: |
-          CHANNELS="-c conda-forge -c conda-forge/label/python_rc -c https://software.repos.intel.com/python/conda --override-channels"
-          VERSIONS="--python ${{ matrix.python }}"
-          TEST="--no-test"
+          CHANNELS=(-c conda-forge -c conda-forge/label/python_rc -c https://software.repos.intel.com/python/conda --override-channels)
+          VERSIONS=(--python "${{ matrix.python }}")
+          TEST=(--no-test)
 
           conda build \
-            $TEST \
-            $VERSIONS \
-            $CHANNELS \
+            "${TEST[@]}" \
+            "${VERSIONS[@]}" \
+            "${CHANNELS[@]}" \
             conda-recipe
 
       - name: Upload artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
 
       - name: Upload wheels artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
           path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
@@ -127,20 +127,20 @@ jobs:
       - name: Store conda paths as envs
         shell: bash -el {0}
         run: |
-          echo "CONDA_BLD=$CONDA_PREFIX\\conda-bld\\win-64\\" >> $GITHUB_ENV
-          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE\\" >> $GITHUB_ENV
+          echo "CONDA_BLD=$CONDA_PREFIX\\conda-bld\\win-64\\" >> "$GITHUB_ENV"
+          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE\\" >> "$GITHUB_ENV"
 
       - name: Build conda package
         run: conda build --no-test --python ${{ matrix.python }} -c https://software.repos.intel.com/python/conda -c conda-forge -c conda-forge/label/python_rc --override-channels conda-recipe
 
       - name: Upload artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
 
       - name: Upload wheels artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
           path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
@@ -160,32 +160,33 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
 
       - name: Add conda to system path
-        run: echo $CONDA/bin >> $GITHUB_PATH
+        run: echo "$CONDA/bin" >> "$GITHUB_PATH"
 
       - name: Install conda-build
         run: conda install conda-build
 
       - name: Create conda channel
         run: |
-          mkdir -p $GITHUB_WORKSPACE/channel/linux-64
-          conda index $GITHUB_WORKSPACE/channel || exit 1
-          mv ${PACKAGE_NAME}-*.conda $GITHUB_WORKSPACE/channel/linux-64 || exit 1
-          conda index $GITHUB_WORKSPACE/channel || exit 1
+          mkdir -p "$GITHUB_WORKSPACE/channel/linux-64"
+          conda index "$GITHUB_WORKSPACE/channel" || exit 1
+          mv "${PACKAGE_NAME}"-*.conda "$GITHUB_WORKSPACE/channel/linux-64" || exit 1
+          conda index "$GITHUB_WORKSPACE/channel" || exit 1
           # Test channel
-          conda search $PACKAGE_NAME -c $GITHUB_WORKSPACE/channel --override-channels --info --json > $GITHUB_WORKSPACE/ver.json
+          conda search "$PACKAGE_NAME" -c "$GITHUB_WORKSPACE/channel" --override-channels --info --json > "$GITHUB_WORKSPACE/ver.json"
           cat ver.json
 
       - name: Collect dependencies
         run: |
-          . $CONDA/etc/profile.d/conda.sh
-          CHANNELS="-c $GITHUB_WORKSPACE/channel ${{ env.CHANNELS }}"
-          export PACKAGE_VERSION=$(python -c "${VER_SCRIPT1} ${VER_SCRIPT2}")
-          conda create -n ${{ env.TEST_ENV_NAME }} $PACKAGE_NAME=${PACKAGE_VERSION} python=${{ matrix.python }} $CHANNELS --only-deps --dry-run > lockfile
+          . "$CONDA/etc/profile.d/conda.sh"
+          CHANNELS=(-c "$GITHUB_WORKSPACE/channel" -c conda-forge -c conda-forge/label/python_rc -c https://software.repos.intel.com/python/conda --override-channels)
+          PACKAGE_VERSION="$(python -c "${VER_SCRIPT1} ${VER_SCRIPT2}")"
+          export PACKAGE_VERSION
+          conda create -n "${{ env.TEST_ENV_NAME }}" "$PACKAGE_NAME=$PACKAGE_VERSION" "python=${{ matrix.python }}" "${CHANNELS[@]}" --only-deps --dry-run > lockfile
           cat lockfile
 
       - name: Set pkgs_dirs
@@ -206,16 +207,17 @@ jobs:
 
       - name: Install mkl-service
         run: |
-          . $CONDA/etc/profile.d/conda.sh
-          CHANNELS="-c $GITHUB_WORKSPACE/channel ${{ env.CHANNELS }}"
-          export PACKAGE_VERSION=$(python -c "${VER_SCRIPT1} ${VER_SCRIPT2}")
-          conda create -n ${{ env.TEST_ENV_NAME }} $PACKAGE_NAME=${PACKAGE_VERSION} pytest python=${{ matrix.python }} $CHANNELS
+          . "$CONDA/etc/profile.d/conda.sh"
+          CHANNELS=(-c "$GITHUB_WORKSPACE/channel" -c conda-forge -c conda-forge/label/python_rc -c https://software.repos.intel.com/python/conda --override-channels)
+          PACKAGE_VERSION="$(python -c "${VER_SCRIPT1} ${VER_SCRIPT2}")"
+          export PACKAGE_VERSION
+          conda create -n "${{ env.TEST_ENV_NAME }}" "$PACKAGE_NAME=$PACKAGE_VERSION" pytest "python=${{ matrix.python }}" "${CHANNELS[@]}"
           # Test installed packages
           conda list
 
       - name: Run tests
         run: |
-          . $CONDA/etc/profile.d/conda.sh
+          . "$CONDA/etc/profile.d/conda.sh"
           conda activate ${{ env.TEST_ENV_NAME }}
           pytest -vv --pyargs ${{ env.MODULE_NAME }}
 
@@ -234,7 +236,7 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
       - uses: conda-incubator/setup-miniconda@fc2d68f6413eb2d87b895e92f8584b5b94a10167 # v3.3.0
@@ -250,13 +252,13 @@ jobs:
 
       - name: Create conda channel
         run: |
-          mkdir ${{ env.GITHUB_WORKSPACE }}\channel\win-64
-          move ${{ env.PACKAGE_NAME }}-*.conda ${{ env.GITHUB_WORKSPACE }}\channel\win-64
-          python -m conda_index ${{ env.GITHUB_WORKSPACE }}/channel
+          mkdir ${{ env.GITHUB_WORKSPACE }}/channel/win-64
+          move ${{ env.PACKAGE_NAME }}-*.conda ${{ env.GITHUB_WORKSPACE }}/channel/win-64
+          python -m conda_index "${{ env.GITHUB_WORKSPACE }}/channel"
 
           # Test channel
-          conda search ${{ env.PACKAGE_NAME }} -c ${{ env.GITHUB_WORKSPACE }}/channel --override-channels --info --json > ${{ env.GITHUB_WORKSPACE }}\ver.json
-          more ${{ env.GITHUB_WORKSPACE }}\ver.json
+          conda search ${{ env.PACKAGE_NAME }} -c ${{ env.GITHUB_WORKSPACE }}/channel --override-channels --info --json > ${{ env.GITHUB_WORKSPACE }}/ver.json
+          more ${{ env.GITHUB_WORKSPACE }}/ver.json
 
       - name: Collect dependencies
         shell: cmd
