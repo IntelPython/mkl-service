@@ -5,3 +5,6 @@
 
 # Add additional pre-commit hooks
 29de56032f5a5bb031eb1145d970c92b53319930
+
+# Move to clang-format-22
+6056b26ff82dfd156708fd7d3680470d9ba3c9ce
