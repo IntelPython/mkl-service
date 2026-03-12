@@ -1,0 +1,42 @@
+BasedOnStyle: LLVM
+
+AccessModifierOffset: -4
+
+AlignConsecutiveMacros: true
+AlignConsecutiveBitFields: true
+AlignEscapedNewlines: Right
+
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: Empty
+
+AlwaysBreakTemplateDeclarations: Yes
+
+BinPackParameters: false
+
+BraceWrapping:
+  AfterCaseLabel:  true
+  AfterClass:      true
+  AfterControlStatement: Never
+  AfterEnum:       true
+  AfterFunction:   true
+  AfterNamespace:  true
+  AfterObjCDeclaration: false
+  AfterStruct:     true
+  AfterUnion:      true
+  AfterExternBlock: true
+  BeforeCatch:     false
+  BeforeElse:      true
+  BeforeLambdaBody: false
+  BeforeWhile:     false
+  IndentBraces:    false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+BreakBeforeBraces: Custom
+
+ColumnLimit:     80
+
+IndentWidth: 4
+IndentWrappedFunctionNames: true
+
+Standard: c++17
