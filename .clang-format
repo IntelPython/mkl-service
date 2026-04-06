@@ -38,5 +38,3 @@ ColumnLimit:     80
 
 IndentWidth: 4
 IndentWrappedFunctionNames: true
-
-Standard: c++17
