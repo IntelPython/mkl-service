@@ -1,0 +1,50 @@
+name: Editable build using pip and pre-release NumPy
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions: read-all
+
+env:
+  PACKAGE_NAME: mkl-service
+  MODULE_NAME: mkl-service
+  TEST_ENV_NAME: test_mkl_service
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+         shell: bash -el {0}
+
+    strategy:
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        use_pre: ["", "--pre"]
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - uses: conda-incubator/setup-miniconda@fc2d68f6413eb2d87b895e92f8584b5b94a10167 # v3.3.0
+        with:
+          miniforge-version: latest
+          channels: conda-forge
+          activate-environment: test
+          python-version: ${{ matrix.python }}
+
+      - name: Install MKL
+        run: |
+          conda install mkl-devel mkl
+
+      - name: Build conda package
+        run: |
+          pip install --no-cache-dir meson-python ninja cmake cython
+          pip install --no-cache-dir numpy ${{ matrix.use_pre }}
+          pip install -e ".[test]" --no-build-isolation --verbose
+          pip list
+          python -m pytest -v mkl/tests
