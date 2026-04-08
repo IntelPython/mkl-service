@@ -247,16 +247,24 @@ def test_cbwr_get_auto_branch():
     mkl.cbwr_get_auto_branch()
 
 
-def test_enable_instructions_avx512():
-    mkl.enable_instructions("avx512")
+instructions = [
+    "single_path",
+    "avx512_e4",
+    "avx512_e3",
+    "avx512_e2",
+    "avx512_e1",
+    "avx512_e5",
+    "avx512",
+    "avx2_e1",
+    "avx2",
+    "sse4_2",
+    "avx10",
+]
 
 
-def test_enable_instructions_avx2():
-    mkl.enable_instructions("avx2")
-
-
-def test_enable_instructions_sse4_2():
-    mkl.enable_instructions("sse4_2")
+@pytest.mark.parametrize("isa", instructions)
+def test_enable_instructions(isa):
+    mkl.enable_instructions(isa)
 
 
 def test_set_env_mode():
