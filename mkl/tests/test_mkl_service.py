@@ -247,24 +247,12 @@ def test_cbwr_get_auto_branch():
     mkl.cbwr_get_auto_branch()
 
 
-def test_enable_instructions_avx512_mic_e1():
-    mkl.enable_instructions("avx512_mic_e1")
-
-
 def test_enable_instructions_avx512():
     mkl.enable_instructions("avx512")
 
 
-def test_enable_instructions_avx512_mic():
-    mkl.enable_instructions("avx512_mic")
-
-
 def test_enable_instructions_avx2():
     mkl.enable_instructions("avx2")
-
-
-def test_enable_instructions_avx():
-    mkl.enable_instructions("avx")
 
 
 def test_enable_instructions_sse4_2():

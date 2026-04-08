@@ -773,12 +773,9 @@ cdef object __enable_instructions(isa=None) except *:
             "avx512_e3": mkl.MKL_ENABLE_AVX512_E3,
             "avx512_e2": mkl.MKL_ENABLE_AVX512_E2,
             "avx512_e1": mkl.MKL_ENABLE_AVX512_E1,
-            "avx512_mic_e1": mkl.MKL_ENABLE_AVX512_MIC_E1,
             "avx512": mkl.MKL_ENABLE_AVX512,
-            "avx512_mic": mkl.MKL_ENABLE_AVX512_MIC,
             "avx2_e1": mkl.MKL_ENABLE_AVX2_E1,
             "avx2": mkl.MKL_ENABLE_AVX2,
-            "avx": mkl.MKL_ENABLE_AVX,
             "sse4_2": mkl.MKL_ENABLE_SSE4_2,
         },
     }
