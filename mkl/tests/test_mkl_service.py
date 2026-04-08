@@ -219,21 +219,15 @@ branches = [
     "auto",
     "compatible",
     "sse2",
-    "ssse3",
-    "sse4_1",
     "sse4_2",
-    "avx",
     "avx2",
-    "avx512_mic",
     "avx512",
-    "avx512_mic_e1",
     "avx512_e1",
 ]
 
 
 strict = [
     "avx2,strict",
-    "avx512_mic,strict",
     "avx512,strict",
     "avx512_e1,strict",
 ]
