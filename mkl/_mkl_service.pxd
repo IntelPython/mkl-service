@@ -59,6 +59,7 @@ cdef extern from "mkl.h":
     int MKL_CBWR_AVX2
     int MKL_CBWR_AVX512
     int MKL_CBWR_AVX512_E1
+    int MKL_CBWR_AVX10
 
     int MKL_CBWR_SUCCESS
     int MKL_CBWR_ERR_INVALID_SETTINGS

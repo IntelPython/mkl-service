@@ -223,6 +223,7 @@ branches = [
     "avx2",
     "avx512",
     "avx512_e1",
+    "avx10",
 ]
 
 
@@ -230,6 +231,7 @@ strict = [
     "avx2,strict",
     "avx512,strict",
     "avx512_e1,strict",
+    "avx10,strict",
 ]
 
 
