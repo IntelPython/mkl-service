@@ -684,6 +684,8 @@ cdef object __cbwr_set(branch=None) except *:
             "avx512,strict": mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT,
             "avx512_e1": mkl.MKL_CBWR_AVX512_E1,
             "avx512_e1,strict": mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT,
+            "avx10": mkl.MKL_CBWR_AVX10,
+            "avx10,strict": mkl.MKL_CBWR_AVX10 | mkl.MKL_CBWR_STRICT,
         },
         "output": {
             mkl.MKL_CBWR_SUCCESS: "success",
@@ -721,6 +723,8 @@ cdef inline __cbwr_get(cnr_const=None) except *:
             mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT: "avx512,strict",
             mkl.MKL_CBWR_AVX512_E1: "avx512_e1",
             mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT: "avx512_e1,strict",
+            mkl.MKL_CBWR_AVX10: "avx10",
+            mkl.MKL_CBWR_AVX10 | mkl.MKL_CBWR_STRICT: "avx10,strict",
             mkl.MKL_CBWR_ERR_INVALID_INPUT: "err_invalid_input",
         },
     }
@@ -749,6 +753,8 @@ cdef object __cbwr_get_auto_branch() except *:
             mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT: "avx512,strict",
             mkl.MKL_CBWR_AVX512_E1: "avx512_e1",
             mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT: "avx512_e1,strict",
+            mkl.MKL_CBWR_AVX10: "avx10",
+            mkl.MKL_CBWR_AVX10 | mkl.MKL_CBWR_STRICT: "avx10,strict",
             mkl.MKL_CBWR_SUCCESS: "success",
             mkl.MKL_CBWR_ERR_INVALID_INPUT: "err_invalid_input",
         },
@@ -773,10 +779,12 @@ cdef object __enable_instructions(isa=None) except *:
             "avx512_e3": mkl.MKL_ENABLE_AVX512_E3,
             "avx512_e2": mkl.MKL_ENABLE_AVX512_E2,
             "avx512_e1": mkl.MKL_ENABLE_AVX512_E1,
+            "avx512_e5": mkl.MKL_ENABLE_AVX512_E5,
             "avx512": mkl.MKL_ENABLE_AVX512,
             "avx2_e1": mkl.MKL_ENABLE_AVX2_E1,
             "avx2": mkl.MKL_ENABLE_AVX2,
             "sse4_2": mkl.MKL_ENABLE_SSE4_2,
+            "avx10": mkl.MKL_ENABLE_AVX10,
         },
     }
     cdef int c_mkl_isa = __mkl_str_to_int(isa, __variables["input"])

@@ -59,6 +59,7 @@ cdef extern from "mkl.h":
     int MKL_CBWR_AVX2
     int MKL_CBWR_AVX512
     int MKL_CBWR_AVX512_E1
+    int MKL_CBWR_AVX10
 
     int MKL_CBWR_SUCCESS
     int MKL_CBWR_ERR_INVALID_SETTINGS
@@ -73,10 +74,12 @@ cdef extern from "mkl.h":
     int MKL_ENABLE_AVX512_E3
     int MKL_ENABLE_AVX512_E4
     int MKL_ENABLE_AVX512_E1
+    int MKL_ENABLE_AVX512_E5
     int MKL_ENABLE_AVX512
     int MKL_ENABLE_AVX2
     int MKL_ENABLE_AVX2_E1
     int MKL_ENABLE_SSE4_2
+    int MKL_ENABLE_AVX10
 
     # MPI Implementation Constants
     int MKL_BLACS_CUSTOM
