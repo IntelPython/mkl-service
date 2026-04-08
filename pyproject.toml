@@ -29,7 +29,8 @@ requires = [
   "meson-python>=0.13.0",
   "ninja",
   "Cython",
-  "mkl-devel"
+  "mkl-devel",
+  "cmake"
 ]
 
 [project]
