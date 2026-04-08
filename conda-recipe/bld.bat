@@ -2,8 +2,6 @@ echo on
 rem set CFLAGS=-I%PREFIX%\Library\include %CFLAGS%
 rem set LDFLAGS=/LIBPATH:%PREFIX% %LDFLAGS%
 
-set MKLROOT=%CONDA_PREFIX%
-
 "%PYTHON%" setup.py clean --all
 
 :: Make CMake verbose
