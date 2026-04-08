@@ -18,8 +18,14 @@ c_args = ['-DNDEBUG']
 thread_dep = dependency('threads')
 
 cc = meson.get_compiler('c')
-mkl_rt = cc.find_library('mkl_rt', required: true)
-mkl_dep = declare_dependency(dependencies: [mkl_rt])
+mkl_dep = dependency('MKL', method: 'cmake',
+    modules: ['MKL::MKL'],
+    cmake_args: [
+        '-DMKL_ARCH=intel64',
+        '-DMKL_LINK=sdl',
+    ],
+    required: true
+)
 
 rpath = ''
 if host_machine.system() != 'windows'

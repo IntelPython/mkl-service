@@ -47,7 +47,7 @@ jobs:
 
       - name: Install mkl-service dependencies
         run: |
-          pip install meson-python cython mkl
+          pip install meson-python cython cmake ninja mkl
           pip install ${{ matrix.numpy_version }}
 
       - name: Build mkl-service
