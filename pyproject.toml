@@ -24,19 +24,11 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [build-system]
-build-backend = "setuptools.build_meta"
-requires = [
-  "setuptools>=77",
-  "Cython",
-  "wheel>=0.45.1",
-  "build>=1.2.2",
-  "mkl-devel"
-]
+build-backend = "mesonpy"
+requires = ["meson-python>=0.13.0", "Cython", "mkl-devel"]
 
 [project]
-authors = [
-  {name = "Intel Corporation", email = "scripting@intel.com"}
-]
+authors = [{name = "Intel Corporation"}]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Science/Research",
@@ -71,13 +63,3 @@ test = ["pytest"]
 [project.urls]
 Download = "http://github.com/IntelPython/mkl-service"
 Homepage = "http://github.com/IntelPython/mkl-service"
-
-[tool.setuptools]
-include-package-data = true
-packages = ["mkl"]
-
-[tool.setuptools.dynamic]
-version = {attr = "mkl._version.__version__"}
-
-[tool.setuptools.package-data]
-"mkl" = ["tests/*.py"]
