@@ -24,6 +24,7 @@ requirements:
       - ninja
       - python
       - python-gil     # [py>=314]
+      - python-build
       - pip >=25.0
       - mkl-devel
       - cython
