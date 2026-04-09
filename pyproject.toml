@@ -25,7 +25,13 @@
 
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=77", "Cython", "wheel>=0.45.1", "build>=1.2.2"]
+requires = [
+  "setuptools>=77",
+  "Cython",
+  "wheel>=0.45.1",
+  "build>=1.2.2",
+  "mkl-devel"
+]
 
 [project]
 authors = [
@@ -50,7 +56,7 @@ classifiers = [
   "Operating System :: POSIX",
   "Operating System :: Unix"
 ]
-dependencies = []
+dependencies = ["mkl"]
 description = "Python hooks for Intel® oneAPI Math Kernel Library (oneMKL) runtime control settings"
 dynamic = ["version"]
 keywords = ["MKL"]
