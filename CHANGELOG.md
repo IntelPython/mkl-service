@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * Added support for ISA constants `"avx10"` and `"avx512_e5"` and CNR constants `"avx10"` and `"avx10,strict"` [gh-175](https://github.com/IntelPython/mkl-service/pull/175)
 
+### Changed
+* Added `mkl` as a runtime dependency and `mkl-devel` as build dependency in `pyproject.toml` [gh-177](https://github.com/IntelPython/mkl-service/pull/177)
+
 ### Removed
 * Dropped support for Python 3.9 [gh-118](https://github.com/IntelPython/mkl-service/pull/118)
 * Dropped support for `"ssse3"`, `"sse4_1"`, `"avx"`, `"avx512_mic"`, `"avx512_mic,strict"`, and `"avx512_mic_e1"` cbwr branches [gh-173](https://github.com/IntelPython/mkl-service/pull/173)
