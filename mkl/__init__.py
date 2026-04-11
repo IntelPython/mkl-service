@@ -23,8 +23,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import sys
-
 from . import _init_helper
 
 
@@ -34,6 +32,7 @@ class RTLD_for_MKL:
 
     def __enter__(self):
         import ctypes
+        import sys
 
         try:
             self.saved_rtld = sys.getdlopenflags()
@@ -46,6 +45,8 @@ class RTLD_for_MKL:
         del ctypes
 
     def __exit__(self, *args):
+        import sys
+
         if self.saved_rtld:
             sys.setdlopenflags(self.saved_rtld)
             self.saved_rtld = None
@@ -55,45 +56,44 @@ with RTLD_for_MKL():
     from . import _mklinit
 
 del RTLD_for_MKL
-del sys
 
 from ._py_mkl_service import (
-    get_version,
-    get_version_string,
-    set_num_threads,
-    domain_set_num_threads,
-    set_num_threads_local,
-    set_dynamic,
-    get_max_threads,
-    domain_get_max_threads,
-    get_dynamic,
-    set_num_stripes,
-    get_num_stripes,
-    second,
-    dsecnd,
-    get_cpu_clocks,
-    get_cpu_frequency,
-    get_max_cpu_frequency,
-    get_clocks_frequency,
-    free_buffers,
-    thread_free_buffers,
-    disable_fast_mm,
-    mem_stat,
-    peak_mem_usage,
-    set_memory_limit,
-    cbwr_set,
     cbwr_get,
     cbwr_get_auto_branch,
+    cbwr_set,
+    disable_fast_mm,
+    domain_get_max_threads,
+    domain_set_num_threads,
+    dsecnd,
     enable_instructions,
-    set_env_mode,
+    free_buffers,
+    get_clocks_frequency,
+    get_cpu_clocks,
+    get_cpu_frequency,
+    get_dynamic,
     get_env_mode,
-    verbose,
+    get_max_cpu_frequency,
+    get_max_threads,
+    get_num_stripes,
+    get_version,
+    get_version_string,
+    mem_stat,
+    peak_mem_usage,
+    second,
+    set_dynamic,
+    set_env_mode,
+    set_memory_limit,
     set_mpi,
-    vml_set_mode,
+    set_num_stripes,
+    set_num_threads,
+    set_num_threads_local,
+    thread_free_buffers,
+    verbose,
+    vml_clear_err_status,
+    vml_get_err_status,
     vml_get_mode,
     vml_set_err_status,
-    vml_get_err_status,
-    vml_clear_err_status,
+    vml_set_mode,
 )
 from ._version import __version__
 
@@ -133,7 +133,7 @@ __all__ = [
     "vml_get_mode",
     "vml_set_err_status",
     "vml_get_err_status",
-    "vml_clear_err_status"
+    "vml_clear_err_status",
 ]
 
 del _init_helper
