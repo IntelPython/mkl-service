@@ -37,7 +37,10 @@ def extensions():
     if mkl_root:
         mkl_info = {
             "include_dirs": [join(mkl_root, "include")],
-            "library_dirs": [join(mkl_root, "lib"), join(mkl_root, "lib", "intel64")],
+            "library_dirs": [
+                join(mkl_root, "lib"),
+                join(mkl_root, "lib", "intel64"),
+            ],
             "libraries": ["mkl_rt"],
         }
     else:
@@ -62,7 +65,8 @@ def extensions():
             "mkl._mklinit",
             sources=[join("mkl", "_mklinitmodule.c")],
             include_dirs=mkl_include_dirs,
-            libraries=mkl_libraries + (["pthread"] if os.name == "posix" else []),
+            libraries=mkl_libraries
+            + (["pthread"] if os.name == "posix" else []),
             library_dirs=mkl_library_dirs,
             runtime_library_dirs=mkl_rpaths,
             extra_compile_args=[
