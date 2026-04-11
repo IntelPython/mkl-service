@@ -8,3 +8,6 @@
 
 # Move to clang-format-22
 6056b26ff82dfd156708fd7d3680470d9ba3c9ce
+
+# Clean up in setup.py
+5045ed9c6b39fa1747cdae2719477e5a596f0d3b
