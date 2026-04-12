@@ -116,7 +116,7 @@ cdef class MKLMemory:
             memcpy(self._memory_ptr, other_mem._memory_ptr, self.nbytes)
 
     def __cinit__(self, *args, **kwargs):
-        cdef Py_ssize_t alignment = kwargs.get("alignment", 64)
+        cdef Py_ssize_t alignment
 
         n_args = len(args)
         if not (0 < n_args < 3):
@@ -127,8 +127,10 @@ cdef class MKLMemory:
         if n_args == 1:
             arg = args[0]
             if isinstance(arg, numbers.Integral):
+                alignment = kwargs.get("alignment", 64)
                 self._cinit_malloc(arg, alignment)
             elif isinstance(arg, MKLMemory):
+                alignment = kwargs.get("alignment", arg.alignment)
                 self._cinit_mklmemory(arg, alignment)
             else:
                 raise TypeError(
@@ -138,6 +140,7 @@ cdef class MKLMemory:
 
         elif n_args == 2:
             arg0, arg1 = args[0], args[1]
+            alignment = kwargs.get("alignment", 64)
             if not isinstance(arg0, numbers.Integral):
                 raise TypeError(
                     "MKLMemory constructor expects first argument "
@@ -148,7 +151,6 @@ cdef class MKLMemory:
                     "MKLMemory constructor expects second argument "
                     f"to be an integer, but got {type(arg1)}"
                 )
-
             self._cinit_calloc(arg0, arg1, alignment)
 
     def __dealloc__(self):
