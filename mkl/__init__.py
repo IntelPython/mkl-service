@@ -57,6 +57,7 @@ with RTLD_for_MKL():
 
 del RTLD_for_MKL
 
+from ._mkl_memory import MKLMemory
 from ._py_mkl_service import (
     cbwr_get,
     cbwr_get_auto_branch,
