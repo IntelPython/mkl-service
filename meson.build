@@ -7,6 +7,7 @@ project(
         check: true
     ).stdout().strip(),
     default_options: [
+        'c_std=c11',
         'buildtype=release',
     ]
 )
@@ -18,6 +19,13 @@ c_args = ['-DNDEBUG']
 thread_dep = dependency('threads')
 
 cc = meson.get_compiler('c')
+if cc.get_id() == 'msvc'
+    add_project_arguments(
+        '/experimental:c11atomics',
+        language: 'c'
+    )
+endif
+
 mkl_dep = dependency('MKL', method: 'cmake',
     modules: ['MKL::MKL'],
     cmake_args: [

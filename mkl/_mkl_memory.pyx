@@ -31,16 +31,25 @@ import numbers
 from cpython cimport Py_buffer
 from libc.string cimport memcpy
 
-from mkl._mkl_service cimport mkl_malloc, mkl_free
+from mkl._mkl_service cimport mkl_malloc, mkl_realloc, mkl_free
+
+cdef extern from "stdatomic.h" nogil:
+    ctypedef int atomic_int "_Atomic int"
+    void atomic_init(atomic_int *obj, int value)
+    int atomic_fetch_add(atomic_int *obj, int value)
+    int atomic_fetch_sub(atomic_int *obj, int value)
+    int atomic_load(atomic_int *obj)
 
 
 cdef class MKLMemory:
     cdef void *_memory_ptr
     cdef Py_ssize_t nbytes
+    cdef atomic_int exported_buffers
 
     cdef _cinit_empty(self):
         self._memory_ptr = NULL
         self.nbytes = 0
+        atomic_init(&self.exported_buffers, 0)
 
     cdef _cinit_alloc(self, Py_ssize_t nbytes, Py_ssize_t alignment):
         self._cinit_empty()
@@ -100,5 +109,23 @@ cdef class MKLMemory:
         buffer.strides = &buffer.itemsize
         buffer.suboffsets = NULL                # for pointer arrays only
 
+        atomic_fetch_add(&self.exported_buffers, 1)
+
     def __releasebuffer__(self, Py_buffer *buffer):
-        pass
+        atomic_fetch_sub(&self.exported_buffers, 1)
+
+    def realloc(self, Py_ssize_t new_nbytes):
+        if atomic_load(&self.exported_buffers) > 0:
+            raise BufferError("Cannot realloc memory while there are exported buffers.")
+        if new_nbytes <= 0:
+            raise ValueError("New number of bytes must be positive.")
+
+        cdef void *p
+        with nogil:
+            p = mkl_realloc(self._memory_ptr, new_nbytes)
+
+        if not p:
+            raise MemoryError("MKL memory reallocation failed.")
+
+        self._memory_ptr = p
+        self.nbytes = new_nbytes
