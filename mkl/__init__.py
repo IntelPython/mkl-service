@@ -57,6 +57,7 @@ with RTLD_for_MKL():
 del RTLD_for_MKL
 del sys
 
+from ._mkl_memory import MKLMemory
 from ._py_mkl_service import *
 from ._version import __version__
 
