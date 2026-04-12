@@ -31,7 +31,8 @@ import numbers
 from cpython cimport Py_buffer
 from libc.string cimport memcpy
 
-from mkl._mkl_service cimport mkl_malloc, mkl_realloc, mkl_free
+from mkl._mkl_service cimport mkl_calloc, mkl_free, mkl_malloc, mkl_realloc
+
 
 cdef extern from "stdatomic.h" nogil:
     ctypedef int atomic_int "_Atomic int"
@@ -51,7 +52,7 @@ cdef class MKLMemory:
         self.nbytes = 0
         atomic_init(&self.exported_buffers, 0)
 
-    cdef _cinit_alloc(self, Py_ssize_t nbytes, Py_ssize_t alignment):
+    cdef _cinit_malloc(self, Py_ssize_t nbytes, Py_ssize_t alignment):
         self._cinit_empty()
 
         if (nbytes > 0):
@@ -67,26 +68,71 @@ cdef class MKLMemory:
                 )
         else:
             raise ValueError(
-                "Number of bytes of request allocation must be positive."
+                "Number of bytes of requested allocation must be positive."
             )
 
-    cdef _cinit_other(self, object other, Py_ssize_t alignment):
-        cdef MKLMemory other_mem
-        if isinstance(other, MKLMemory):
-            other_mem = <MKLMemory> other
+    cdef _cinit_calloc(self, Py_ssize_t num, Py_ssize_t size, Py_ssize_t alignment):
+        self._cinit_empty()
+
+        if (num > 0 and size > 0):
+            with nogil:
+                p = mkl_calloc(num, size, alignment)
+
+            if (p):
+                self._memory_ptr = p
+                self.nbytes = num * size
+            else:
+                raise MemoryError(
+                    "MKL memory allocation failed."
+                )
         else:
             raise ValueError(
-                f"Argument {other} is not of type MKLMemory."
+                "Number of elements and size of requested allocation must be "
+                "positive."
             )
-        self._cinit_alloc(other_mem.nbytes, alignment)
+
+    cdef _cinit_mklmemory(self, object other, Py_ssize_t alignment):
+        other_mem = <MKLMemory> other
+
+        self._cinit_malloc(other_mem.nbytes, alignment)
         with nogil:
             memcpy(self._memory_ptr, other_mem._memory_ptr, self.nbytes)
 
-    def __cinit__(self, other, *, Py_ssize_t alignment=64):
-        if isinstance(other, numbers.Integral):
-            self._cinit_alloc(other, alignment)
-        else:
-            self._cinit_other(other, alignment)
+    def __cinit__(self, *args, **kwargs):
+        cdef Py_ssize_t alignment = kwargs.get("alignment", 64)
+
+        n_args = len(args)
+        if not (0 < n_args < 3):
+            raise TypeError(
+                "MKLMemory constructor takes 1 or 2 arguments, but "
+                f"{n_args} were given"
+            )
+        if n_args == 1:
+            arg = args[0]
+            if isinstance(arg, numbers.Integral):
+                self._cinit_malloc(arg, alignment)
+            elif isinstance(arg, MKLMemory):
+                self._cinit_mklmemory(arg, alignment)
+            else:
+                raise TypeError(
+                    "MKLMemory single argument constructor expects an integer "
+                    f"or MKLMemory instance, but got {type(arg)}"
+                )
+
+        elif n_args == 2:
+            arg0, arg1 = args[0], args[1]
+            if not isinstance(arg0, numbers.Integral):
+                raise TypeError(
+                    "MKLMemory constructor expects first argument "
+                    f"to be an integer, but got {type(arg0)}"
+                )
+            if not isinstance(arg1, numbers.Integral):
+                raise TypeError(
+                    "MKLMemory constructor expects second argument "
+                    f"to be an integer, but got {type(arg1)}"
+                )
+
+            self._cinit_calloc(arg0, arg1, alignment)
 
     def __dealloc__(self):
         if not (self._memory_ptr is NULL):
