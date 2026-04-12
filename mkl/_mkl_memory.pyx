@@ -42,14 +42,29 @@ cdef extern from "stdatomic.h" nogil:
     int atomic_load(atomic_int *obj)
 
 
+def _mkl_memory_from_bytes(bytes data, Py_ssize_t alignment):
+    cdef Py_ssize_t nbytes = len(data)
+    cdef MKLMemory mem = MKLMemory(nbytes, alignment=alignment)
+
+    cdef void *dst = mem._memory_ptr
+    cdef char *src = data
+
+    with nogil:
+        memcpy(dst, src, nbytes)
+
+    return mem
+
+
 cdef class MKLMemory:
     cdef void *_memory_ptr
     cdef Py_ssize_t nbytes
+    cdef Py_ssize_t alignment
     cdef atomic_int exported_buffers
 
     cdef _cinit_empty(self):
         self._memory_ptr = NULL
         self.nbytes = 0
+        self.alignment = 0
         atomic_init(&self.exported_buffers, 0)
 
     cdef _cinit_malloc(self, Py_ssize_t nbytes, Py_ssize_t alignment):
@@ -62,6 +77,7 @@ cdef class MKLMemory:
             if (p):
                 self._memory_ptr = p
                 self.nbytes = nbytes
+                self.alignment = alignment
             else:
                 raise MemoryError(
                     "MKL memory allocation failed."
@@ -81,6 +97,7 @@ cdef class MKLMemory:
             if (p):
                 self._memory_ptr = p
                 self.nbytes = num * size
+                self.alignment = alignment
             else:
                 raise MemoryError(
                     "MKL memory allocation failed."
@@ -176,6 +193,10 @@ cdef class MKLMemory:
         self._memory_ptr = p
         self.nbytes = new_nbytes
 
+    def tobytes(self):
+        cdef char* data_ptr = <char*>self._memory_ptr
+        return data_ptr[:self.nbytes]
+
     @property
     def nbytes(self):
         return self.nbytes
@@ -183,6 +204,10 @@ cdef class MKLMemory:
     @property
     def size(self):
         return self.nbytes
+
+    @property
+    def alignment(self):
+        return self.alignment
 
     @property
     def _pointer(self):
@@ -199,3 +224,6 @@ cdef class MKLMemory:
 
     def __sizeof__(self):
         return self.nbytes
+
+    def __reduce__(self):
+        return (_mkl_memory_from_bytes, (self.tobytes(), self.alignment))
