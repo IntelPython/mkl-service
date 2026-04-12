@@ -153,6 +153,7 @@ cdef extern from "mkl.h":
     int mkl_set_memory_limit(int mem_type, size_t limit)
     void *mkl_malloc(size_t size, int alignment) nogil
     void *mkl_realloc(void *ptr, size_t size) nogil
+    void *mkl_calloc(size_t num, size_t size, int alignment) nogil
     void mkl_free(void *ptr) nogil
 
     # Conditional Numerical Reproducibility
