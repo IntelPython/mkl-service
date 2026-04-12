@@ -24,7 +24,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-cdef extern from "mkl.h":
+cdef extern from "mkl.h" nogil:
     # defer definition of integer types to mkl.h
     # Cython will narrow the types based on what mkl.h defines
     ctypedef long long MKL_INT64
@@ -149,10 +149,10 @@ cdef extern from "mkl.h":
     MKL_INT64 mkl_mem_stat(int* buf)
     MKL_INT64 mkl_peak_mem_usage(int mode)
     int mkl_set_memory_limit(int mem_type, size_t limit)
-    void *mkl_malloc(size_t size, int alignment) nogil
-    void *mkl_realloc(void *ptr, size_t size) nogil
-    void *mkl_calloc(size_t num, size_t size, int alignment) nogil
-    void mkl_free(void *ptr) nogil
+    void *mkl_malloc(size_t size, int alignment)
+    void *mkl_realloc(void *ptr, size_t size)
+    void *mkl_calloc(size_t num, size_t size, int alignment)
+    void mkl_free(void *ptr)
 
     # Conditional Numerical Reproducibility
     int mkl_cbwr_set(int settings)
