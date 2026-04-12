@@ -175,3 +175,27 @@ cdef class MKLMemory:
 
         self._memory_ptr = p
         self.nbytes = new_nbytes
+
+    @property
+    def nbytes(self):
+        return self.nbytes
+
+    @property
+    def size(self):
+        return self.nbytes
+
+    @property
+    def _pointer(self):
+        return <size_t>(self._memory_ptr)
+
+    def __repr__(self):
+        return (
+            f"<MKL memory allocation of {self.nbytes} bytes at "
+            f"{hex(<object>(<size_t>self._memory_ptr))}>"
+        )
+
+    def __len__(self):
+        return self.nbytes
+
+    def __sizeof__(self):
+        return self.nbytes
