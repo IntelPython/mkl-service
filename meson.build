@@ -60,7 +60,7 @@ py.extension_module(
     subdir: 'mkl'
 )
 
-# Cython extension
+# Cython extensions
 py.extension_module(
     '_py_mkl_service',
     sources: ['mkl/_py_mkl_service.pyx'],
@@ -70,6 +70,17 @@ py.extension_module(
     install: true,
     subdir: 'mkl'
 )
+
+py.extension_module(
+    '_mkl_memory',
+    sources: ['mkl/_mkl_memory.pyx'],
+    dependencies: [mkl_dep],
+    c_args: c_args,
+    install_rpath: rpath,
+    install: true,
+    subdir: 'mkl'
+)
+
 
 # Python sources
 py.install_sources(
