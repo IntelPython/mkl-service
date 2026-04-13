@@ -4,8 +4,6 @@ extend-ignore =
     E203,
     # line too long (in docstrings):
     E501,
-    # ‘from module import *’ used; unable to detect undefined names:
-    F403,
     # doc line too long (105 > 80 characters):
     W505,
     # missing docstring in public module:

@@ -72,6 +72,13 @@ test = ["pytest"]
 Download = "http://github.com/IntelPython/mkl-service"
 Homepage = "http://github.com/IntelPython/mkl-service"
 
+[tool.black]
+line-length = 80
+
+[tool.isort]
+line_length = 80
+profile = "black"
+
 [tool.setuptools]
 include-package-data = true
 packages = ["mkl"]
