@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Dropped support for `"ssse3"`, `"sse4_1"`, `"avx"`, `"avx512_mic"`, `"avx512_mic,strict"`, and `"avx512_mic_e1"` cbwr branches [gh-173](https://github.com/IntelPython/mkl-service/pull/173)
 
 ### Fixed
+* Fixed Cython warnings when building `mkl-service` [gh-183](https://github.com/IntelPython/mkl-service/pull/183)
 * Removed use of star import in `mkl-service` initialization, which removes imported module pollution from the namespace [gh-178](https://github.com/IntelPython/mkl-service/pull/178)
 
 ## [2.6.1] (11/25/2025)

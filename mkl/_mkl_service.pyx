@@ -405,7 +405,7 @@ cpdef vml_clear_err_status():
     return __vml_clear_err_status()
 
 
-cdef str __mkl_status_to_string(int mkl_status) noexcept:
+cdef str __mkl_status_to_string(int mkl_status):
     if mkl_status == 1:
         return "success"
     else:
@@ -449,7 +449,7 @@ cdef inline int __mkl_str_to_int(variable, possible_variables_dict) except *:
     return possible_variables_dict[variable]
 
 
-cdef  __mkl_int_to_str(int mkl_int_variable, possible_variables_dict) except *:
+cdef __mkl_int_to_str(int mkl_int_variable, possible_variables_dict):
     if possible_variables_dict is None:
         raise RuntimeError(
             "Dictionary mapping possible internal code to output string is "
@@ -473,7 +473,7 @@ cdef mkl.MKLVersion __get_version() noexcept:
     return c_mkl_version
 
 
-cdef str __get_version_string() except *:
+cdef str __get_version_string():
     """
     Returns the Intel(R) MKL version in a character string.
     """
@@ -631,7 +631,7 @@ cdef inline MemStatData __mem_stat() noexcept:
     return mem_stat_data
 
 
-cdef object __peak_mem_usage(mem_const) except *:
+cdef object __peak_mem_usage(mem_const):
     """
     Reports the peak memory allocated by the Intel(R) MKL Memory Allocator.
     """
@@ -654,7 +654,7 @@ cdef object __peak_mem_usage(mem_const) except *:
     return memory_allocator
 
 
-cdef inline object __set_memory_limit(limit) except *:
+cdef inline object __set_memory_limit(limit):
     """
     On Linux, sets the limit of memory that Intel(R) MKL can allocate for a specified
     type of memory.
@@ -666,7 +666,7 @@ cdef inline object __set_memory_limit(limit) except *:
 
 
 # Conditional Numerical Reproducibility
-cdef object __cbwr_set(branch=None) except *:
+cdef object __cbwr_set(branch=None):
     """
     Configures the CNR mode of Intel(R) MKL.
     """
@@ -702,7 +702,7 @@ cdef object __cbwr_set(branch=None) except *:
     return status
 
 
-cdef inline __cbwr_get(cnr_const=None) except *:
+cdef inline __cbwr_get(cnr_const=None):
     """
     Returns the current CNR settings.
     """
@@ -736,7 +736,7 @@ cdef inline __cbwr_get(cnr_const=None) except *:
     return status
 
 
-cdef object __cbwr_get_auto_branch() except *:
+cdef object __cbwr_get_auto_branch():
     """
     Automatically detects the CNR code branch for your platform.
     """
@@ -767,7 +767,7 @@ cdef object __cbwr_get_auto_branch() except *:
 
 
 # Miscellaneous
-cdef object __enable_instructions(isa=None) except *:
+cdef object __enable_instructions(isa=None):
     """
     Enables dispatching for new Intel architectures or restricts the set of Intel
     instruction sets available for dispatching.
@@ -794,7 +794,7 @@ cdef object __enable_instructions(isa=None) except *:
     return __mkl_status_to_string(c_mkl_status)
 
 
-cdef object __set_env_mode() except *:
+cdef object __set_env_mode():
     """
     Sets up the mode that ignores environment settings specific to Intel(R) MKL.
     See mkl_set_env_mode(1).
@@ -812,7 +812,7 @@ cdef object __set_env_mode() except *:
     return status
 
 
-cdef object __get_env_mode() except *:
+cdef object __get_env_mode():
     """
     Query the current environment mode. See mkl_set_env_mode(0).
     """
@@ -835,7 +835,7 @@ cdef inline int __verbose(int c_enable) noexcept:
     return mkl.mkl_verbose(c_enable)
 
 
-cdef __set_mpi(vendor, custom_library_name=None) except *:
+cdef __set_mpi(vendor, custom_library_name=None):
     """
     Sets the implementation of the message-passing interface to be used by Intel(R) MKL.
     """
@@ -875,7 +875,7 @@ cdef __set_mpi(vendor, custom_library_name=None) except *:
 
 
 # VM Service Functions
-cdef object __vml_set_mode(accuracy, ftzdaz, errmode) except *:
+cdef object __vml_set_mode(accuracy, ftzdaz, errmode):
     """
     Sets a new mode for VM functions according to the mode parameter and stores the
     previous VM mode to oldmode.
@@ -945,7 +945,7 @@ cdef object __vml_set_mode(accuracy, ftzdaz, errmode) except *:
     return (accuracy, ftzdaz, errmode)
 
 
-cdef object __vml_get_mode() except *:
+cdef object __vml_get_mode():
     """
     Gets the VM mode.
     """
@@ -998,7 +998,7 @@ __mkl_vml_status = {
 }
 
 
-cdef object __vml_set_err_status(status) except *:
+cdef object __vml_set_err_status(status):
     """
     Sets the new VM Error Status according to err and stores the previous VM Error
     Status to olderr.
@@ -1033,7 +1033,7 @@ cdef object __vml_set_err_status(status) except *:
     return status
 
 
-cdef object __vml_get_err_status() except *:
+cdef object __vml_get_err_status():
     """
     Gets the VM Error Status.
     """
@@ -1057,7 +1057,7 @@ cdef object __vml_get_err_status() except *:
     return status
 
 
-cdef object __vml_clear_err_status() except *:
+cdef object __vml_clear_err_status():
     """
     Sets the VM Error Status to VML_STATUS_OK and stores the previous VM Error Status
     to olderr.
