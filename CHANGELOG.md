@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Enabled support of Python 3.14 [gh-100](https://github.com/IntelPython/mkl-service/pull/100)
 
 ### Changed
-* Used `GIT_DESCRIBE_TAG` and `GIT_DESCRIBE_NUMBER` in `meta.yaml` instead of manual stepping the numbers [gh-98](https://github.com/IntelPython/mkl-service/pull/98)
+* Used `GIT_DESCRIBE_TAG` and `GIT_DESCRIBE_NUMBER` in `meta.yaml` instead of manually stepping the numbers [gh-98](https://github.com/IntelPython/mkl-service/pull/98)
 
 ## [2.5.2] (07/01/2025)
 
