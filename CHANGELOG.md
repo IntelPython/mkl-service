@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [dev] (MM/DD/YYYY)
+## [2.7.0] (04/16/2026)
 
 ### Added
 * Added support for ISA constants `"avx10"` and `"avx512_e5"` and CNR constants `"avx10"` and `"avx10,strict"` [gh-175](https://github.com/IntelPython/mkl-service/pull/175)
@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.6.1] (11/25/2025)
 
 ### Fixed
-* Fixed the run-time dependencies of `mkl-service` package to explicitly depend on a non–free-threaded (GIL-enabled) Python [gh-111](github.com/IntelPython/mkl-service/pull/111)
+* Fixed the run-time dependencies of `mkl-service` package to explicitly depend on a non–free-threaded (GIL-enabled) Python [gh-111](https://github.com/IntelPython/mkl-service/pull/111)
 
 ## [2.6.0] (10/06/2025)
 
@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Enabled support of Python 3.14 [gh-100](https://github.com/IntelPython/mkl-service/pull/100)
 
 ### Changed
-* Used `GIT_DESCRIBE_TAG` and `GIT_DESCRIBE_NUMBER` in `meta.yaml` instead of manual stepping the numbers [gh-98](github.com/IntelPython/mkl-service/pull/98)
+* Used `GIT_DESCRIBE_TAG` and `GIT_DESCRIBE_NUMBER` in `meta.yaml` instead of manually stepping the numbers [gh-98](https://github.com/IntelPython/mkl-service/pull/98)
 
 ## [2.5.2] (07/01/2025)
 
