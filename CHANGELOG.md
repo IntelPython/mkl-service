@@ -6,13 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [dev] (MM/DD/YYYY)
 
-## [2.7.0] (04/16/2026)
-
 ### Added
 
 ### Changed
 
 ### Fixed
+
+## [2.7.0] (04/16/2026)
 
 ### Added
 * Added support for ISA constants `"avx10"` and `"avx512_e5"` and CNR constants `"avx10"` and `"avx10,strict"` [gh-175](https://github.com/IntelPython/mkl-service/pull/175)
