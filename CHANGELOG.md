@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [dev] (MM/DD/YYYY)
+
 ## [2.7.0] (04/16/2026)
+
+### Added
+
+### Changed
+
+### Fixed
 
 ### Added
 * Added support for ISA constants `"avx10"` and `"avx512_e5"` and CNR constants `"avx10"` and `"avx10,strict"` [gh-175](https://github.com/IntelPython/mkl-service/pull/175)
