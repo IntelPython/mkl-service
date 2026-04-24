@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+* Changed insecure HTTP URLs to HTTPS in `pyproject.toml` and conda recipe files for improved security
 
 ## [2.7.0] (04/16/2026)
 
