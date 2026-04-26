@@ -28,7 +28,7 @@ mkl_dep = dependency('MKL', method: 'cmake',
 )
 
 rpath = ''
-if host_machine.system() != 'windows'
+if host_machine.system() == 'linux'
     rpath = '$ORIGIN/../..:$ORIGIN/../../..'
 endif
 
