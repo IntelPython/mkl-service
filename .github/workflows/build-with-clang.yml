@@ -15,7 +15,6 @@ jobs:
     strategy:
       matrix:
         python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        numpy_version: ["numpy'>=2'"]
 
     env:
       ONEAPI_ROOT: /opt/intel/oneapi
@@ -57,7 +56,6 @@ jobs:
       - name: Install mkl-service dependencies
         run: |
           pip install meson-python cython cmake ninja
-          pip install ${{ matrix.numpy_version }}
 
       - name: List oneAPI folder content
         run: ls ${{ env.ONEAPI_ROOT }}/compiler
