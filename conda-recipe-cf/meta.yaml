@@ -42,7 +42,7 @@ test:
       - pytest -vv --pyargs mkl
 
 about:
-    home: http://github.com/IntelPython/mkl-service
+    home: https://github.com/IntelPython/mkl-service
     license: BSD-3-Clause
     license_file: LICENSE.txt
     summary: Python hooks for Intel® oneAPI Math Kernel Library (oneMKL) runtime control settings

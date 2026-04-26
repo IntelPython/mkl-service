@@ -67,8 +67,8 @@ requires-python = ">=3.10,<3.15"
 test = ["pytest"]
 
 [project.urls]
-Download = "http://github.com/IntelPython/mkl-service"
-Homepage = "http://github.com/IntelPython/mkl-service"
+Download = "https://github.com/IntelPython/mkl-service"
+Homepage = "https://github.com/IntelPython/mkl-service"
 
 [tool.black]
 line-length = 80
