@@ -14,7 +14,6 @@ jobs:
     strategy:
       matrix:
         python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        numpy_version: ["numpy'>=2'"]
 
     env:
       COMPILER_ROOT: /usr/bin
@@ -48,7 +47,6 @@ jobs:
       - name: Install mkl-service dependencies
         run: |
           pip install meson-python cython cmake ninja mkl-devel
-          pip install ${{ matrix.numpy_version }}
 
       - name: Build mkl-service
         run: |
