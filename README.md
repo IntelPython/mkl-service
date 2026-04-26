@@ -29,3 +29,28 @@ A short example, illustrating its use:
 ```
 
 For more information about the usage of support functions see [Developer Reference for Intel® oneAPI Math Kernel Library for C](https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2025-2/support-functions.html).
+
+---
+
+## Building
+
+A C compiler and Intel(R) OneAPI Math Kernel Library (OneMKL) are required to build mkl-service from source.
+
+Executing
+```sh
+python -m pip install .
+```
+
+will pull in the required build and runtime dependencies, including `mkl`, and build `mkl-service`.
+
+With an existing system or Conda `mkl` installation, build dependencies
+- `mkl-devel`
+- `meson-python`
+- `cmake`
+- `ninja`
+- `cython`
+
+then, simply execute
+```
+python -m pip install --no-build-isolation --no-deps .
+```
