@@ -4,7 +4,10 @@ CI/CD workflows, automation, security scanning, and package distribution.
 
 ## Workflows
 - **conda-package.yml** — main build/test pipeline (Linux/Windows, Python 3.10-3.14)
+- **conda-package-cf.yml** — build/test using only conda-forge channel (Linux/Windows, Python 3.10-3.14)
 - **build-with-clang.yml** — Linux Clang compiler compatibility validation
+- **build-with-standard-clang.yml** — standard Clang compiler compatibility validation
+- **build_pip.yml** — validates editable build
 - **pre-commit.yml** — code quality checks (flake8, etc.)
 - **openssf-scorecard.yml** — security posture scanning
 

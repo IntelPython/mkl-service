@@ -15,21 +15,24 @@ Originally part of Intel® Distribution for Python*, now a standalone package av
 
 ## Key components
 - **Python interface:** `mkl/__init__.py` — public API surface
-- **Cython wrapper:** `mkl/_mkl_service.pyx` — wraps MKL support functions
+- **Cython wrapper:** `mkl/_py_mkl_service.pyx` — wraps MKL support functions
 - **C init module:** `mkl/_mklinitmodule.c` — Linux-side MKL runtime preloading / initialization
 - **Helper:** `mkl/_init_helper.py` — Windows venv DLL loading helper
-- **Build system:** setuptools + Cython
+- **Build system:** meson-python + Cython
 
 ## Build dependencies
 **Required:**
 - Intel® oneMKL
+- meson-python
+- CMake
+- Ninja
 - Cython
 - Python 3.10+
 
 **Conda environment:**
 ```bash
-conda install -c conda-forge mkl-devel cython
-python setup.py install
+conda install -c conda-forge mkl-devel cython meson-python cmake ninja
+python -m pip install --no-deps --no-build-isolation .
 ```
 
 ## CI/CD
@@ -37,7 +40,10 @@ python setup.py install
 - **Python versions:** 3.10, 3.11, 3.12, 3.13, 3.14
 - **Workflows:** `.github/workflows/`
   - `conda-package.yml` — main conda build/test pipeline
+  - `conda-package-cf.yml — conda build/test using only conda-forge channel
   - `build-with-clang.yml` — Linux Clang compatibility
+  - `build-with-standard-clang.yml` — standard Clang compiler compatibility validation
+  - `build_pip` — validates editable build
   - `pre-commit.yml` — code quality checks
   - `openssf-scorecard.yml` — security scanning
 
@@ -85,4 +91,6 @@ Below directories have local `AGENTS.md` for deeper context:
 For broader IntelPython ecosystem context, see:
 - `mkl_umath` (MKL-backed NumPy ufuncs)
 - `mkl_random` (MKL-based random number generation)
+- `mkl_fft` (MKL-based fast fourier transform functions)
 - `dpnp` (Data Parallel NumPy)
+- `dpctl` (Data Parallel Control)
