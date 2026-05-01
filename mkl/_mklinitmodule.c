@@ -28,8 +28,11 @@ static struct PyMethodDef methods[] = {{NULL, NULL, 0, NULL}};
 #define MKL_SERVICE_INLINE inline
 #endif
 
+#ifdef MKL_ILP64
 static MKL_SERVICE_INLINE void _set_mkl_ilp64(void);
+#else
 static MKL_SERVICE_INLINE void _set_mkl_lp64(void);
+#endif
 static MKL_SERVICE_INLINE void _set_mkl_interface(void);
 
 static const char *mtlayer;
@@ -154,6 +157,7 @@ static void _preload_threading_layer(void)
     return;
 }
 
+#ifdef MKL_ILP64
 static MKL_SERVICE_INLINE void _set_mkl_ilp64(void)
 {
 #ifdef USING_MKL_RT
@@ -161,7 +165,7 @@ static MKL_SERVICE_INLINE void _set_mkl_ilp64(void)
 #endif
     return;
 }
-
+#else
 static MKL_SERVICE_INLINE void _set_mkl_lp64(void)
 {
 #ifdef USING_MKL_RT
@@ -169,10 +173,15 @@ static MKL_SERVICE_INLINE void _set_mkl_lp64(void)
 #endif
     return;
 }
+#endif
 
 static MKL_SERVICE_INLINE void _set_mkl_interface(void)
 {
+#ifdef MKL_ILP64
+    _set_mkl_ilp64();
+#else
     _set_mkl_lp64();
+#endif
     _preload_threading_layer();
 }
 
