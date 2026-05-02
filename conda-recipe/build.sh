@@ -1,15 +1,12 @@
 #!/bin/bash
 set -ex
 
-export MKLROOT=$CONDA_PREFIX
-
 read -r GLIBC_MAJOR GLIBC_MINOR <<<"$(conda list '^sysroot_linux-64$' \
     | tail -n 1 | awk '{print $2}' | grep -oP '\d+' | head -n 2 | tr '\n' ' ')"
 
-${PYTHON} setup.py clean --all
-
-# Make CMake verbose
-export VERBOSE=1
+if [ -d "build" ]; then
+    rm -rf build
+fi
 
 # -wnx flags mean: --wheel --no-isolation --skip-dependency-check
 ${PYTHON} -m build -w -n -x

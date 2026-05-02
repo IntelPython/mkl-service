@@ -24,19 +24,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [build-system]
-build-backend = "setuptools.build_meta"
+build-backend = "mesonpy"
 requires = [
-  "setuptools>=77",
+  "meson-python>=0.13.0",
+  "ninja",
   "Cython",
-  "wheel>=0.45.1",
-  "build>=1.2.2",
-  "mkl-devel"
+  "mkl-devel",
+  "cmake"
 ]
 
 [project]
-authors = [
-  {name = "Intel Corporation", email = "scripting@intel.com"}
-]
+authors = [{name = "Intel Corporation"}]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Science/Research",

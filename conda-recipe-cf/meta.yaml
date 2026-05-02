@@ -18,14 +18,16 @@ requirements:
       - {{ compiler('c') }}
       - {{ stdlib('c') }}
     host:
+      - meson-python >=0.13.0
+      - meson
+      - cmake
+      - ninja
       - python
       - python-gil     # [py>=314]
       - pip >=25.0
-      - setuptools >=77
       - mkl-devel
       - cython
       - wheel >=0.45.1
-      - python-build >=1.2.2
     run:
       - python
       - python-gil     # [py>=314]
