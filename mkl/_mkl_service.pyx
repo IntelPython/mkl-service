@@ -684,8 +684,6 @@ cdef object __cbwr_set(branch=None):
             "avx512,strict": mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT,
             "avx512_e1": mkl.MKL_CBWR_AVX512_E1,
             "avx512_e1,strict": mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT,
-            "avx10": mkl.MKL_CBWR_AVX10,
-            "avx10,strict": mkl.MKL_CBWR_AVX10 | mkl.MKL_CBWR_STRICT,
         },
         "output": {
             mkl.MKL_CBWR_SUCCESS: "success",
@@ -694,6 +692,27 @@ cdef object __cbwr_set(branch=None):
             mkl.MKL_CBWR_ERR_MODE_CHANGE_FAILURE: "err_mode_change_failure",
         },
     }
+    # new CNR branches added in 2026.0
+    if mkl.MKL_CBWR_AVX10 != -2:
+        __variables["input"]["avx10"] = mkl.MKL_CBWR_AVX10
+        __variables["input"]["avx10,strict"] = mkl.MKL_CBWR_AVX10 | mkl.MKL_CBWR_STRICT
+    # legacy branches removed in 2026.0
+    if mkl.MKL_CBWR_SSSE3 != -1:
+        __variables["input"]["ssse3"] = mkl.MKL_CBWR_SSSE3
+    if mkl.MKL_CBWR_SSE4_1 != -1:
+        __variables["input"]["sse4_1"] = mkl.MKL_CBWR_SSE4_1
+    if mkl.MKL_CBWR_AVX != -1:
+        __variables["input"]["avx"] = mkl.MKL_CBWR_AVX
+    if mkl.MKL_CBWR_AVX512_MIC != -1:
+        __variables["input"]["avx512_mic"] = mkl.MKL_CBWR_AVX512_MIC
+        __variables["input"][
+            "avx512_mic,strict"
+        ] = mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT
+    if mkl.MKL_CBWR_AVX512_MIC_E1 != -1:
+        __variables["input"]["avx512_mic_e1"] = mkl.MKL_CBWR_AVX512_MIC_E1
+        __variables["input"][
+            "avx512_mic_e1,strict"
+        ] = mkl.MKL_CBWR_AVX512_MIC_E1 | mkl.MKL_CBWR_STRICT
     mkl_branch = __mkl_str_to_int(branch, __variables["input"])
 
     mkl_status = mkl.mkl_cbwr_set(mkl_branch)
@@ -723,11 +742,30 @@ cdef inline __cbwr_get(cnr_const=None):
             mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT: "avx512,strict",
             mkl.MKL_CBWR_AVX512_E1: "avx512_e1",
             mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT: "avx512_e1,strict",
-            mkl.MKL_CBWR_AVX10: "avx10",
-            mkl.MKL_CBWR_AVX10 | mkl.MKL_CBWR_STRICT: "avx10,strict",
             mkl.MKL_CBWR_ERR_INVALID_INPUT: "err_invalid_input",
         },
     }
+    # new CNR branches added in 2026.0
+    if mkl.MKL_CBWR_AVX10 != -2:
+        __variables["output"][mkl.MKL_CBWR_AVX10] = "avx10"
+        __variables["output"][mkl.MKL_CBWR_AVX10 | mkl.MKL_CBWR_STRICT] = "avx10,strict"
+    # legacy branches removed in 2026.0
+    if mkl.MKL_CBWR_SSSE3 != -1:
+        __variables["output"][mkl.MKL_CBWR_SSSE3] = "ssse3"
+    if mkl.MKL_CBWR_SSE4_1 != -1:
+        __variables["output"][mkl.MKL_CBWR_SSE4_1] = "sse4_1"
+    if mkl.MKL_CBWR_AVX != -1:
+        __variables["output"][mkl.MKL_CBWR_AVX] = "avx"
+    if mkl.MKL_CBWR_AVX512_MIC != -1:
+        __variables["output"][mkl.MKL_CBWR_AVX512_MIC] = "avx512_mic"
+        __variables["output"][
+            mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT
+        ] = "avx512_mic,strict"
+    if mkl.MKL_CBWR_AVX512_MIC_E1 != -1:
+        __variables["output"][mkl.MKL_CBWR_AVX512_MIC_E1] = "avx512_mic_e1"
+        __variables["output"][
+            mkl.MKL_CBWR_AVX512_MIC_E1 | mkl.MKL_CBWR_STRICT
+        ] = "avx512_mic_e1,strict"
     mkl_cnr_const = __mkl_str_to_int(cnr_const, __variables["input"])
 
     mkl_status = mkl.mkl_cbwr_get(mkl_cnr_const)
@@ -753,12 +791,31 @@ cdef object __cbwr_get_auto_branch():
             mkl.MKL_CBWR_AVX512 | mkl.MKL_CBWR_STRICT: "avx512,strict",
             mkl.MKL_CBWR_AVX512_E1: "avx512_e1",
             mkl.MKL_CBWR_AVX512_E1 | mkl.MKL_CBWR_STRICT: "avx512_e1,strict",
-            mkl.MKL_CBWR_AVX10: "avx10",
-            mkl.MKL_CBWR_AVX10 | mkl.MKL_CBWR_STRICT: "avx10,strict",
             mkl.MKL_CBWR_SUCCESS: "success",
             mkl.MKL_CBWR_ERR_INVALID_INPUT: "err_invalid_input",
         },
     }
+    # new CNR branch added in 2026.0
+    if mkl.MKL_CBWR_AVX10 != -2:
+        __variables["output"][mkl.MKL_CBWR_AVX10] = "avx10"
+        __variables["output"][mkl.MKL_CBWR_AVX10 | mkl.MKL_CBWR_STRICT] = "avx10,strict"
+    # legacy CNR branches removed in 2026.0
+    if mkl.MKL_CBWR_SSSE3 != -1:
+        __variables["output"][mkl.MKL_CBWR_SSSE3] = "ssse3"
+    if mkl.MKL_CBWR_SSE4_1 != -1:
+        __variables["output"][mkl.MKL_CBWR_SSE4_1] = "sse4_1"
+    if mkl.MKL_CBWR_AVX != -1:
+        __variables["output"][mkl.MKL_CBWR_AVX] = "avx"
+    if mkl.MKL_CBWR_AVX512_MIC != -1:
+        __variables["output"][mkl.MKL_CBWR_AVX512_MIC] = "avx512_mic"
+        __variables["output"][
+            mkl.MKL_CBWR_AVX512_MIC | mkl.MKL_CBWR_STRICT
+        ] = "avx512_mic,strict"
+    if mkl.MKL_CBWR_AVX512_MIC_E1 != -1:
+        __variables["output"][mkl.MKL_CBWR_AVX512_MIC_E1] = "avx512_mic_e1"
+        __variables["output"][
+            mkl.MKL_CBWR_AVX512_MIC_E1 | mkl.MKL_CBWR_STRICT
+        ] = "avx512_mic_e1,strict"
 
     mkl_status = mkl.mkl_cbwr_get_auto_branch()
 
@@ -779,14 +836,24 @@ cdef object __enable_instructions(isa=None):
             "avx512_e3": mkl.MKL_ENABLE_AVX512_E3,
             "avx512_e2": mkl.MKL_ENABLE_AVX512_E2,
             "avx512_e1": mkl.MKL_ENABLE_AVX512_E1,
-            "avx512_e5": mkl.MKL_ENABLE_AVX512_E5,
             "avx512": mkl.MKL_ENABLE_AVX512,
             "avx2_e1": mkl.MKL_ENABLE_AVX2_E1,
             "avx2": mkl.MKL_ENABLE_AVX2,
             "sse4_2": mkl.MKL_ENABLE_SSE4_2,
-            "avx10": mkl.MKL_ENABLE_AVX10,
         },
     }
+    # new constants added in 2026.0
+    if mkl.MKL_ENABLE_AVX512_E5 != -2:
+        __variables["input"]["avx512_e5"] = mkl.MKL_ENABLE_AVX512_E5
+    if mkl.MKL_ENABLE_AVX10 != -2:
+        __variables["input"]["avx10"] = mkl.MKL_ENABLE_AVX10
+    # legacy constants removed in 2026.0
+    if mkl.MKL_ENABLE_AVX != -1:
+        __variables["input"]["avx"] = mkl.MKL_ENABLE_AVX
+    if mkl.MKL_ENABLE_AVX512_MIC != -1:
+        __variables["input"]["avx512_mic"] = mkl.MKL_ENABLE_AVX512_MIC
+    if mkl.MKL_ENABLE_AVX512_MIC_E1 != -1:
+        __variables["input"]["avx512_mic_e1"] = mkl.MKL_ENABLE_AVX512_MIC_E1
     cdef int c_mkl_isa = __mkl_str_to_int(isa, __variables["input"])
 
     cdef int c_mkl_status = mkl.mkl_enable_instructions(c_mkl_isa)
