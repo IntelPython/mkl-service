@@ -213,6 +213,8 @@ def check_cbwr(branch, cnr_const):
         pytest.fail(status)
 
 
+_mkl_major = mkl.get_version()["MajorVersion"]
+
 branches = [
     "off",
     "branch_off",
@@ -223,15 +225,20 @@ branches = [
     "avx2",
     "avx512",
     "avx512_e1",
-    "avx10",
 ]
 
+# removed in MKL 2026.0
+legacy_cbwr_branches = ["ssse3", "sse4_1", "avx", "avx512_mic", "avx512_mic_e1"]
+legacy_cbwr_strict = ["avx512_mic,strict", "avx512_mic_e1,strict"]
+
+# added in MKL 2026.0
+new_cbwr_branches = ["avx10"]
+new_cbwr_strict = ["avx10,strict"]
 
 strict = [
     "avx2,strict",
     "avx512,strict",
     "avx512_e1,strict",
-    "avx10,strict",
 ]
 
 
@@ -249,23 +256,81 @@ def test_cbwr_get_auto_branch():
     mkl.cbwr_get_auto_branch()
 
 
+@pytest.mark.skipif(
+    _mkl_major >= 2026,
+    reason="Removed in MKL 2026.0",
+)
+@pytest.mark.parametrize("branch", legacy_cbwr_branches)
+def test_cbwr_branch_legacy(branch):
+    check_cbwr(branch, "branch")
+
+
+@pytest.mark.skipif(
+    _mkl_major >= 2026,
+    reason="Removed in MKL 2026.0",
+)
+@pytest.mark.parametrize("branch", legacy_cbwr_branches + legacy_cbwr_strict)
+def test_cbwr_legacy(branch):
+    check_cbwr(branch, "all")
+
+
+@pytest.mark.skipif(
+    _mkl_major < 2026,
+    reason="Added in MKL 2026.0",
+)
+@pytest.mark.parametrize("branch", new_cbwr_branches)
+def test_cbwr_branch_new(branch):
+    check_cbwr(branch, "branch")
+
+
+@pytest.mark.skipif(
+    _mkl_major < 2026,
+    reason="Added in MKL 2026.0",
+)
+@pytest.mark.parametrize("branch", new_cbwr_branches + new_cbwr_strict)
+def test_cbwr_all_new(branch):
+    check_cbwr(branch, "all")
+
+
 instructions = [
     "single_path",
     "avx512_e4",
     "avx512_e3",
     "avx512_e2",
     "avx512_e1",
-    "avx512_e5",
     "avx512",
     "avx2_e1",
     "avx2",
     "sse4_2",
-    "avx10",
 ]
+
+# removed in MKL 2026.0
+legacy_instructions = ["avx", "avx512_mic", "avx512_mic_e1"]
+
+# added in MKL 2026.0
+new_instructions = ["avx512_e5", "avx10"]
 
 
 @pytest.mark.parametrize("isa", instructions)
 def test_enable_instructions(isa):
+    mkl.enable_instructions(isa)
+
+
+@pytest.mark.skipif(
+    _mkl_major >= 2026,
+    reason="Removed in MKL 2026.0",
+)
+@pytest.mark.parametrize("isa", legacy_instructions)
+def test_enable_instructions_legacy(isa):
+    mkl.enable_instructions(isa)
+
+
+@pytest.mark.skipif(
+    _mkl_major < 2026,
+    reason="Added in MKL 2026.0",
+)
+@pytest.mark.parametrize("isa", new_instructions)
+def test_enable_instructions_new(isa):
     mkl.enable_instructions(isa)
 
 

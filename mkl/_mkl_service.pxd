@@ -59,7 +59,6 @@ cdef extern from "mkl.h":
     int MKL_CBWR_AVX2
     int MKL_CBWR_AVX512
     int MKL_CBWR_AVX512_E1
-    int MKL_CBWR_AVX10
 
     int MKL_CBWR_SUCCESS
     int MKL_CBWR_ERR_INVALID_SETTINGS
@@ -74,12 +73,10 @@ cdef extern from "mkl.h":
     int MKL_ENABLE_AVX512_E3
     int MKL_ENABLE_AVX512_E4
     int MKL_ENABLE_AVX512_E1
-    int MKL_ENABLE_AVX512_E5
     int MKL_ENABLE_AVX512
     int MKL_ENABLE_AVX2
     int MKL_ENABLE_AVX2_E1
     int MKL_ENABLE_SSE4_2
-    int MKL_ENABLE_AVX10
 
     # MPI Implementation Constants
     int MKL_BLACS_CUSTOM
@@ -169,3 +166,62 @@ cdef extern from "mkl.h":
     int vmlSetErrStatus(const MKL_INT status)
     int vmlGetErrStatus()
     int vmlClearErrStatus()
+
+# version-compat shim
+cdef extern from *:
+    """
+    #include <mkl.h>
+
+    /* define constants removed in 2026.0 if undefined */
+    #ifndef MKL_CBWR_SSSE3
+        #define MKL_CBWR_SSSE3 -1
+    #endif
+    #ifndef MKL_CBWR_SSE4_1
+        #define MKL_CBWR_SSE4_1 -1
+    #endif
+    #ifndef MKL_CBWR_AVX
+        #define MKL_CBWR_AVX -1
+    #endif
+    #ifndef MKL_CBWR_AVX512_MIC
+        #define MKL_CBWR_AVX512_MIC -1
+    #endif
+    #ifndef MKL_CBWR_AVX512_MIC_E1
+        #define MKL_CBWR_AVX512_MIC_E1 -1
+    #endif
+
+    #ifndef MKL_ENABLE_AVX512_MIC_E1
+        #define MKL_ENABLE_AVX512_MIC_E1 -1
+    #endif
+    #ifndef MKL_ENABLE_AVX512_MIC
+        #define MKL_ENABLE_AVX512_MIC -1
+    #endif
+    #ifndef MKL_ENABLE_AVX
+        #define MKL_ENABLE_AVX -1
+    #endif
+
+    /* define constants from 2026.0 if undefined */
+    #ifndef MKL_CBWR_AVX10
+        #define MKL_CBWR_AVX10 -2
+    #endif
+
+    #ifndef MKL_ENABLE_AVX512_E5
+        #define MKL_ENABLE_AVX512_E5 -2
+    #endif
+    #ifndef MKL_ENABLE_AVX10
+        #define MKL_ENABLE_AVX10 -2
+    #endif
+    """
+    int MKL_CBWR_SSSE3
+    int MKL_CBWR_SSE4_1
+    int MKL_CBWR_AVX
+    int MKL_CBWR_AVX512_MIC
+    int MKL_CBWR_AVX512_MIC_E1
+
+    int MKL_ENABLE_AVX512_MIC_E1
+    int MKL_ENABLE_AVX512_MIC
+    int MKL_ENABLE_AVX
+
+    int MKL_CBWR_AVX10
+
+    int MKL_ENABLE_AVX512_E5
+    int MKL_ENABLE_AVX10
