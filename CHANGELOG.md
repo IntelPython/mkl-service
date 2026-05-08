@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.1] (05/08/2026)
+
+### Changed
+* Make `mkl-service` backward compatibility from MKL 2026.0 down to at least 2023.2 [gh-193](https://github.com/IntelPython/mkl-service/pull/193), broken by [gh-175](https://github.com/IntelPython/mkl-service/pull/175)
+
+### Fixed
+* Changed insecure HTTP URLs to HTTPS in `pyproject.toml` and conda recipe files for improved security [gh-189](https://github.com/IntelPython/mkl-service/pull/189)
+
 ## [2.7.0] (04/16/2026)
 
 ### Added
