@@ -17,7 +17,7 @@ env:
 
 jobs:
   build_osx:
-    runs-on: macos-latest
+    runs-on: macos-26-intel
 
     strategy:
       matrix:
@@ -97,7 +97,7 @@ jobs:
       matrix:
         python: ['3.10', '3.11', '3.12', '3.13', '3.14']
         experimental: [false]
-        runner: [macos-latest]
+        runner: [macos-26-intel]
     continue-on-error: ${{ matrix.experimental }}
     env:
       CHANNELS: -c conda-forge -c conda-forge/label/python_rc --override-channels
