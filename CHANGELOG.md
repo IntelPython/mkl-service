@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+* Make `mkl-service` backward compatibility from MKL 2026.0 down to at least 2023.2 [gh-193](https://github.com/IntelPython/mkl-service/pull/193)
 
 ### Fixed
 * Changed insecure HTTP URLs to HTTPS in `pyproject.toml` and conda recipe files for improved security
