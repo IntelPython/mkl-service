@@ -108,6 +108,14 @@ jobs:
           channels: conda-forge
           python-version: ${{ matrix.python }}
 
+      - name: Update conda
+        run: |
+          conda update -n base --all
+
+      - name: Install conda build
+        run: |
+          conda install -n base -y conda-build
+
       - name: Cache conda packages
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         env:
@@ -126,9 +134,12 @@ jobs:
           echo "CONDA_BLD=$CONDA\\conda-bld\\win-64\\" >> "$GITHUB_ENV"
           echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE\\" >> "$GITHUB_ENV"
 
-      - name: Install conda build
+      - name: Show Conda info
         run: |
-          conda install -n base -y conda-build
+          conda info --all
+
+      - name: List base environment packages
+        run: |
           conda list -n base
 
       - name: Build conda package
