@@ -1,0 +1,2 @@
+option('ilp64', type: 'boolean', value: false,
+    description: 'Build with MKL ILP64 interface')
