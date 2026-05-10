@@ -15,6 +15,10 @@ py = import('python').find_installation(pure: false)
 
 c_args = ['-DNDEBUG']
 
+if get_option('ilp64')
+    c_args += '-DMKL_ILP64'
+endif
+
 thread_dep = dependency('threads')
 
 cc = meson.get_compiler('c')
