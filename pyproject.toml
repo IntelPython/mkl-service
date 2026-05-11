@@ -56,7 +56,7 @@ classifiers = [
   "Operating System :: POSIX",
   "Operating System :: Unix"
 ]
-dependencies = ["mkl"]
+dependencies = []
 description = "Python hooks for Intel® oneAPI Math Kernel Library (oneMKL) runtime control settings"
 dynamic = ["version"]
 keywords = ["MKL"]
