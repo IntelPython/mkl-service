@@ -35,10 +35,12 @@ requirements:
 
 test:
     requires:
+      - pip
       - pytest
     imports:
       - mkl
     commands:
+      - pip check
       - pytest -vv --pyargs mkl
 
 about:
