@@ -42,7 +42,7 @@ jobs:
 
       - name: Build conda package
         run: |
-          pip install --no-cache-dir meson-python ninja cmake cython
+          pip install --no-cache-dir meson-python ninja cmake "cython>=3.1.0"
           pip install -e ".[test]" --no-build-isolation --verbose
           pip list
           python -m pytest -v mkl/tests

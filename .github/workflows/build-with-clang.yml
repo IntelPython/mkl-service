@@ -55,7 +55,7 @@ jobs:
 
       - name: Install mkl-service dependencies
         run: |
-          pip install meson-python cython cmake ninja
+          pip install meson-python "cython>=3.1.0" cmake ninja
 
       - name: List oneAPI folder content
         run: ls ${{ env.ONEAPI_ROOT }}/compiler
