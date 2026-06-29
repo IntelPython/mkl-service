@@ -25,6 +25,7 @@
 
 # distutils: language = c
 # cython: language_level=3
+# cython: freethreading_compatible=True
 
 import numbers
 import warnings

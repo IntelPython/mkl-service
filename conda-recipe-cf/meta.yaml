@@ -19,18 +19,18 @@ requirements:
       - {{ compiler('c') }}
       - {{ stdlib('c') }}
     host:
+      - meson-python >=0.13.0
+      - meson
+      - cmake
+      - ninja
       - python
-      - python-gil     # [py>=314]
       - pip >=25.0
-      - setuptools >=77
       - mkl-devel  # [not osx]
       - mkl-devel <2024 # [osx]
-      - cython
+      - cython >=3.1.0
       - wheel >=0.45.1
-      - python-build >=1.2.2
     run:
       - python
-      - python-gil     # [py>=314]
       - {{ pin_compatible('mkl') }}
 
 test:

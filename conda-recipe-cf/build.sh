@@ -1,2 +1,2 @@
 #!/bin/bash -x
-MKLROOT=$PREFIX $PYTHON setup.py build --force install --old-and-unmanageable
+$PYTHON -m pip install --no-deps --no-build-isolation .
