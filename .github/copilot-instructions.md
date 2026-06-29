@@ -37,7 +37,7 @@ Higher-precedence file overrides; lower must not restate overridden guidance.
 - Build/config: `pyproject.toml`, `setup.py`
 - Recipe/deps: `conda-recipe/meta.yaml`, `conda-recipe/conda_build_config.yaml`
 - CI: `.github/workflows/*.{yml,yaml}`
-- API contracts: `mkl/__init__.py`, `mkl/_mkl_service.pyx`
+- API contracts: `mkl/__init__.py`, `mkl/_py_mkl_service.pyx`
 - Tests: `mkl/tests/test_mkl_service.py`
 
 ## MKL-specific constraints

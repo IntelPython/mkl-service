@@ -1,0 +1,62 @@
+name: Build project with standard clang compiler
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions: read-all
+
+jobs:
+  build-with-standard-clang:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    env:
+      COMPILER_ROOT: /usr/bin
+
+    defaults:
+      run:
+        shell: bash -el {0}
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: x64
+
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Install mkl-service dependencies
+        run: |
+          pip install meson-python cython cmake ninja mkl-devel
+
+      - name: Build mkl-service
+        run: |
+          export CC=${{ env.COMPILER_ROOT }}/clang
+          pip install . --no-build-isolation --no-deps --verbose
+
+      - name: Run mkl-service tests
+        run: |
+          pip install pytest
+          # mkl-service cannot be installed in editable mode, we need
+          # to change directory before importing it and running tests
+          cd ..
+          pytest -s -v --pyargs mkl

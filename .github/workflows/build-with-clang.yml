@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ["3.10", "3.11", "3.12", "3.13"]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     env:
       ONEAPI_ROOT: /opt/intel/oneapi
@@ -40,7 +40,6 @@ jobs:
       - name: Install Intel OneAPI
         run: |
           sudo apt-get install intel-oneapi-compiler-dpcpp-cpp
-          sudo apt-get install intel-oneapi-tbb
           sudo apt-get install intel-oneapi-mkl-devel
 
       - name: Setup Python
@@ -55,12 +54,8 @@ jobs:
           fetch-depth: 0
 
       - name: Install mkl-service dependencies
-        uses: BSFishy/pip-action@8f2d471d809dc20b6ada98c91910b6ae6243f318 # v1
-        with:
-          packages: |
-            cython
-            setuptools>=77
-            pytest
+        run: |
+          pip install meson-python cython cmake ninja
 
       - name: List oneAPI folder content
         run: ls ${{ env.ONEAPI_ROOT }}/compiler
@@ -71,9 +66,10 @@ jobs:
           echo "$CMPLR_ROOT"
           export CC="$CMPLR_ROOT/bin/icx"
           export CFLAGS="${CFLAGS} -fno-fast-math"
-          python setup.py develop
+          pip install . --no-build-isolation --no-deps --verbose
 
       - name: Run mkl-service tests
         run: |
           source ${{ env.ONEAPI_ROOT }}/setvars.sh
+          pip install pytest
           pytest -s -v --pyargs mkl
