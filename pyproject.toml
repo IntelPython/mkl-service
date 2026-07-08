@@ -76,13 +76,3 @@ line-length = 80
 [tool.isort]
 line_length = 80
 profile = "black"
-
-[tool.setuptools]
-include-package-data = true
-packages = ["mkl"]
-
-[tool.setuptools.dynamic]
-version = {attr = "mkl._version.__version__"}
-
-[tool.setuptools.package-data]
-"mkl" = ["tests/*.py"]

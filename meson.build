@@ -28,8 +28,13 @@ mkl_dep = dependency('MKL', method: 'cmake',
 )
 
 rpath = ''
-if host_machine.system() == 'linux'
-    rpath = '$ORIGIN/../..:$ORIGIN/../../..'
+if host_machine.system() != 'windows'
+    if host_machine.system() == 'darwin'
+        origin = '@loader_path'
+    else
+        origin = '$ORIGIN'
+    endif
+    rpath = origin / '../..' + ':' + origin / '../../..'
 endif
 
 # C extension
@@ -64,7 +69,7 @@ py.install_sources(
     subdir: 'mkl'
 )
 
-install_subdir(
-    'mkl/tests',
-    install_dir: py.get_install_dir() / 'mkl'
+py.install_sources(
+    ['mkl/tests/test_mkl_service.py'],
+    subdir: 'mkl/tests'
 )

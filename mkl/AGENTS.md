@@ -5,10 +5,10 @@ Core Python/Cython implementation: MKL support function wrappers and runtime con
 ## Structure
 - `__init__.py` — public API, RTLD_GLOBAL context manager, module initialization
 - `_py_mkl_service.pyx` — Cython wrappers for MKL support functions
-- `_py_mkl_service.pxd` — Cython declarations (C function signatures)
+- `_mkl_service.pxd` — Cython declarations (C function signatures)
 - `_mklinitmodule.c` — C extension for Linux-side MKL runtime preloading/init
 - `_init_helper.py` — Windows loading helper (DLL path setup in venv)
-- `_version.py` — version string (dynamic via setuptools)
+- `_version.py` — version string
 - `tests/` — unit tests for API functionality
 
 ## API categories

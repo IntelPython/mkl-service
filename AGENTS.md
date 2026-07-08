@@ -71,7 +71,7 @@ mkl.get_version_string()             # MKL version info
 - **C init:** `_mklinitmodule.c` handles Linux preloading (`dlopen(..., RTLD_GLOBAL)`) for MKL runtime
 - **Windows loading helper:** `_init_helper.py` handles DLL path setup in Windows venv
 - **Python wrapper:** `__init__.py` imports `_py_mkl_service` (generated from `.pyx`)
-- **Version:** `_version.py` (dynamic via setuptools)
+- **Version:** `_version.py`
 
 ## Notes
 - RTLD_GLOBAL preloading is required on Linux (handled by `RTLD_for_MKL` context manager)
