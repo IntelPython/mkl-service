@@ -40,10 +40,10 @@ python -m pip install --no-deps --no-build-isolation .
 - **Python versions:** 3.10, 3.11, 3.12, 3.13, 3.14
 - **Workflows:** `.github/workflows/`
   - `conda-package.yml` — main conda build/test pipeline
-  - `conda-package-cf.yml — conda build/test using only conda-forge channel
+  - `conda-package-cf.yml` — conda build/test using only conda-forge channel
   - `build-with-clang.yml` — Linux Clang compatibility
   - `build-with-standard-clang.yml` — standard Clang compiler compatibility validation
-  - `build_pip` — validates editable build
+  - `build_pip.yml` — validates editable build
   - `pre-commit.yml` — code quality checks
   - `openssf-scorecard.yml` — security scanning
 
@@ -67,7 +67,7 @@ mkl.get_version_string()             # MKL version info
 - **Docs:** MKL support functions documented in [Intel oneMKL Developer Reference](https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2025-2/support-functions.html)
 
 ## Code structure
-- **Cython layer:** `_mkl_service.pyx` + `_mkl_service.pxd` (C declarations)
+- **Cython layer:** `_py_mkl_service.pyx` + `_mkl_service.pxd` (C declarations)
 - **C init:** `_mklinitmodule.c` handles Linux preloading (`dlopen(..., RTLD_GLOBAL)`) for MKL runtime
 - **Windows loading helper:** `_init_helper.py` handles DLL path setup in Windows venv
 - **Python wrapper:** `__init__.py` imports `_py_mkl_service` (generated from `.pyx`)

@@ -8,11 +8,6 @@ on:
 
 permissions: read-all
 
-env:
-  PACKAGE_NAME: mkl-service
-  MODULE_NAME: mkl-service
-  TEST_ENV_NAME: test_mkl_service
-
 jobs:
   build:
     runs-on: ubuntu-latest
