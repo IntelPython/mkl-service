@@ -34,7 +34,7 @@ For more information about the usage of support functions see [Developer Referen
 
 ## Building
 
-A C compiler and Intel(R) OneAPI Math Kernel Library (OneMKL) are required to build mkl-service from source.
+A C compiler and Intel(R) oneAPI Math Kernel Library (oneMKL) are required to build mkl-service from source.
 
 Executing
 ```sh
@@ -51,6 +51,6 @@ With an existing system or Conda `mkl` installation, build dependencies
 - `cython`
 
 then, simply execute
-```
+```sh
 python -m pip install --no-build-isolation --no-deps .
 ```
