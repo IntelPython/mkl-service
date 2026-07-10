@@ -76,6 +76,7 @@ mkl.get_version_string()             # MKL version info
 ## Notes
 - RTLD_GLOBAL preloading is required on Linux (handled by `RTLD_for_MKL` context manager)
 - MKL must be available at runtime (conda: mkl, pip: relies on system MKL)
+- Do **not** add `mkl` to `[project].dependencies` in `pyproject.toml` (its PyPI wheel lacks `.dist-info`, which breaks `pip check`).
 - Threading functions affect NumPy, SciPy, and other MKL-backed libraries
 
 ## Directory map

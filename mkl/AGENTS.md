@@ -37,7 +37,7 @@ Core Python/Cython implementation: MKL support function wrappers and runtime con
 ## Development guardrails
 - **Thread safety:** All threading functions must be thread-safe
 - **API stability:** Preserve function signatures (widely used in ecosystem)
-- **MKL dependency:** Assumes MKL is available at runtime (conda: mkl package)
+- **MKL dependency:** Assumes MKL is available at runtime (conda: mkl package). Do **not** list `mkl` in `pyproject.toml` `[project].dependencies` — its PyPI wheel lacks `.dist-info`, which breaks `pip check`; on conda-forge there is no pip-visible `mkl` distribution.
 - **RTLD_GLOBAL preload path:** Linux preload is handled in `_mklinitmodule.c`; Windows DLL setup is in `_init_helper.py`
 
 ## Cython details
