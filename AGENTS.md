@@ -29,9 +29,18 @@ Originally part of Intel® Distribution for Python*, now a standalone package av
 - Cython
 - Python 3.10+
 
-**Conda environment:**
+**Build against an existing `mkl` installation:**
+
+Install the build dependencies via Conda:
 ```bash
 conda install -c conda-forge mkl-devel cython meson-python cmake ninja
+```
+or via pip:
+```bash
+python -m pip install mkl-devel cython meson-python cmake ninja
+```
+then build without pulling a fresh `mkl` into an isolated build:
+```bash
 python -m pip install --no-deps --no-build-isolation .
 ```
 
