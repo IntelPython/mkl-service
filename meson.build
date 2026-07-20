@@ -3,7 +3,7 @@ project(
     ['c', 'cython'],
     version: run_command(
         find_program('python3', 'python'),
-        ['-c', 'import os; exec(open("mkl/_version.py").read()); print(__version__)'],
+        ['-c', 'exec(open("mkl/_version.py").read()); print(__version__)'],
         check: true
     ).stdout().strip(),
     meson_version: '>=1.8.3',
