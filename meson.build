@@ -28,7 +28,7 @@ mkl_dep = dependency('MKL', method: 'cmake',
     required: true
 )
 
-rpath = ''
+rpath_link_args = []
 if host_machine.system() != 'windows'
     if host_machine.system() == 'darwin'
         origin = '@loader_path'
@@ -36,6 +36,7 @@ if host_machine.system() != 'windows'
         origin = '$ORIGIN'
     endif
     rpath = origin / '../..' + ':' + origin / '../../..'
+    rpath_link_args = ['-Wl,-rpath,' + rpath]
 endif
 
 # C extension
@@ -44,7 +45,7 @@ py.extension_module(
     sources: ['mkl/_mklinitmodule.c'],
     dependencies: [mkl_dep, thread_dep],
     c_args: c_args + ['-DUSING_MKL_RT'],
-    install_rpath: rpath,
+    link_args: rpath_link_args,
     install: true,
     subdir: 'mkl'
 )
@@ -55,7 +56,7 @@ py.extension_module(
     sources: ['mkl/_py_mkl_service.pyx'],
     dependencies: [mkl_dep],
     c_args: c_args,
-    install_rpath: rpath,
+    link_args: rpath_link_args,
     install: true,
     subdir: 'mkl'
 )
