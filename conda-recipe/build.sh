@@ -9,7 +9,8 @@ if [ -d "build" ]; then
 fi
 
 # -wnx flags mean: --wheel --no-isolation --skip-dependency-check
-${PYTHON} -m build -w -n -x
+# -Ccompile-args=-v makes ninja print full compiler commands (verbose build)
+${PYTHON} -m build -w -n -x -Ccompile-args=-v
 
 ${PYTHON} -m wheel tags --remove \
     --platform-tag "manylinux_${GLIBC_MAJOR}_${GLIBC_MINOR}_x86_64" \
