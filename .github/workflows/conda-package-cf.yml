@@ -59,7 +59,6 @@ jobs:
         shell: bash -el {0}
         run: |
           echo "CONDA_BLD=/usr/share/miniconda/conda-bld/linux-64/" >> "$GITHUB_ENV"
-          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE/" >> "$GITHUB_ENV"
 
       - name: Build conda package
         run: |
@@ -78,12 +77,6 @@ jobs:
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
-
-      - name: Upload wheels artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
-          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   build_windows:
     runs-on: windows-latest
@@ -132,7 +125,6 @@ jobs:
         shell: bash -el {0}
         run: |
           echo "CONDA_BLD=$CONDA\\conda-bld\\win-64\\" >> "$GITHUB_ENV"
-          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE\\" >> "$GITHUB_ENV"
 
       - name: Show Conda info
         run: |
@@ -150,12 +142,6 @@ jobs:
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
-
-      - name: Upload wheels artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
-          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   test_linux:
     needs: build_linux
@@ -359,7 +345,6 @@ jobs:
         shell: bash -el {0}
         run: |
           echo "CONDA_BLD=$CONDA/conda-bld/osx-64/" >> "$GITHUB_ENV"
-          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE/" >> "$GITHUB_ENV"
 
       - name: Build conda package
         shell: bash -el {0}
@@ -379,12 +364,6 @@ jobs:
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
-
-      - name: Upload wheels artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
-          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   test_osx:
     needs: build_osx
