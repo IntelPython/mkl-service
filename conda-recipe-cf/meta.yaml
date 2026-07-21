@@ -8,8 +8,6 @@ source:
 build:
     number: {{ GIT_DESCRIBE_NUMBER }}
     skip: true  # [osx and arm64]
-    script_env:
-      - WHEELS_OUTPUT_FOLDER
     ignore_run_exports:
       - blas
       - mkl-service
@@ -19,15 +17,16 @@ requirements:
       - {{ compiler('c') }}
       - {{ stdlib('c') }}
     host:
+      - meson-python >=0.13.0
+      - cmake
+      - ninja
       - python
       - python-gil     # [py>=314]
       - pip >=25.0
-      - setuptools >=77
       - mkl-devel  # [not osx]
       - mkl-devel <2024 # [osx]
       - cython
       - wheel >=0.45.1
-      - python-build >=1.2.2
     run:
       - python
       - python-gil     # [py>=314]

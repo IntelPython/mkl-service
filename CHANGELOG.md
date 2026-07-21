@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+* Migrated the build system from `setuptools` to `meson-python`, removing `setup.py` in favor of `meson.build` [gh-174](https://github.com/IntelPython/mkl-service/pull/174)
 
 ### Fixed
 

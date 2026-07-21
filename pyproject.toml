@@ -24,19 +24,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [build-system]
-build-backend = "setuptools.build_meta"
+build-backend = "mesonpy"
 requires = [
-  "setuptools>=77",
+  "meson-python>=0.13.0",
+  "ninja",
   "Cython",
-  "wheel>=0.45.1",
-  "build>=1.2.2",
-  "mkl-devel"
+  "mkl-devel",
+  "cmake"
 ]
 
 [project]
-authors = [
-  {name = "Intel Corporation", email = "scripting@intel.com"}
-]
+authors = [{name = "Intel Corporation"}]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Science/Research",
@@ -78,13 +76,3 @@ line-length = 80
 [tool.isort]
 line_length = 80
 profile = "black"
-
-[tool.setuptools]
-include-package-data = true
-packages = ["mkl"]
-
-[tool.setuptools.dynamic]
-version = {attr = "mkl._version.__version__"}
-
-[tool.setuptools.package-data]
-"mkl" = ["tests/*.py"]

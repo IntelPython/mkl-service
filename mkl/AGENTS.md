@@ -4,11 +4,11 @@ Core Python/Cython implementation: MKL support function wrappers and runtime con
 
 ## Structure
 - `__init__.py` — public API, RTLD_GLOBAL context manager, module initialization
-- `_mkl_service.pyx` — Cython wrappers for MKL support functions
+- `_py_mkl_service.pyx` — Cython wrappers for MKL support functions
 - `_mkl_service.pxd` — Cython declarations (C function signatures)
 - `_mklinitmodule.c` — C extension for Linux-side MKL runtime preloading/init
 - `_init_helper.py` — Windows loading helper (DLL path setup in venv)
-- `_version.py` — version string (dynamic via setuptools)
+- `_version.py` — version string
 - `tests/` — unit tests for API functionality
 
 ## API categories
@@ -37,11 +37,11 @@ Core Python/Cython implementation: MKL support function wrappers and runtime con
 ## Development guardrails
 - **Thread safety:** All threading functions must be thread-safe
 - **API stability:** Preserve function signatures (widely used in ecosystem)
-- **MKL dependency:** Assumes MKL is available at runtime (conda: mkl package)
+- **MKL dependency:** Assumes MKL is available at runtime (conda: mkl package). Do **not** list `mkl` in `pyproject.toml` `[project].dependencies` — its PyPI wheel lacks `.dist-info`, which breaks `pip check`; on conda-forge there is no pip-visible `mkl` distribution.
 - **RTLD_GLOBAL preload path:** Linux preload is handled in `_mklinitmodule.c`; Windows DLL setup is in `_init_helper.py`
 
 ## Cython details
-- `_mkl_service.pyx` → generates `_py_mkl_service` extension module
+- `_py_mkl_service.pyx` → generates `_py_mkl_service` extension module
 - `.pxd` file declares external C functions from MKL headers
 - Cython build requires MKL headers (`mkl-devel`)
 

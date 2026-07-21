@@ -15,21 +15,33 @@ Originally part of Intel® Distribution for Python*, now a standalone package av
 
 ## Key components
 - **Python interface:** `mkl/__init__.py` — public API surface
-- **Cython wrapper:** `mkl/_mkl_service.pyx` — wraps MKL support functions
+- **Cython wrapper:** `mkl/_py_mkl_service.pyx` — wraps MKL support functions
 - **C init module:** `mkl/_mklinitmodule.c` — Linux-side MKL runtime preloading / initialization
 - **Helper:** `mkl/_init_helper.py` — Windows venv DLL loading helper
-- **Build system:** setuptools + Cython
+- **Build system:** meson-python + Cython
 
 ## Build dependencies
 **Required:**
 - Intel® oneMKL
+- meson-python
+- CMake
+- Ninja
 - Cython
 - Python 3.10+
 
-**Conda environment:**
+**Build against an existing `mkl` installation:**
+
+Install the build dependencies via Conda:
 ```bash
-conda install -c conda-forge mkl-devel cython
-python setup.py install
+conda install -c conda-forge mkl-devel cython meson-python cmake ninja
+```
+or via pip:
+```bash
+python -m pip install mkl-devel cython meson-python cmake ninja
+```
+then build without pulling a fresh `mkl` into an isolated build:
+```bash
+python -m pip install --no-deps --no-build-isolation .
 ```
 
 ## CI/CD
@@ -37,7 +49,10 @@ python setup.py install
 - **Python versions:** 3.10, 3.11, 3.12, 3.13, 3.14
 - **Workflows:** `.github/workflows/`
   - `conda-package.yml` — main conda build/test pipeline
+  - `conda-package-cf.yml` — conda build/test using only conda-forge channel
   - `build-with-clang.yml` — Linux Clang compatibility
+  - `build-with-standard-clang.yml` — standard Clang compiler compatibility validation
+  - `build_pip.yml` — validates editable build
   - `pre-commit.yml` — code quality checks
   - `openssf-scorecard.yml` — security scanning
 
@@ -61,15 +76,16 @@ mkl.get_version_string()             # MKL version info
 - **Docs:** MKL support functions documented in [Intel oneMKL Developer Reference](https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2025-2/support-functions.html)
 
 ## Code structure
-- **Cython layer:** `_mkl_service.pyx` + `_mkl_service.pxd` (C declarations)
+- **Cython layer:** `_py_mkl_service.pyx` + `_mkl_service.pxd` (C declarations)
 - **C init:** `_mklinitmodule.c` handles Linux preloading (`dlopen(..., RTLD_GLOBAL)`) for MKL runtime
 - **Windows loading helper:** `_init_helper.py` handles DLL path setup in Windows venv
 - **Python wrapper:** `__init__.py` imports `_py_mkl_service` (generated from `.pyx`)
-- **Version:** `_version.py` (dynamic via setuptools)
+- **Version:** `_version.py`
 
 ## Notes
 - RTLD_GLOBAL preloading is required on Linux (handled by `RTLD_for_MKL` context manager)
 - MKL must be available at runtime (conda: mkl, pip: relies on system MKL)
+- Do **not** add `mkl` to `[project].dependencies` in `pyproject.toml` (its PyPI wheel lacks `.dist-info`, which breaks `pip check`).
 - Threading functions affect NumPy, SciPy, and other MKL-backed libraries
 
 ## Directory map
@@ -85,4 +101,6 @@ Below directories have local `AGENTS.md` for deeper context:
 For broader IntelPython ecosystem context, see:
 - `mkl_umath` (MKL-backed NumPy ufuncs)
 - `mkl_random` (MKL-based random number generation)
+- `mkl_fft` (MKL-based fast fourier transform functions)
 - `dpnp` (Data Parallel NumPy)
+- `dpctl` (Data Parallel Control)
