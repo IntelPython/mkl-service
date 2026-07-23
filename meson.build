@@ -35,8 +35,11 @@ if host_machine.system() != 'windows'
     else
         origin = '$ORIGIN'
     endif
-    rpath = origin / '../..' + ':' + origin / '../../..'
-    rpath_link_args = ['-Wl,-rpath,' + rpath]
+
+    rpath_link_args = [
+        '-Wl,-rpath,' + origin / '../..',
+        '-Wl,-rpath,' + origin / '../../..',
+    ]
 endif
 
 # C extension
