@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 * Migrated the build system from `setuptools` to `meson-python`, removing `setup.py` in favor of `meson.build` [gh-174](https://github.com/IntelPython/mkl-service/pull/174)
 
+### Fixed
+* Emit one `-rpath` linker argument per path instead of colon-joining them, so the runtime library search path is baked correctly into macOS (Mach-O) extensions [gh-222](https://github.com/IntelPython/mkl-service/pull/222)
+
 ## [2.7.2] (05/11/2026)
 
 ### Fixed
