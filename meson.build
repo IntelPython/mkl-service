@@ -2,10 +2,11 @@ project(
     'mkl-service',
     ['c', 'cython'],
     version: run_command(
-        'python', '-c',
-        'import os; exec(open("mkl/_version.py").read()); print(__version__)',
+        find_program('python3', 'python'),
+        ['-c', 'exec(open("mkl/_version.py").read()); print(__version__)'],
         check: true
     ).stdout().strip(),
+    meson_version: '>=1.8.3',
     default_options: [
         'buildtype=release',
     ]
@@ -27,9 +28,18 @@ mkl_dep = dependency('MKL', method: 'cmake',
     required: true
 )
 
-rpath = ''
-if host_machine.system() == 'linux'
-    rpath = '$ORIGIN/../..:$ORIGIN/../../..'
+rpath_link_args = []
+if host_machine.system() != 'windows'
+    if host_machine.system() == 'darwin'
+        origin = '@loader_path'
+    else
+        origin = '$ORIGIN'
+    endif
+
+    rpath_link_args = [
+        '-Wl,-rpath,' + origin / '../..',
+        '-Wl,-rpath,' + origin / '../../..',
+    ]
 endif
 
 # C extension
@@ -38,7 +48,7 @@ py.extension_module(
     sources: ['mkl/_mklinitmodule.c'],
     dependencies: [mkl_dep, thread_dep],
     c_args: c_args + ['-DUSING_MKL_RT'],
-    install_rpath: rpath,
+    link_args: rpath_link_args,
     install: true,
     subdir: 'mkl'
 )
@@ -49,7 +59,7 @@ py.extension_module(
     sources: ['mkl/_py_mkl_service.pyx'],
     dependencies: [mkl_dep],
     c_args: c_args,
-    install_rpath: rpath,
+    link_args: rpath_link_args,
     install: true,
     subdir: 'mkl'
 )
@@ -64,7 +74,7 @@ py.install_sources(
     subdir: 'mkl'
 )
 
-install_subdir(
-    'mkl/tests',
-    install_dir: py.get_install_dir() / 'mkl'
+py.install_sources(
+    ['mkl/tests/test_mkl_service.py'],
+    subdir: 'mkl/tests'
 )

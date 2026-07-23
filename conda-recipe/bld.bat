@@ -3,7 +3,8 @@ rem set CFLAGS=-I%PREFIX%\Library\include %CFLAGS%
 rem set LDFLAGS=/LIBPATH:%PREFIX% %LDFLAGS%
 
 :: -wnx flags mean: --wheel --no-isolation --skip-dependency-check
-%PYTHON% -m build -w -n -x
+:: -Ccompile-args=-v makes ninja print full compiler commands (verbose build)
+%PYTHON% -m build -w -n -x -Ccompile-args=-v
 if %ERRORLEVEL% neq 0 exit 1
 
 :: wheel file was renamed

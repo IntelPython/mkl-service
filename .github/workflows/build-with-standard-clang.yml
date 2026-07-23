@@ -51,12 +51,6 @@ jobs:
       - name: Build mkl-service
         run: |
           export CC=${{ env.COMPILER_ROOT }}/clang
-          pip install . --no-build-isolation --no-deps --verbose
-
-      - name: Run mkl-service tests
-        run: |
-          pip install pytest
-          # mkl-service cannot be installed in editable mode, we need
-          # to change directory before importing it and running tests
-          cd ..
-          pytest -s -v --pyargs mkl
+          pip install -e ".[test]" --no-build-isolation --verbose
+          pip list
+          python -m pytest -v mkl/tests

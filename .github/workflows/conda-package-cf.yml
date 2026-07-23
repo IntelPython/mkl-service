@@ -29,7 +29,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
@@ -38,7 +38,7 @@ jobs:
           echo "pkgs_dirs: [~/.conda/pkgs]" >> ~/.condarc
 
       - name: Cache conda packages
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         env:
           CACHE_NUMBER: 0  # Increase to reset cache
         with:
@@ -59,7 +59,6 @@ jobs:
         shell: bash -el {0}
         run: |
           echo "CONDA_BLD=/usr/share/miniconda/conda-bld/linux-64/" >> "$GITHUB_ENV"
-          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE/" >> "$GITHUB_ENV"
 
       - name: Build conda package
         run: |
@@ -79,12 +78,6 @@ jobs:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
 
-      - name: Upload wheels artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
-          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
-
   build_windows:
     runs-on: windows-latest
 
@@ -98,7 +91,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
       - uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
@@ -117,7 +110,7 @@ jobs:
           conda install -n base -y conda-build
 
       - name: Cache conda packages
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         env:
           CACHE_NUMBER: 3  # Increase to reset cache
         with:
@@ -132,7 +125,6 @@ jobs:
         shell: bash -el {0}
         run: |
           echo "CONDA_BLD=$CONDA\\conda-bld\\win-64\\" >> "$GITHUB_ENV"
-          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE\\" >> "$GITHUB_ENV"
 
       - name: Show Conda info
         run: |
@@ -150,12 +142,6 @@ jobs:
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
-
-      - name: Upload wheels artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
-          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   test_linux:
     needs: build_linux
@@ -206,7 +192,7 @@ jobs:
           echo "pkgs_dirs: [~/.conda/pkgs]" >> ~/.condarc
 
       - name: Cache conda packages
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         env:
           CACHE_NUMBER: 0  # Increase to reset cache
         with:
@@ -284,7 +270,7 @@ jobs:
           more lockfile
 
       - name: Cache conda packages
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         env:
           CACHE_NUMBER: 3  # Increase to reset cache
         with:
@@ -326,7 +312,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
@@ -338,7 +324,7 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Cache conda packages
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         env:
           CACHE_NUMBER: 0  # Increase to reset cache
         with:
@@ -359,7 +345,6 @@ jobs:
         shell: bash -el {0}
         run: |
           echo "CONDA_BLD=$CONDA/conda-bld/osx-64/" >> "$GITHUB_ENV"
-          echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE/" >> "$GITHUB_ENV"
 
       - name: Build conda package
         shell: bash -el {0}
@@ -379,12 +364,6 @@ jobs:
         with:
           name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
-
-      - name: Upload wheels artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
-          path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   test_osx:
     needs: build_osx
@@ -436,7 +415,7 @@ jobs:
           cat lockfile
 
       - name: Cache conda packages
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         env:
           CACHE_NUMBER: 0  # Increase to reset cache
         with:

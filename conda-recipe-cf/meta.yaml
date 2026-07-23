@@ -8,8 +8,6 @@ source:
 build:
     number: {{ GIT_DESCRIBE_NUMBER }}
     skip: true  # [osx and arm64]
-    script_env:
-      - WHEELS_OUTPUT_FOLDER
     ignore_run_exports:
       - blas
       - mkl-service
@@ -20,7 +18,6 @@ requirements:
       - {{ stdlib('c') }}
     host:
       - meson-python >=0.13.0
-      - meson
       - cmake
       - ninja
       - python
