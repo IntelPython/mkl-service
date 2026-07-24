@@ -22,15 +22,14 @@ requirements:
       - cmake
       - ninja
       - python
+      - python-build
       - python-gil     # [py>=314]
-      - python-build >=1.2.2
       - pip >=25.0
       - mkl-devel
-      - cython
+      - cython >=3.1.0
       - wheel >=0.45.1
     run:
       - python
-      - python-gil     # [py>=314]
       - {{ pin_compatible('mkl') }}
 
 test:

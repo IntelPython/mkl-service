@@ -200,6 +200,12 @@ PyMODINIT_FUNC PyInit__mklinit(void)
         return NULL;
     }
 
+#ifdef Py_GIL_DISABLED
+    /* Declare that this module supports running without the GIL so the
+     * free-threaded interpreter does not re-enable it on import. */
+    PyUnstable_Module_SetGIL(m, Py_MOD_GIL_NOT_USED);
+#endif
+
     return m;
 }
 #else
