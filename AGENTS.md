@@ -26,18 +26,18 @@ Originally part of Intel® Distribution for Python*, now a standalone package av
 - meson-python
 - CMake
 - Ninja
-- Cython
+- Cython 3.1+ (required for the `freethreading_compatible` directive)
 - Python 3.10+
 
 **Build against an existing `mkl` installation:**
 
 Install the build dependencies via Conda:
 ```bash
-conda install -c conda-forge mkl-devel cython meson-python cmake ninja
+conda install -c conda-forge mkl-devel "cython>=3.1.0" meson-python cmake ninja
 ```
 or via pip:
 ```bash
-python -m pip install mkl-devel cython meson-python cmake ninja
+python -m pip install mkl-devel "cython>=3.1.0" meson-python cmake ninja
 ```
 then build without pulling a fresh `mkl` into an isolated build:
 ```bash
@@ -45,8 +45,9 @@ python -m pip install --no-deps --no-build-isolation .
 ```
 
 ## CI/CD
-- **Platforms in CI workflows:** Linux, Windows
-- **Python versions:** 3.10, 3.11, 3.12, 3.13, 3.14
+- **Platforms in CI workflows:** Linux, Windows, macOS (conda-forge workflow only)
+- **Python versions:** 3.10, 3.11, 3.12, 3.13, 3.14, and free-threaded 3.14t
+- **Python 3.14 ABI selection:** conda jobs must request an explicit ABI, `3.14.* *_cp314` (GIL) or `3.14.* *_cp314t` (free-threaded). Once the recipes stopped constraining `python-gil`, a bare `--python 3.14` was observed to resolve to the free-threaded build, so it must not be relied on.
 - **Workflows:** `.github/workflows/`
   - `conda-package.yml` — main conda build/test pipeline
   - `conda-package-cf.yml` — conda build/test using only conda-forge channel

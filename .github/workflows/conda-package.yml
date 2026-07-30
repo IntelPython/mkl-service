@@ -21,7 +21,15 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python: ['3.10', '3.11', '3.12', '3.13']
+        python_spec: ['']
+        include:
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314'
+            python_tag: '3.14'
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314t'
+            python_tag: '3.14t'
 
     steps:
       - name: Cancel Previous Runs
@@ -44,9 +52,9 @@ jobs:
         with:
           path: ~/.conda/pkgs
           key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('**/meta.yaml') }}
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-${{hashFiles('**/meta.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
 
       - name: Add conda to system path
@@ -64,7 +72,7 @@ jobs:
       - name: Build conda package
         run: |
           CHANNELS=(-c conda-forge -c conda-forge/label/python_rc -c https://software.repos.intel.com/python/conda --override-channels)
-          VERSIONS=(--python "${{ matrix.python }}")
+          VERSIONS=(--python "${{ matrix.python_spec || matrix.python }}")
           TEST=(--no-test)
 
           conda build \
@@ -76,13 +84,13 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python_tag || matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
 
       - name: Upload wheels artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python_tag || matrix.python }}
           path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   build_windows:
@@ -90,7 +98,15 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python: ['3.10', '3.11', '3.12', '3.13']
+        python_spec: ['']
+        include:
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314'
+            python_tag: '3.14'
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314t'
+            python_tag: '3.14t'
 
     steps:
       - name: Cancel Previous Runs
@@ -115,9 +131,9 @@ jobs:
         with:
           path: /home/runner/conda_pkgs_dir
           key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('**/meta.yaml') }}
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-${{hashFiles('**/meta.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
 
       - name: Store conda paths as envs
@@ -132,18 +148,18 @@ jobs:
           conda list -n base
 
       - name: Build conda package
-        run: conda build --no-test --python ${{ matrix.python }} -c https://software.repos.intel.com/python/conda -c conda-forge -c conda-forge/label/python_rc --override-channels conda-recipe
+        run: conda build --no-test --python "${{ matrix.python_spec || matrix.python }}" -c https://software.repos.intel.com/python/conda -c conda-forge -c conda-forge/label/python_rc --override-channels conda-recipe
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python_tag || matrix.python }}
           path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.conda
 
       - name: Upload wheels artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python }}
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Wheels Python ${{ matrix.python_tag || matrix.python }}
           path: ${{ env.WHEELS_OUTPUT_FOLDER }}mkl_service-*.whl
 
   test_linux:
@@ -152,9 +168,21 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python: ['3.10', '3.11', '3.12', '3.13']
+        python_spec: ['']
         experimental: [false]
         runner: [ubuntu-latest]
+        include:
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314'
+            python_tag: '3.14'
+            experimental: false
+            runner: ubuntu-latest
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314t'
+            python_tag: '3.14t'
+            experimental: false
+            runner: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
     env:
       CHANNELS: -c conda-forge -c conda-forge/label/python_rc -c https://software.repos.intel.com/python/conda --override-channels
@@ -163,7 +191,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python_tag || matrix.python }}
 
       - name: Add conda to system path
         run: echo "$CONDA/bin" >> "$GITHUB_PATH"
@@ -187,7 +215,7 @@ jobs:
           CHANNELS=(-c "$GITHUB_WORKSPACE/channel" -c conda-forge -c conda-forge/label/python_rc -c https://software.repos.intel.com/python/conda --override-channels)
           PACKAGE_VERSION="$(python -c "${VER_SCRIPT1} ${VER_SCRIPT2}")"
           export PACKAGE_VERSION
-          conda create -n "${{ env.TEST_ENV_NAME }}" "$PACKAGE_NAME=$PACKAGE_VERSION" "python=${{ matrix.python }}" "${CHANNELS[@]}" --only-deps --dry-run > lockfile
+          conda create -n "${{ env.TEST_ENV_NAME }}" "$PACKAGE_NAME=$PACKAGE_VERSION" "python ${{ matrix.python_spec || matrix.python }}" "${CHANNELS[@]}" --only-deps --dry-run > lockfile
           cat lockfile
 
       - name: Set pkgs_dirs
@@ -201,9 +229,9 @@ jobs:
         with:
           path: ~/.conda/pkgs
           key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('lockfile') }}
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-${{hashFiles('lockfile') }}
           restore-keys: |
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
 
       - name: Install mkl-service
@@ -212,7 +240,7 @@ jobs:
           CHANNELS=(-c "$GITHUB_WORKSPACE/channel" -c conda-forge -c conda-forge/label/python_rc -c https://software.repos.intel.com/python/conda --override-channels)
           PACKAGE_VERSION="$(python -c "${VER_SCRIPT1} ${VER_SCRIPT2}")"
           export PACKAGE_VERSION
-          conda create -n "${{ env.TEST_ENV_NAME }}" "$PACKAGE_NAME=$PACKAGE_VERSION" pytest "python=${{ matrix.python }}" "${CHANNELS[@]}"
+          conda create -n "${{ env.TEST_ENV_NAME }}" "$PACKAGE_NAME=$PACKAGE_VERSION" pytest "python ${{ matrix.python_spec || matrix.python }}" "${CHANNELS[@]}"
           # Test installed packages
           conda list
 
@@ -228,9 +256,21 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python: ['3.10', '3.11', '3.12', '3.13']
+        python_spec: ['']
         experimental: [false]
         runner: [windows-latest]
+        include:
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314'
+            python_tag: '3.14'
+            experimental: false
+            runner: windows-latest
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314t'
+            python_tag: '3.14t'
+            experimental: false
+            runner: windows-latest
     continue-on-error: ${{ matrix.experimental }}
     env:
       CHANNELS: -c conda-forge -c conda-forge/label/python_rc -c https://software.repos.intel.com/python/conda --override-channels
@@ -239,7 +279,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python_tag || matrix.python }}
       - uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           miniforge-version: latest
@@ -269,7 +309,7 @@ jobs:
           FOR /F "tokens=* USEBACKQ" %%F IN (`python -c "%SCRIPT%"`) DO (
              SET PACKAGE_VERSION=%%F
           )
-          conda install -n ${{ env.TEST_ENV_NAME }} ${{ env.PACKAGE_NAME }}=%PACKAGE_VERSION% python=${{ matrix.python }} -c ${{ env.GITHUB_WORKSPACE }}/channel ${{ env.CHANNELS }} --only-deps --dry-run > lockfile
+          conda install -n ${{ env.TEST_ENV_NAME }} ${{ env.PACKAGE_NAME }}=%PACKAGE_VERSION% "python ${{ matrix.python_spec || matrix.python }}" -c ${{ env.GITHUB_WORKSPACE }}/channel ${{ env.CHANNELS }} --only-deps --dry-run > lockfile
           more lockfile
 
       - name: Cache conda packages
@@ -279,9 +319,9 @@ jobs:
         with:
           path: /home/runner/conda_pkgs_dir
           key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('lockfile') }}
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-${{hashFiles('lockfile') }}
           restore-keys: |
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-
             ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
 
         # add intel-openmp as an explicit dependency
@@ -296,7 +336,7 @@ jobs:
              SET PACKAGE_VERSION=%%F
           )
           SET "WORKAROUND_DEPENDENCIES=intel-openmp"
-          conda create -n ${{ env.TEST_ENV_NAME }} ${{ env.PACKAGE_NAME }}=%PACKAGE_VERSION% %WORKAROUND_DEPENDENCIES% pytest python=${{ matrix.python }} -c ${{ env.GITHUB_WORKSPACE }}/channel ${{ env.CHANNELS }}
+          conda create -n ${{ env.TEST_ENV_NAME }} ${{ env.PACKAGE_NAME }}=%PACKAGE_VERSION% %WORKAROUND_DEPENDENCIES% pytest "python ${{ matrix.python_spec || matrix.python }}" -c ${{ env.GITHUB_WORKSPACE }}/channel ${{ env.CHANNELS }}
           # Test installed packages
           conda list
 

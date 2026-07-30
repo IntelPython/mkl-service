@@ -17,7 +17,13 @@ jobs:
 
     strategy:
       matrix:
-        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python: ["3.10", "3.11", "3.12", "3.13"]
+        python_spec: ['']
+        include:
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314'
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314t'
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -33,7 +39,7 @@ jobs:
 
       - name: Install MKL
         run: |
-          conda install mkl-devel mkl
+          conda install mkl-devel mkl "python ${{ matrix.python_spec || matrix.python }}"
 
       - name: Build with pip
         run: |
