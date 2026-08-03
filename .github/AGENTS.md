@@ -19,7 +19,7 @@ All build/test workflows cover Python 3.10-3.14 plus free-threaded 3.14t.
 - Python 3.14 is expressed as two `include` rows carrying `python_spec` (`3.14.* *_cp314` and `3.14.* *_cp314t`); a bare `--python 3.14` has been observed to select the free-threaded ABI and must not be relied on
 - `include` rows create new matrix combinations and inherit nothing, so `runner`/`experimental` must be repeated wherever the job reads them
 - Artifact naming: `$PACKAGE_NAME $OS Python $VERSION`, where `$VERSION` is `python_tag` (`3.14` or `3.14t`) when set, otherwise `python`
-- Channels: `conda-forge`, `conda-forge/label/python_rc`, Intel channel
+- Channels: `conda-forge`, Intel channel
 
 ## Security
 - OpenSSF Scorecard runs automatically
@@ -33,4 +33,3 @@ All build/test workflows cover Python 3.10-3.14 plus free-threaded 3.14t.
 ## Notes
 - Workflow/job renames are breaking for downstream tooling
 - Cache key includes `meta.yaml` hash for conda packages
-- Python 3.14 uses `conda-forge/label/python_rc` for pre-release support
