@@ -274,17 +274,16 @@ jobs:
         with:
           miniforge-version: latest
           channels: conda-forge
-          activate-environment: ${{ env.TEST_ENV_NAME }}
-          python-version: ${{ matrix.python }}
+          activate-environment: base
 
       - name: Install conda-index
-        run: conda install conda-index
+        run: conda install -n base conda-index
 
       - name: Create conda channel
         run: |
           mkdir ${{ env.GITHUB_WORKSPACE }}/channel/win-64
           move ${{ env.PACKAGE_NAME }}-*.conda ${{ env.GITHUB_WORKSPACE }}/channel/win-64
-          python -m conda_index ${{ env.GITHUB_WORKSPACE }}/channel
+          conda index ${{ env.GITHUB_WORKSPACE }}/channel
 
           # Test channel
           conda search ${{ env.PACKAGE_NAME }} -c ${{ env.GITHUB_WORKSPACE }}/channel --override-channels --info --json > ${{ env.GITHUB_WORKSPACE }}/ver.json

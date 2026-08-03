@@ -7,14 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [dev] (MM/DD/YYYY)
 
 ### Added
-
-### Changed
-
-### Fixed
-
-## [Unreleased]
-
-### Added
 * Added support for free-threaded (GIL-disabled) CPython builds: the Cython extension is compiled with `freethreading_compatible=True` and `_mklinit` declares `Py_MOD_GIL_NOT_USED`, so importing `mkl` no longer re-enables the GIL [gh-213](https://github.com/IntelPython/mkl-service/pull/213)
 
 ### Changed
