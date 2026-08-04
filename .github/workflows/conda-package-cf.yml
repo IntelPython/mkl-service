@@ -295,7 +295,7 @@ jobs:
           FOR /F "tokens=* USEBACKQ" %%F IN (`python -c "%SCRIPT%"`) DO (
              SET PACKAGE_VERSION=%%F
           )
-          conda install -n ${{ env.TEST_ENV_NAME }} ${{ env.PACKAGE_NAME }}=%PACKAGE_VERSION% "python=${{ matrix.python_spec || matrix.python }}" -c ${{ env.GITHUB_WORKSPACE }}/channel ${{ env.CHANNELS }} --only-deps --dry-run > lockfile
+          conda create -n ${{ env.TEST_ENV_NAME }} ${{ env.PACKAGE_NAME }}=%PACKAGE_VERSION% "python=${{ matrix.python_spec || matrix.python }}" -c ${{ env.GITHUB_WORKSPACE }}/channel ${{ env.CHANNELS }} --only-deps --dry-run > lockfile
           more lockfile
 
       - name: Cache conda packages
