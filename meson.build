@@ -77,7 +77,7 @@ py.extension_module(
     sources: ['mkl/_mkl_memory.pyx'],
     dependencies: [mkl_dep],
     c_args: c_args,
-    install_rpath: rpath,
+    link_args: rpath_link_args,
     install: true,
     subdir: 'mkl'
 )
