@@ -101,6 +101,9 @@ py.install_sources(
 )
 
 py.install_sources(
-    ['mkl/tests/test_mkl_service.py'],
+    [
+        'mkl/tests/test_mkl_memory.py',
+        'mkl/tests/test_mkl_service.py',
+    ],
     subdir: 'mkl/tests'
 )
