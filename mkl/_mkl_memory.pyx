@@ -1,4 +1,4 @@
-# Copyright (c) 2018, Intel Corporation
+# Copyright (c) 2026, Intel Corporation
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -25,6 +25,7 @@
 
 # distutils: language = c
 # cython: language_level=3
+# cython: freethreading_compatible=True
 
 import numbers
 
@@ -163,8 +164,8 @@ cdef class MKLMemory:
 
     def __getbuffer__(self, Py_buffer *buffer, int flags):
         buffer.buf = <void *>self._memory_ptr
-        buffer.format = "B"                     # byte
-        buffer.internal = NULL                  # see References
+        buffer.format = "B"
+        buffer.internal = NULL
         buffer.itemsize = 1
         buffer.len = self.nbytes
         buffer.ndim = 1
@@ -172,7 +173,7 @@ cdef class MKLMemory:
         buffer.readonly = 0
         buffer.shape = &self.nbytes
         buffer.strides = &buffer.itemsize
-        buffer.suboffsets = NULL                # for pointer arrays only
+        buffer.suboffsets = NULL
 
         atomic_fetch_add(&self.exported_buffers, 1)
 
