@@ -25,6 +25,9 @@
 
 # pylint: disable=no-member
 
+import sys
+import sysconfig
+
 import pytest
 
 import mkl
@@ -197,6 +200,14 @@ def test_peak_mem_usage_peak_mem_reset():
 
 def test_set_memory_limit():
     mkl.set_memory_limit(2**16)
+
+
+@pytest.mark.skipif(
+    not sysconfig.get_config_var("Py_GIL_DISABLED"),
+    reason="requires a free-threaded (GIL-disabled) Python build",
+)
+def test_import_does_not_reenable_gil():
+    assert sys._is_gil_enabled() is False
 
 
 def check_cbwr(branch, cnr_const):

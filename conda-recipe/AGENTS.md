@@ -9,10 +9,10 @@ Conda package build recipe for conda-forge and Intel channel distribution.
 - **conda_build_config.yaml** — compiler / stdlib pinning used by conda-build variants
 
 ## Build configuration
-- **Channels:** `conda-forge`, `conda-forge/label/python_rc`, Intel channel
-- **Python versions in CI build matrix:** 3.10, 3.11, 3.12, 3.13, 3.14
+- **Channels:** `conda-forge`, Intel channel
+- **Python versions in CI build matrix:** 3.10, 3.11, 3.12, 3.13, 3.14, and free-threaded 3.14t
 - **Compilers:** pinned via `conda_build_config.yaml` (GCC/GXX on Linux, VS2022 on Windows)
-- **Dependencies:** `mkl` (runtime), `mkl-devel` (build), `cython`
+- **Dependencies:** `mkl` (runtime), `mkl-devel` (build), `cython >=3.1.0`
 
 ## Build outputs
 - Conda package: `mkl-service-<version>-<build>.conda`
@@ -31,4 +31,3 @@ Conda package build recipe for conda-forge and Intel channel distribution.
 ## Maintenance
 - Keep recipe metadata in sync with workflow matrix and package metadata
 - MKL version pinning: track Intel MKL releases through recipe deps
-- Python 3.14 in CI uses `conda-forge/label/python_rc` while pre-release

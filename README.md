@@ -47,7 +47,7 @@ If you already have `mkl` installed (from your system or a Conda environment) an
 want to reuse it instead of pulling a fresh copy into an isolated build, first
 install the build dependencies:
 ```sh
-python -m pip install mkl-devel meson-python cmake ninja cython
+python -m pip install mkl-devel meson-python cmake ninja "cython>=3.1.0"
 ```
 
 then build against the existing installation with:

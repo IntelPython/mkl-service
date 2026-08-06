@@ -3,8 +3,10 @@
 CI/CD workflows, automation, security scanning, and package distribution.
 
 ## Workflows
-- **conda-package.yml** — main build/test pipeline (Linux/Windows, Python 3.10-3.14)
-- **conda-package-cf.yml** — build/test using only conda-forge channel (Linux/Windows, Python 3.10-3.14)
+All build/test workflows cover Python 3.10-3.14 plus free-threaded 3.14t.
+
+- **conda-package.yml** — main build/test pipeline (Linux/Windows)
+- **conda-package-cf.yml** — build/test using only conda-forge channel (Linux/Windows)
 - **build-with-clang.yml** — Linux Clang compiler compatibility validation
 - **build-with-standard-clang.yml** — standard Clang compiler compatibility validation
 - **build_pip.yml** — validates editable build
@@ -14,8 +16,10 @@ CI/CD workflows, automation, security scanning, and package distribution.
 ## CI/CD policy
 - Keep build matrix (Python versions, platforms) in workflow files only
 - Required checks: conda build + test on supported Python versions/platforms in CI
-- Artifact naming: `$PACKAGE_NAME $OS Python $VERSION`
-- Channels: `conda-forge`, `conda-forge/label/python_rc`, Intel channel
+- Python 3.14 is expressed as two `include` rows carrying `python_spec` (`3.14.* *_cp314` and `3.14.* *_cp314t`); a bare `--python 3.14` has been observed to select the free-threaded ABI and must not be relied on
+- `include` rows create new matrix combinations and inherit nothing, so `experimental` must be repeated wherever the job reads them
+- Artifact naming: `$PACKAGE_NAME $OS Python $VERSION`, where `$VERSION` is `python_tag` (`3.14` or `3.14t`) when set, otherwise `python`
+- Channels: `conda-forge`, Intel channel
 
 ## Security
 - OpenSSF Scorecard runs automatically
@@ -29,4 +33,3 @@ CI/CD workflows, automation, security scanning, and package distribution.
 ## Notes
 - Workflow/job renames are breaking for downstream tooling
 - Cache key includes `meta.yaml` hash for conda packages
-- Python 3.14 uses `conda-forge/label/python_rc` for pre-release support

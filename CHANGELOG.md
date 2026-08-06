@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [dev] (MM/DD/YYYY)
 
 ### Added
+* Added support for free-threaded (GIL-disabled) CPython builds: the Cython extension is compiled with `freethreading_compatible=True` and `_mklinit` declares `Py_MOD_GIL_NOT_USED`, so importing `mkl` no longer re-enables the GIL [gh-213](https://github.com/IntelPython/mkl-service/pull/213)
 
 ### Changed
+* Raised the minimum build-time `Cython` requirement to `3.1.0`, the first release providing the `freethreading_compatible` directive [gh-213](https://github.com/IntelPython/mkl-service/pull/213)
 
-### Fixed
+### Removed
+* Removed the `python-gil` constraint from the conda recipes, which pinned `mkl-service` to GIL-enabled Python 3.14 builds [gh-213](https://github.com/IntelPython/mkl-service/pull/213)
 
 ## [2.8.0] (07/23/2026)
 
