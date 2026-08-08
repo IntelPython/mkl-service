@@ -602,7 +602,8 @@ cdef inline void __free_buffers() noexcept:
     """
     Frees unused memory allocated by the Intel(R) MKL Memory Allocator.
     """
-    mkl.mkl_free_buffers()
+    with nogil:
+        mkl.mkl_free_buffers()
     return
 
 
@@ -611,7 +612,8 @@ cdef inline void __thread_free_buffers() noexcept:
     Frees unused memory allocated by the Intel(R) MKL Memory Allocator in the current
     thread.
     """
-    mkl.mkl_thread_free_buffers()
+    with nogil:
+        mkl.mkl_thread_free_buffers()
     return
 
 
