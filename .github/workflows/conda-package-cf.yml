@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   linux:
-    name: conda-forge / linux
+    name: linux
     uses: ./.github/workflows/conda-build-test.yml
     with:
       runs-on: ubuntu-latest
@@ -24,7 +24,7 @@ jobs:
       recipe-dir: conda-recipe-cf
 
   windows:
-    name: conda-forge / windows
+    name: windows
     uses: ./.github/workflows/conda-build-test.yml
     with:
       runs-on: windows-latest
@@ -34,7 +34,7 @@ jobs:
       recipe-dir: conda-recipe-cf
 
   osx:
-    name: conda-forge / osx
+    name: osx
     uses: ./.github/workflows/conda-build-test.yml
     with:
       runs-on: macos-26-intel

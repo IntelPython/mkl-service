@@ -1,4 +1,4 @@
-name: Conda package
+name: Conda package using Intel channel
 
 on:
   push:
@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   linux:
-    name: Intel / linux
+    name: linux
     uses: ./.github/workflows/conda-build-test.yml
     with:
       runs-on: ubuntu-latest
@@ -25,7 +25,7 @@ jobs:
       build-wheels: true
 
   windows:
-    name: Intel / windows
+    name: windows
     uses: ./.github/workflows/conda-build-test.yml
     with:
       runs-on: windows-latest
