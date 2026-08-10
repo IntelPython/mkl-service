@@ -43,6 +43,7 @@ jobs:
     name: Build
 
     strategy:
+      fail-fast: false
       matrix:
         python: ['3.10', '3.11', '3.12', '3.13']
         include:
@@ -122,6 +123,7 @@ jobs:
     needs: build
 
     strategy:
+      fail-fast: false
       matrix:
         python: ['3.10', '3.11', '3.12', '3.13']
         include:
