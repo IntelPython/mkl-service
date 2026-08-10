@@ -34,7 +34,7 @@ permissions: read-all
 env:
   module-name: mkl
   package-name: mkl-service
-  ver-json-path: '${{ github.workspace }}/version.json'
+  ver-json-path: 'version.json'
   ver-script-part1: "import json; f = open('version.json', 'r'); j = json.load(f); f.close(); "
   ver-script-part2: "d = j['mkl-service'][0]; print('='.join((d[s] for s in ('version', 'build'))))"
 
@@ -143,8 +143,8 @@ jobs:
 
     env:
       test-env-name: 'test'
-      channel-path: '${{ github.workspace }}/channel/'
-      pkg-path-in-channel: '${{ github.workspace }}/channel/${{ inputs.conda-subdir }}'
+      channel-path: './channel'
+      pkg-path-in-channel: './channel/${{ inputs.conda-subdir }}'
       CONDA_PKGS_DIRS: ${{ inputs.pkgs-dir }}
 
     steps:
