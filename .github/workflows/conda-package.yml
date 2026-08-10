@@ -1,4 +1,4 @@
-name: Conda package using Intel channel
+name: Conda package using Intel
 
 on:
   push:

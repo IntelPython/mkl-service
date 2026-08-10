@@ -163,11 +163,11 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install conda-index
-        run: conda install conda-index
+        run: conda install -n base -y conda-index
 
       - name: Create conda channel
         run: |
-          python -m conda_index ${{ env.channel-path }}
+          conda run -n base python -m conda_index ${{ env.channel-path }}
 
       - name: Test conda channel
         run: |
