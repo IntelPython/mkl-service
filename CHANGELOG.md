@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 * Removed the `python-gil` constraint from the conda recipes, which pinned `mkl-service` to GIL-enabled Python 3.14 builds [gh-213](https://github.com/IntelPython/mkl-service/pull/213)
+* Removed the `IS_PY3K` macro and the dead Python 2 module-init branch from `_mklinitmodule.c`, since the project requires Python 3.10+ [gh-235](https://github.com/IntelPython/mkl-service/pull/235)
 
 ## [2.8.0] (07/23/2026)
 

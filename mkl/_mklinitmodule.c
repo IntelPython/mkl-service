@@ -14,11 +14,8 @@
 #undef _GNU_SOURCE
 #endif
 
-#include <Python.h>
-#if PY_MAJOR_VERSION >= 3
-#define IS_PY3K
-#endif
 #include "mkl.h"
+#include <Python.h>
 
 static struct PyMethodDef methods[] = {{NULL, NULL, 0, NULL}};
 
@@ -176,7 +173,6 @@ static MKL_SERVICE_INLINE void _set_mkl_interface(void)
     _preload_threading_layer();
 }
 
-#if defined(IS_PY3K)
 static struct PyModuleDef moduledef = {PyModuleDef_HEAD_INIT,
                                        "mklinit",
                                        NULL,
@@ -186,10 +182,8 @@ static struct PyModuleDef moduledef = {PyModuleDef_HEAD_INIT,
                                        NULL,
                                        NULL,
                                        NULL};
-#endif
 
 /* Initialization function for the module */
-#if defined(IS_PY3K)
 PyMODINIT_FUNC PyInit__mklinit(void)
 {
     PyObject *m;
@@ -208,10 +202,3 @@ PyMODINIT_FUNC PyInit__mklinit(void)
 
     return m;
 }
-#else
-PyMODINIT_FUNC init_mklinit(void)
-{
-    _set_mkl_interface();
-    Py_InitModule("_mklinit", methods);
-}
-#endif
