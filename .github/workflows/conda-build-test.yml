@@ -1,0 +1,215 @@
+name: Reusable conda build and test
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: Runner image to execute the jobs on
+        required: true
+        type: string
+      conda-subdir:
+        description: Conda platform subdir (e.g. linux-64, win-64, osx-64)
+        required: true
+        type: string
+      pkgs-dir:
+        description: Directory to cache conda packages in
+        required: true
+        type: string
+      channels-list:
+        description: Conda channels to build and test against
+        required: true
+        type: string
+      recipe-dir:
+        description: Path to the conda recipe directory
+        required: true
+        type: string
+      build-wheels:
+        description: Whether to build and upload wheel packages
+        required: false
+        default: false
+        type: boolean
+
+permissions: read-all
+
+env:
+  module-name: mkl
+  package-name: mkl-service
+  ver-json-path: 'version.json'
+  ver-script-part1: "import json; f = open('version.json', 'r'); j = json.load(f); f.close(); "
+  ver-script-part2: "d = j['mkl-service'][0]; print('='.join((d[s] for s in ('version', 'build'))))"
+
+jobs:
+  build:
+    name: Build
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.11', '3.12', '3.13']
+        include:
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314'
+            python_tag: '3.14'
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314t'
+            python_tag: '3.14t'
+
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        shell: bash -el {0}
+
+    env:
+      build-env-name: 'build'
+      CONDA_PKGS_DIRS: ${{ inputs.pkgs-dir }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
+        with:
+          miniforge-version: latest
+          activate-environment: ${{ env.build-env-name }}
+          channels: conda-forge
+          python-version: ${{ matrix.python }}
+
+      - name: Cache conda packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        env:
+          CACHE_NUMBER: 0  # Increase to reset cache
+        with:
+          path: ${{ inputs.pkgs-dir }}
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-${{hashFiles('**/meta.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
+
+      - name: Install conda-build
+        run: conda install -n base -y conda-build
+
+      - name: Store conda paths as envs
+        run: |
+          echo "CONDA_BLD=$CONDA/conda-bld/${{ inputs.conda-subdir }}" >> "$GITHUB_ENV"
+          if [ "${{ inputs.build-wheels }}" = "true" ]; then
+            echo "WHEELS_OUTPUT_FOLDER=${{ github.workspace }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build conda package
+        run: |
+          conda build --no-test --python "${{ matrix.python_spec || matrix.python }}" ${{ inputs.channels-list }} ${{ inputs.recipe-dir }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.package-name }} ${{ runner.os }} Python ${{ matrix.python_tag || matrix.python }}
+          path: ${{ env.CONDA_BLD }}/${{ env.package-name }}-*.conda
+
+      - name: Upload wheels artifact
+        if: ${{ inputs.build-wheels }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.package-name }} ${{ runner.os }} Wheels Python ${{ matrix.python_tag || matrix.python }}
+          path: ${{ env.WHEELS_OUTPUT_FOLDER }}/mkl_service-*.whl
+
+  test:
+    name: Test
+    needs: build
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.11', '3.12', '3.13']
+        include:
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314'
+            python_tag: '3.14'
+          - python: '3.14'
+            python_spec: '3.14.* *_cp314t'
+            python_tag: '3.14t'
+
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        shell: bash -el {0}
+
+    env:
+      test-env-name: 'test'
+      channel-path: './channel'
+      pkg-path-in-channel: './channel/${{ inputs.conda-subdir }}'
+      CONDA_PKGS_DIRS: ${{ inputs.pkgs-dir }}
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ env.package-name }} ${{ runner.os }} Python ${{ matrix.python_tag || matrix.python }}
+          path: ${{ env.pkg-path-in-channel }}
+
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
+        with:
+          miniforge-version: latest
+          channels: conda-forge
+          activate-environment: ${{ env.test-env-name }}
+          python-version: ${{ matrix.python }}
+
+      - name: Install conda-index
+        run: conda install -n base -y conda-index
+
+      - name: Create conda channel
+        run: |
+          conda run -n base python -m conda_index ${{ env.channel-path }}
+
+      - name: Test conda channel
+        run: |
+          conda search ${{ env.package-name }} -c ${{ env.channel-path }} --override-channels --info --json > ${{ env.ver-json-path }}
+          cat ${{ env.ver-json-path }}
+
+      - name: Get package version
+        run: |
+          PACKAGE_VERSION=$(python -c "${{ env.ver-script-part1 }} ${{ env.ver-script-part2 }}")
+          export PACKAGE_VERSION
+
+          echo "PACKAGE_VERSION=${PACKAGE_VERSION}"
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> "$GITHUB_ENV"
+
+      - name: Collect dependencies
+        run: |
+          conda install ${{ env.package-name }}=${{ env.PACKAGE_VERSION }} pytest "python=${{ matrix.python_spec || matrix.python }}" ${{ env.CHANNELS }} --only-deps --dry-run > lockfile
+          cat lockfile
+        env:
+          CHANNELS: '-c ${{ env.channel-path }} ${{ inputs.channels-list }}'
+
+      - name: Cache conda packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        env:
+          CACHE_NUMBER: 0  # Increase to reset cache
+        with:
+          path: ${{ inputs.pkgs-dir }}
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-${{hashFiles('lockfile') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
+
+      - name: Install mkl-service
+        run: |
+          conda install ${{ env.package-name }}=${{ env.PACKAGE_VERSION }} pytest "python=${{ matrix.python_spec || matrix.python }}" ${{ env.CHANNELS }}
+        env:
+          CHANNELS: '-c ${{ env.channel-path }} ${{ inputs.channels-list }}'
+
+      - name: List installed packages
+        run: conda list
+
+      - name: Run tests
+        run: |
+          pytest -vv --pyargs ${{ env.module-name }}
