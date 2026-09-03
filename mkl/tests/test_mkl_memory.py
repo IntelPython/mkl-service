@@ -24,6 +24,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import sys
+import threading
+
+import pytest
 
 import mkl
 
@@ -137,3 +140,132 @@ def test_pickling_with_alignment():
     assert (
         mem.alignment == mem_reconstructed.alignment
     ), "Pickling should preserve alignment"
+
+
+def test_realloc_exported_buffer():
+    mem = mkl.MKLMemory(1024)
+    mv = memoryview(mem)
+    with pytest.raises(BufferError):
+        mem.realloc(2048)
+    del mv
+
+
+def test_realloc_refcheck_shared():
+    mem = mkl.MKLMemory(1024)
+    alias = mem  # noqa: F841 — extra reference
+    with pytest.raises(ValueError, match="referenced by"):
+        mem.realloc(2048)
+    del alias
+
+
+def test_alignment_validation():
+    with pytest.raises(ValueError, match="positive"):
+        mkl.MKLMemory(1024, alignment=0)
+    with pytest.raises(ValueError, match="positive"):
+        mkl.MKLMemory(1024, alignment=-1)
+    with pytest.raises(ValueError, match="must not exceed"):
+        mkl.MKLMemory(1024, alignment=2**40)
+
+
+def test_concurrent_reads():
+    mem = mkl.MKLMemory(1024)
+    mv = memoryview(mem)
+    for i in range(len(mem)):
+        mv[i] = i % 256
+    del mv
+
+    errors = []
+
+    def reader():
+        try:
+            for _ in range(500):
+                assert len(mem) == 1024
+                data = mem.tobytes()
+                assert len(data) == 1024
+                v = memoryview(mem)
+                assert v[0] == 0
+                v.release()
+        except Exception as e:
+            errors.append(e)
+
+    ts = [threading.Thread(target=reader) for _ in range(4)]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    assert not errors, f"Concurrent read errors: {errors}"
+
+
+def test_concurrent_realloc_never_overlaps():
+    initial = 64
+    sizes = (1 << 16, 1 << 17)
+
+    for _ in range(50):
+        mem = mkl.MKLMemory(initial)
+        barrier = threading.Barrier(len(sizes))
+        results = [None] * len(sizes)
+
+        def worker(idx, size, mem=mem, barrier=barrier, results=results):
+            barrier.wait()
+            try:
+                mem.realloc(size)
+                results[idx] = "ok"
+            except (ValueError, BufferError):
+                results[idx] = "refused"
+
+        ts = [
+            threading.Thread(target=worker, args=(idx, size))
+            for idx, size in enumerate(sizes)
+        ]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join()
+
+        assert all(
+            r in ("ok", "refused") for r in results
+        ), f"realloc raised an unexpected error: {results}"
+        allowed = {initial, *sizes}
+        assert (
+            len(mem) in allowed
+        ), f"Inconsistent size {len(mem)} from {results}"
+        assert mem.nbytes == len(mem)
+        assert len(mem.tobytes()) == len(mem)
+
+        mv = memoryview(mem)
+        try:
+            mv[0] = 1
+            mv[len(mem) - 1] = 2
+        finally:
+            mv.release()
+
+
+def test_realloc_refused_while_another_thread_holds_reference():
+    mem = mkl.MKLMemory(64)
+    holder_ready = threading.Event()
+    release_holder = threading.Event()
+    outcome = []
+
+    def holder():
+        # keep reference alive
+        alias = mem  # noqa: F841
+        holder_ready.set()
+        release_holder.wait(timeout=30)
+
+    t = threading.Thread(target=holder)
+    t.start()
+    try:
+        assert holder_ready.wait(timeout=30)
+        try:
+            mem.realloc(1 << 16)
+            outcome.append("ok")
+        except ValueError:
+            outcome.append("refused")
+    finally:
+        release_holder.set()
+        t.join()
+
+    assert outcome == [
+        "refused"
+    ], f"Expected refusal while shared, got {outcome}"
+    assert len(mem) == 64, "Refused realloc must not change the buffer"
