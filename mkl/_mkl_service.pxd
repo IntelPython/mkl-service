@@ -24,12 +24,13 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-ctypedef long long MKL_INT64
-ctypedef unsigned long long MKL_UINT64
-ctypedef int MKL_INT
-
-
 cdef extern from "mkl.h":
+    # defer definition of integer types to mkl.h
+    # Cython will narrow the types based on what mkl.h defines
+    ctypedef long long MKL_INT64
+    ctypedef unsigned long long MKL_UINT64
+    ctypedef long long MKL_INT
+
     # MKL Function Domains Constants
     int MKL_DOMAIN_BLAS
     int MKL_DOMAIN_FFT

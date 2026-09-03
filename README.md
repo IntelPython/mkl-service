@@ -54,3 +54,36 @@ then build against the existing installation with:
 ```sh
 python -m pip install --no-build-isolation --no-deps .
 ```
+
+### Build options
+
+| Option  | Type    | Default | Description                           |
+| ------- | ------- | ------- | ------------------------------------- |
+| `ilp64` | boolean | `false` | Build with the oneMKL ILP64 interface |
+
+Options are passed using `-Csetup-args`:
+```sh
+python -m pip install . -Csetup-args=-Dilp64=true
+```
+
+By default `mkl-service` is built against the LP64 interface, in which oneMKL's
+integer type `MKL_INT` is 32-bit. Enabling `ilp64` makes `MKL_INT` 64-bit
+and requests the ILP64 interface layer from `libmkl_rt` on import.
+Use it when the oneMKL libraries you link against provide the ILP64 interface.
+
+The Python API is identical in both configurations — no function signature or
+return value changes.
+
+> **Warning:** the oneMKL interface layer is process-global and can only be
+> selected before the first oneMKL call. `mkl-service` requests it on import,
+> so an ILP64 build is order-dependent and unsafe to mix with LP64
+> consumers:
+>
+> * If imported before another oneMKL consumer initializes oneMKL, that
+>   consumer's LP64 calls get reinterpreted as ILP64. LAPACK routines in
+>   particular may crash.
+> * If the other consumer initializes oneMKL first, the ILP64 request is ignored
+>   and the process stays LP64.
+>
+> Only enable `ilp64` when every consumer uses the ILP64 interface or
+> `mkl-service` is the sole oneMKL consumer in the process.
