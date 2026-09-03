@@ -15,9 +15,11 @@ project(
 py = import('python').find_installation(pure: false)
 
 c_args = ['-DNDEBUG']
+cmake_mkl_interface = 'lp64'
 
 if get_option('ilp64')
     c_args += '-DMKL_ILP64'
+    cmake_mkl_interface = 'ilp64'
 endif
 
 thread_dep = dependency('threads')
@@ -28,6 +30,7 @@ mkl_dep = dependency('MKL', method: 'cmake',
     cmake_args: [
         '-DMKL_ARCH=intel64',
         '-DMKL_LINK=sdl',
+        '-DMKL_INTERFACE=' + cmake_mkl_interface,
     ],
     required: true
 )
