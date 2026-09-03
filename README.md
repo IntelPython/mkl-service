@@ -57,8 +57,8 @@ python -m pip install --no-build-isolation --no-deps .
 
 ### Build options
 
-| Option  | Type    | Default | Description                          |
-| ------- | ------- | ------- | ------------------------------------ |
+| Option  | Type    | Default | Description                           |
+| ------- | ------- | ------- | ------------------------------------- |
 | `ilp64` | boolean | `false` | Build with the oneMKL ILP64 interface |
 
 Options are passed using `-Csetup-args`:
