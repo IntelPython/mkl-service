@@ -8,6 +8,7 @@ project(
     ).stdout().strip(),
     meson_version: '>=1.8.3',
     default_options: [
+        'c_std=c11',
         'buildtype=release',
     ]
 )
@@ -25,6 +26,13 @@ endif
 thread_dep = dependency('threads')
 
 cc = meson.get_compiler('c')
+if cc.get_id() == 'msvc'
+    add_project_arguments(
+        '/experimental:c11atomics',
+        language: 'c'
+    )
+endif
+
 mkl_dep = dependency('MKL', method: 'cmake',
     modules: ['MKL::MKL'],
     cmake_args: [
@@ -60,7 +68,7 @@ py.extension_module(
     subdir: 'mkl'
 )
 
-# Cython extension
+# Cython extensions
 py.extension_module(
     '_py_mkl_service',
     sources: ['mkl/_py_mkl_service.pyx'],
@@ -70,6 +78,17 @@ py.extension_module(
     install: true,
     subdir: 'mkl'
 )
+
+py.extension_module(
+    '_mkl_memory',
+    sources: ['mkl/_mkl_memory.pyx'],
+    dependencies: [mkl_dep],
+    c_args: c_args,
+    link_args: rpath_link_args,
+    install: true,
+    subdir: 'mkl'
+)
+
 
 # Python sources
 py.install_sources(
@@ -82,6 +101,9 @@ py.install_sources(
 )
 
 py.install_sources(
-    ['mkl/tests/test_mkl_service.py'],
+    [
+        'mkl/tests/test_mkl_memory.py',
+        'mkl/tests/test_mkl_service.py',
+    ],
     subdir: 'mkl/tests'
 )
