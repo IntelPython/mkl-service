@@ -21,7 +21,7 @@ jobs:
       runs-on: ubuntu-latest
       conda-subdir: linux-64
       pkgs-dir: /home/runner/conda_pkgs_dir
-      channels-list: -c https://software.repos.intel.com/python/conda -c conda-forge --override-channels
+      channels-list: -c https://software.repos.intel.com/python/conda -c conda-forge -c conda-forge/label/python_rc --override-channels
       recipe-dir: conda-recipe
       build-wheels: true
 
@@ -32,6 +32,6 @@ jobs:
       runs-on: windows-latest
       conda-subdir: win-64
       pkgs-dir: D:\conda_pkgs_dir
-      channels-list: -c https://software.repos.intel.com/python/conda -c conda-forge --override-channels
+      channels-list: -c https://software.repos.intel.com/python/conda -c conda-forge -c conda-forge/label/python_rc --override-channels
       recipe-dir: conda-recipe
       build-wheels: true
