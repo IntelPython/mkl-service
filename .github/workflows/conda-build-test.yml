@@ -54,6 +54,9 @@ jobs:
           - python: '3.14'
             python_spec: '3.14.* *_cp314t'
             python_tag: '3.14t'
+          - python: '3.15'
+            python_spec: '3.15.* *_cp315'
+            python_tag: '3.15'
 
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 15
@@ -78,7 +81,8 @@ jobs:
         with:
           miniforge-version: latest
           activate-environment: ${{ env.build-env-name }}
-          channels: conda-forge
+          # python_rc label carries the 3.15 release candidate; drop once 3.15 is final
+          channels: conda-forge,conda-forge/label/python_rc
           python-version: ${{ matrix.python }}
 
       - name: Cache conda packages
@@ -142,6 +146,9 @@ jobs:
           - python: '3.14'
             python_spec: '3.14.* *_cp314t'
             python_tag: '3.14t'
+          - python: '3.15'
+            python_spec: '3.15.* *_cp315'
+            python_tag: '3.15'
 
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 15
@@ -167,7 +174,8 @@ jobs:
         uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         with:
           miniforge-version: latest
-          channels: conda-forge
+          # python_rc label carries the 3.15 release candidate; drop once 3.15 is final
+          channels: conda-forge,conda-forge/label/python_rc
           activate-environment: ${{ env.test-env-name }}
           python-version: ${{ matrix.python }}
 

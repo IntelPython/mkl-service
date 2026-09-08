@@ -14,8 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        python: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.14t"]
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.14t", "3.15"]
 
     env:
       ONEAPI_ROOT: /opt/intel/oneapi
@@ -47,6 +48,8 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python }}
+          # allow the 3.15 release candidate until 3.15 is final
+          allow-prereleases: true
           architecture: x64
 
       - name: Checkout repo
