@@ -48,8 +48,9 @@ python -m pip install --no-deps --no-build-isolation .
 
 ## CI/CD
 - **Platforms in CI workflows:** Linux, Windows, macOS (conda-forge workflow only)
-- **Python versions:** 3.10, 3.11, 3.12, 3.13, 3.14, and free-threaded 3.14t
+- **Python versions:** 3.10, 3.11, 3.12, 3.13, 3.14, 3.15, and free-threaded 3.14t
 - **Python 3.14 ABI selection:** conda jobs must request an explicit ABI, `3.14.* *_cp314` (GIL) or `3.14.* *_cp314t` (free-threaded). Once the recipes stopped constraining `python-gil`, a bare `--python 3.14` was observed to resolve to the free-threaded build, so it must not be relied on.
+- **Python 3.15:** GIL-only for now; conda-forge's `python315` migration provides `*_cp315` but no free-threaded `*_cp315t` yet. Conda jobs pin `3.15.* *_cp315` explicitly for the same ABI-selection reason as 3.14.
 - **Workflows:** `.github/workflows/`
   - `conda-package.yml` — main conda build/test pipeline
   - `conda-package-cf.yml` — conda build/test using only conda-forge channel

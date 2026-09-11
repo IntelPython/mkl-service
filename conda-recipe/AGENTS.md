@@ -10,7 +10,7 @@ Conda package build recipe for conda-forge and Intel channel distribution.
 
 ## Build configuration
 - **Channels:** `conda-forge`, Intel channel
-- **Python versions in CI build matrix:** 3.10, 3.11, 3.12, 3.13, 3.14, and free-threaded 3.14t
+- **Python versions in CI build matrix:** 3.10, 3.11, 3.12, 3.13, 3.14, 3.15, and free-threaded 3.14t
 - **Compilers:** pinned via `conda_build_config.yaml` (GCC/GXX on Linux, VS2022 on Windows)
 - **Dependencies:** `mkl` (runtime), `mkl-devel` (build), `cython >=3.1.0`
 

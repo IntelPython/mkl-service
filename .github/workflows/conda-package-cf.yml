@@ -6,7 +6,8 @@ on:
       - master
   pull_request:
 
-permissions: read-all
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,7 +21,7 @@ jobs:
       runs-on: ubuntu-latest
       conda-subdir: linux-64
       pkgs-dir: /home/runner/conda_pkgs_dir
-      channels-list: -c conda-forge --override-channels
+      channels-list: -c conda-forge -c conda-forge/label/python_rc --override-channels
       recipe-dir: conda-recipe-cf
 
   windows:
@@ -30,7 +31,7 @@ jobs:
       runs-on: windows-latest
       conda-subdir: win-64
       pkgs-dir: D:\conda_pkgs_dir
-      channels-list: -c conda-forge --override-channels
+      channels-list: -c conda-forge -c conda-forge/label/python_rc --override-channels
       recipe-dir: conda-recipe-cf
 
   osx:
@@ -40,5 +41,5 @@ jobs:
       runs-on: macos-26-intel
       conda-subdir: osx-64
       pkgs-dir: /Users/runner/conda_pkgs_dir
-      channels-list: -c conda-forge --override-channels
+      channels-list: -c conda-forge -c conda-forge/label/python_rc --override-channels
       recipe-dir: conda-recipe-cf
