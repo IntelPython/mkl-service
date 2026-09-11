@@ -5,6 +5,7 @@ Core Python/Cython implementation: MKL support function wrappers and runtime con
 ## Structure
 - `__init__.py` — public API, RTLD_GLOBAL context manager, module initialization
 - `_py_mkl_service.pyx` — Cython wrappers for MKL support functions
+- `_mkl_memory.pyx` — `MKLMemory`, a buffer-protocol object over MKL's allocator
 - `_mkl_service.pxd` — Cython declarations (C function signatures)
 - `_mklinitmodule.c` — C extension for Linux-side MKL runtime preloading/init
 - `_init_helper.py` — Windows loading helper (DLL path setup in venv)
@@ -26,6 +27,13 @@ Core Python/Cython implementation: MKL support function wrappers and runtime con
 - `peak_mem_usage(memtype)` — peak memory usage stats
 - `mem_stat()` — memory allocation statistics
 
+### Memory allocation
+- `MKLMemory(nbytes, alignment=64)` — aligned allocation via `mkl_malloc`
+- `MKLMemory(num, elem_size, alignment=64)` — zeroed allocation via `mkl_calloc`
+- `MKLMemory(other, alignment=other.alignment)` — copy of another allocation
+- `realloc(new_nbytes, refcheck=True)` — resize in place via `mkl_realloc`
+- `nbytes` / `__len__`, `alignment`, `tobytes()`, buffer protocol, pickling
+
 ### CNR (Conditional Numerical Reproducibility)
 - `set_num_threads_local(n)` — thread-local thread count
 - CNR mode control functions
@@ -39,11 +47,14 @@ Core Python/Cython implementation: MKL support function wrappers and runtime con
 - **API stability:** Preserve function signatures (widely used in ecosystem)
 - **MKL dependency:** Assumes MKL is available at runtime (conda: mkl package). Do **not** list `mkl` in `pyproject.toml` `[project].dependencies` — its PyPI wheel lacks `.dist-info`, which breaks `pip check`; on conda-forge there is no pip-visible `mkl` distribution.
 - **RTLD_GLOBAL preload path:** Linux preload is handled in `_mklinitmodule.c`; Windows DLL setup is in `_init_helper.py`
+- **`MKLMemory` mutation:** `realloc` moves the underlying block, so it must refuse while a buffer is exported, while another thread is resizing, or (unless `refcheck=False`) while the object looks referenced elsewhere. The GIL must not be released across those checks and the pointer store, mirroring NumPy's `PyArray_Resize`. The reference-count check stays NumPy's: `PyUnstable_Object_IsUniquelyReferenced` from 3.14, `Py_REFCNT > 2` before it, keyed on `PY_VERSION_HEX` and not on `Py_GIL_DISABLED`. It is a check against dangling references, not against other threads — on a free-threaded build before 3.14 it cannot be either, and resizing an allocation another thread can reach is the caller's responsibility, as it is for `numpy.ndarray.resize`.
 
 ## Cython details
 - `_py_mkl_service.pyx` → generates `_py_mkl_service` extension module
+- `_mkl_memory.pyx` → generates `_mkl_memory` extension module
 - `.pxd` file declares external C functions from MKL headers
 - Cython build requires MKL headers (`mkl-devel`)
+- `_mkl_memory.pyx` uses C11 atomics (`<stdatomic.h>`); `meson.build` scopes MSVC's `/experimental:c11atomics` to that one target
 
 ## C init module
 - `_mklinitmodule.c` → `_mklinit` extension

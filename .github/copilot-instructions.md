@@ -20,7 +20,7 @@ Higher-precedence file overrides; lower must not restate overridden guidance.
 ## Contribution expectations
 - Keep diffs minimal; prefer atomic single-purpose commits.
 - Preserve public API signatures in `mkl/__init__.py` unless change is explicitly requested.
-- For user-visible behavior changes: update tests in `mkl/tests/test_mkl_service.py`.
+- For user-visible behavior changes: update tests in `mkl/tests/test_mkl_service.py`, or `mkl/tests/test_mkl_memory.py` for `MKLMemory`.
 - For bug fixes: add or extend regression tests in the same change.
 - Do not generate code without corresponding test updates when behavior changes.
 - Run `pre-commit run --all-files` when `.pre-commit-config.yaml` is present.
@@ -37,8 +37,8 @@ Higher-precedence file overrides; lower must not restate overridden guidance.
 - Build/config: `pyproject.toml`, `meson.build`
 - Recipe/deps: `conda-recipe/meta.yaml`, `conda-recipe/conda_build_config.yaml`
 - CI: `.github/workflows/*.{yml,yaml}`
-- API contracts: `mkl/__init__.py`, `mkl/_py_mkl_service.pyx`
-- Tests: `mkl/tests/test_mkl_service.py`
+- API contracts: `mkl/__init__.py`, `mkl/_py_mkl_service.pyx`, `mkl/_mkl_memory.pyx`
+- Tests: `mkl/tests/test_mkl_service.py`, `mkl/tests/test_mkl_memory.py`
 
 ## MKL-specific constraints
 - Linux runtime init path may require `RTLD_GLOBAL` preloading (`mkl/_mklinitmodule.c`).

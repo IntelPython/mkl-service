@@ -122,6 +122,7 @@ __all__ = [
     "mem_stat",
     "peak_mem_usage",
     "set_memory_limit",
+    "MKLMemory",
     "cbwr_set",
     "cbwr_get",
     "cbwr_get_auto_branch",

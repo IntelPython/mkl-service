@@ -7,6 +7,7 @@ Entry point for agent context in this repo.
 - Threading control (set/get number of threads, domain-specific threading)
 - Version information (MKL version, build info)
 - Memory management (peak memory usage, memory statistics)
+- Aligned memory allocation (`MKLMemory`, a buffer-protocol object backed by `mkl_malloc`)
 - Conditional Numerical Reproducibility (CNR)
 - Timing functions (get CPU/wall clock time)
 - Miscellaneous utilities (MKL_VERBOSE control, etc.)
@@ -16,6 +17,7 @@ Originally part of Intel® Distribution for Python*, now a standalone package av
 ## Key components
 - **Python interface:** `mkl/__init__.py` — public API surface
 - **Cython wrapper:** `mkl/_py_mkl_service.pyx` — wraps MKL support functions
+- **Cython allocator:** `mkl/_mkl_memory.pyx` — `MKLMemory`, wraps `mkl_malloc`/`mkl_calloc`/`mkl_realloc`/`mkl_free`
 - **C init module:** `mkl/_mklinitmodule.c` — Linux-side MKL runtime preloading / initialization
 - **Helper:** `mkl/_init_helper.py` — Windows venv DLL loading helper
 - **Build system:** meson-python + Cython
@@ -73,11 +75,11 @@ mkl.get_version_string()             # MKL version info
 - **API stability:** Preserve existing function signatures (widely used in ecosystem)
 - **Threading:** Changes to threading control must be thread-safe
 - **CNR:** Conditional Numerical Reproducibility flags require careful documentation
-- **Testing:** Add tests to `mkl/tests/test_mkl_service.py`
+- **Testing:** Add tests to `mkl/tests/test_mkl_service.py`, or `mkl/tests/test_mkl_memory.py` for `MKLMemory`
 - **Docs:** MKL support functions documented in [Intel oneMKL Developer Reference](https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2025-2/support-functions.html)
 
 ## Code structure
-- **Cython layer:** `_py_mkl_service.pyx` + `_mkl_service.pxd` (C declarations)
+- **Cython layer:** `_py_mkl_service.pyx` and `_mkl_memory.pyx` + `_mkl_service.pxd` (C declarations)
 - **C init:** `_mklinitmodule.c` handles Linux preloading (`dlopen(..., RTLD_GLOBAL)`) for MKL runtime
 - **Windows loading helper:** `_init_helper.py` handles DLL path setup in Windows venv
 - **Python wrapper:** `__init__.py` imports `_py_mkl_service` (generated from `.pyx`)

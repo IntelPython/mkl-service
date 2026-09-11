@@ -26,10 +26,17 @@ endif
 thread_dep = dependency('threads')
 
 cc = meson.get_compiler('c')
+
+atomics_args = []
 if cc.get_id() == 'msvc'
-    add_project_arguments(
-        '/experimental:c11atomics',
-        language: 'c'
+    atomics_args += '/experimental:c11atomics'
+endif
+
+# checked to fail early if missing header
+if not cc.has_header('stdatomic.h', args: atomics_args)
+    error(
+        'mkl-service requires a C compiler supporting C11 atomics',
+        '(i.e., for Windows, Visual Studio 2022 17.5 or newer).'
     )
 endif
 
@@ -83,7 +90,7 @@ py.extension_module(
     '_mkl_memory',
     sources: ['mkl/_mkl_memory.pyx'],
     dependencies: [mkl_dep],
-    c_args: c_args,
+    c_args: c_args + atomics_args,
     link_args: rpath_link_args,
     install: true,
     subdir: 'mkl'

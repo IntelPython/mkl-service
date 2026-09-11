@@ -36,6 +36,10 @@ from libc.string cimport memcpy
 from mkl._mkl_service cimport mkl_calloc, mkl_free, mkl_malloc, mkl_realloc
 
 
+cdef extern from "Python.h":
+    const Py_ssize_t PY_SSIZE_T_MAX
+
+
 cdef extern from "stdatomic.h" nogil:
     ctypedef int atomic_int "_Atomic int"
     void atomic_init(atomic_int *obj, int value)
@@ -50,8 +54,8 @@ cdef extern from "stdatomic.h" nogil:
 
 cdef extern from *:
     """
-    // Check whether a MKLMemory object may be safely reallocated.
-    // Mirrors NumPy's PyArray_Resize_int logic.
+    // Check whether a MKLMemory object may be safely reallocated
+    // Mirrors NumPy's PyArray_Resize_int logic
     static int _MKLMemory_MayBeShared(PyObject *op) {
     #if PY_VERSION_HEX >= 0x030e00b0
         if (PyUnstable_Object_IsUniquelyReferenced(op)) {
@@ -69,10 +73,29 @@ cdef extern from *:
     int _MKLMemory_MayBeShared(object obj)
 
 
-cdef int _check_alignment(Py_ssize_t alignment) except -1:
+cdef _extract_alignment(dict kwargs, object default):
+    """
+    Return the ``alignment`` keyword, or `default` when it was not given.
+    """
+    for name in kwargs:
+        if name != "alignment":
+            raise TypeError(
+                "MKLMemory constructor got an unexpected keyword argument "
+                f"'{name}'"
+            )
+
+    return kwargs.get("alignment", default)
+
+
+cdef int _check_alignment(object alignment) except -1:
+    if not isinstance(alignment, numbers.Integral):
+        raise TypeError(
+            "Alignment of requested allocation must be an integer, but got "
+            f"{type(alignment)}"
+        )
     if alignment <= 0:
         raise ValueError("Alignment of requested allocation must be positive.")
-    if alignment > <Py_ssize_t>INT_MAX:
+    if alignment > INT_MAX:
         raise ValueError(
             f"Alignment of requested allocation must not exceed {INT_MAX}."
         )
@@ -93,7 +116,36 @@ def _mkl_memory_from_bytes(bytes data, Py_ssize_t alignment):
 
 
 cdef class MKLMemory:
-    """MKL-backed memory object that exposes Python buffer protocol."""
+    """
+    MKLMemory(nbytes, alignment=64)
+    MKLMemory(num, elem_size, alignment=64)
+    MKLMemory(other, alignment=other.alignment)
+
+    An object representing an aligned allocation made by oneMKL's allocator,
+    exposed through the Python buffer protocol.
+
+    The first form allocates ``nbytes`` uninitialized bytes with
+    ``mkl_malloc``, the second ``num * elem_size`` zeroed bytes with
+    ``mkl_calloc``, and the third a copy of the content of another
+    :class:`MKLMemory`.
+
+    Args:
+        nbytes (int):
+            number of bytes to allocate.
+            Expected to be positive.
+        num (int):
+            number of elements to allocate.
+            Expected to be positive.
+        elem_size (int):
+            size of a single element in bytes.
+            Expected to be positive.
+        other (:class:`MKLMemory`):
+            allocation whose size and content the new allocation takes.
+        alignment (Optional[int]):
+            address alignment of the allocation in bytes. Expected to be
+            positive and to not exceed ``INT_MAX``. Defaults to the alignment
+            of ``other`` in the copy form, and to `64` otherwise.
+    """
     cdef void *_memory_ptr
     cdef Py_ssize_t _nbytes
     cdef Py_ssize_t _alignment
@@ -108,7 +160,7 @@ cdef class MKLMemory:
         atomic_init(&self.exported_buffers, 0)
         atomic_init(&self.realloc_in_progress, 0)
 
-    cdef _cinit_malloc(self, Py_ssize_t nbytes, Py_ssize_t alignment):
+    cdef _cinit_malloc(self, Py_ssize_t nbytes, object alignment):
         cdef int c_alignment = _check_alignment(alignment)
         cdef void *p
 
@@ -121,7 +173,7 @@ cdef class MKLMemory:
             if (p):
                 self._memory_ptr = p
                 self._nbytes = nbytes
-                self._alignment = alignment
+                self._alignment = c_alignment
             else:
                 raise MemoryError(
                     "MKL memory allocation failed."
@@ -131,31 +183,41 @@ cdef class MKLMemory:
                 "Number of bytes of requested allocation must be positive."
             )
 
-    cdef _cinit_calloc(self, Py_ssize_t num, Py_ssize_t size, Py_ssize_t alignment):
+    cdef _cinit_calloc(
+        self, Py_ssize_t num, Py_ssize_t elem_size, object alignment
+    ):
         cdef int c_alignment = _check_alignment(alignment)
+        cdef Py_ssize_t nbytes
         cdef void *p
 
         self._cinit_empty()
 
-        if (num > 0 and size > 0):
+        if (num > 0 and elem_size > 0):
+            if num > PY_SSIZE_T_MAX // elem_size:
+                raise ValueError(
+                    "Total size of requested allocation must not exceed "
+                    f"{PY_SSIZE_T_MAX} bytes."
+                )
+            nbytes = num * elem_size
+
             with nogil:
-                p = mkl_calloc(num, size, c_alignment)
+                p = mkl_calloc(num, elem_size, c_alignment)
 
             if (p):
                 self._memory_ptr = p
-                self._nbytes = num * size
-                self._alignment = alignment
+                self._nbytes = nbytes
+                self._alignment = c_alignment
             else:
                 raise MemoryError(
                     "MKL memory allocation failed."
                 )
         else:
             raise ValueError(
-                "Number of elements and size of requested allocation must be "
-                "positive."
+                "Number of elements and element size of requested allocation "
+                "must be positive."
             )
 
-    cdef _cinit_mklmemory(self, object other, Py_ssize_t alignment):
+    cdef _cinit_mklmemory(self, object other, object alignment):
         cdef MKLMemory other_mem = <MKLMemory> other
 
         self._cinit_malloc(other_mem._nbytes, alignment)
@@ -163,8 +225,6 @@ cdef class MKLMemory:
             memcpy(self._memory_ptr, other_mem._memory_ptr, self._nbytes)
 
     def __cinit__(self, *args, **kwargs):
-        cdef Py_ssize_t alignment
-
         n_args = len(args)
         if not (0 < n_args < 3):
             raise TypeError(
@@ -174,10 +234,12 @@ cdef class MKLMemory:
         if n_args == 1:
             arg = args[0]
             if isinstance(arg, numbers.Integral):
-                alignment = kwargs.get("alignment", 64)
+                alignment = _extract_alignment(kwargs, 64)
                 self._cinit_malloc(arg, alignment)
             elif isinstance(arg, MKLMemory):
-                alignment = kwargs.get("alignment", (<MKLMemory>arg)._alignment)
+                alignment = _extract_alignment(
+                    kwargs, (<MKLMemory>arg)._alignment
+                )
                 self._cinit_mklmemory(arg, alignment)
             else:
                 raise TypeError(
@@ -187,7 +249,7 @@ cdef class MKLMemory:
 
         elif n_args == 2:
             arg0, arg1 = args[0], args[1]
-            alignment = kwargs.get("alignment", 64)
+            alignment = _extract_alignment(kwargs, 64)
             if not isinstance(arg0, numbers.Integral):
                 raise TypeError(
                     "MKLMemory constructor expects first argument "
@@ -226,7 +288,41 @@ cdef class MKLMemory:
     def __releasebuffer__(self, Py_buffer *buffer):
         atomic_fetch_sub(&self.exported_buffers, 1)
 
-    def realloc(self, Py_ssize_t new_nbytes):
+    def realloc(self, Py_ssize_t new_nbytes, *, bint refcheck=True):
+        """
+        realloc(new_nbytes, refcheck=True)
+
+        Resizes this allocation in place, keeping the content that fits.
+
+        Args:
+            new_nbytes (int):
+                new size of the allocation in bytes.
+                Expected to be positive.
+            refcheck (Optional[bool]):
+                whether to refuse the resize when this object appears to be
+                referenced from elsewhere.
+                Default: `True`.
+
+        Resizing moves the underlying memory, so any other reference to this
+        object would be left pointing at freed memory. The check for such
+        references is a heuristic based on the reference count and can refuse a
+        resize that would have been safe, especially in the case of a reference
+        reachable from more than one thread.
+
+        Passing ``refcheck=False`` skips that check, and it is the caller's
+        responsibility to ensure that nothing else refers to this object and
+        that no other thread can reach it until the call returns.
+
+        Neither the check nor its absence is a substitute for locking. Under the
+        GIL, and on free-threaded builds from Python 3.14 where the object can
+        be asked whether it is uniquely referenced, nothing else can reach the
+        object between the check and the resize. On a free-threaded build before
+        3.14 there is neither, and a reference the caller holds cannot be told
+        apart from one another thread holds: resizing an allocation another
+        thread can reach may leave that thread reading freed memory whatever
+        ``refcheck`` is set to, so arrange for exclusive access. The same
+        applies to :meth:`numpy.ndarray.resize`.
+        """
         cdef void *p
         cdef int shared
         cdef int unclaimed = 0
@@ -243,22 +339,29 @@ cdef class MKLMemory:
                 raise BufferError(
                     "Cannot realloc memory while there are exported buffers."
                 )
-            shared = _MKLMemory_MayBeShared(self)
-            if shared == 1:
-                raise ValueError(
-                    "Cannot realloc MKLMemory that may be referenced by another "
-                    "object. It is possible that this is a false positive."
-                )
-            elif shared == 2:
-                raise ValueError(
-                    "Cannot realloc MKLMemory that is referenced by other "
-                    "objects."
-                )
+            if refcheck:
+                shared = _MKLMemory_MayBeShared(self)
+                if shared == 1:
+                    raise ValueError(
+                        "Cannot realloc MKLMemory that may be referenced by "
+                        "another object. It is possible that this is a false "
+                        "positive. If you are sure that this MKLMemory is "
+                        "uniquely referenced, pass refcheck=False."
+                    )
+                elif shared == 2:
+                    raise ValueError(
+                        "Cannot realloc MKLMemory that is referenced by other "
+                        "objects. Pass refcheck=False to realloc anyway, at the "
+                        "risk of leaving those references pointing at freed "
+                        "memory."
+                    )
             if new_nbytes <= 0:
                 raise ValueError("New number of bytes must be positive.")
 
-            with nogil:
-                p = mkl_realloc(self._memory_ptr, new_nbytes)
+            # do not release the GIL here, as that can allow another thread to
+            # read the or export a buffer with the old pointer before
+            # mkl_realloc frees it
+            p = mkl_realloc(self._memory_ptr, new_nbytes)
 
             if not p:
                 raise MemoryError("MKL memory reallocation failed.")
@@ -269,29 +372,34 @@ cdef class MKLMemory:
             atomic_store(&self.realloc_in_progress, 0)
 
     def tobytes(self):
+        """
+        Constructs bytes object populated with copy of this allocation.
+        """
         cdef char* data_ptr = <char*>self._memory_ptr
         return data_ptr[:self._nbytes]
 
     @property
     def nbytes(self):
-        return self._nbytes
-
-    @property
-    def size(self):
+        """Extent of this allocation in bytes."""
         return self._nbytes
 
     @property
     def alignment(self):
+        """Address alignment of this allocation in bytes, as requested."""
         return self._alignment
 
     @property
     def _pointer(self):
+        """
+        Pointer to the start of this allocation
+        represented as Python integer.
+        """
         return <size_t>(self._memory_ptr)
 
     def __repr__(self):
         return (
             f"<MKL memory allocation of {self._nbytes} bytes at "
-            f"{hex(<object>(<size_t>self._memory_ptr))}>"
+            f"{hex(self._pointer)}>"
         )
 
     def __len__(self):
