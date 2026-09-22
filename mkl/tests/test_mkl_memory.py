@@ -309,6 +309,7 @@ def test_pickling_preserves_subclass_attributes():
 
 
 def test_reconstruct_rejects_foreign_class():
+    # pylint: disable-next=no-name-in-module
     from mkl._mkl_memory import _mkl_memory_from_bytes
 
     with pytest.raises(TypeError, match="not a subclass of MKLMemory"):
