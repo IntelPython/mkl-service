@@ -30,6 +30,7 @@
 import numbers
 
 from cpython cimport Py_buffer
+from cpython.buffer cimport PyBuffer_FillInfo
 from libc.limits cimport INT_MAX
 from libc.string cimport memcpy
 
@@ -88,6 +89,8 @@ cdef _extract_alignment(dict kwargs, object default):
 
 
 cdef int _check_alignment(object alignment) except -1:
+    cdef int c_alignment
+
     if not isinstance(alignment, numbers.Integral):
         raise TypeError(
             "Alignment of requested allocation must be an integer, but got "
@@ -99,15 +102,30 @@ cdef int _check_alignment(object alignment) except -1:
         raise ValueError(
             f"Alignment of requested allocation must not exceed {INT_MAX}."
         )
-    return <int>alignment
+
+    c_alignment = <int>alignment
+    if c_alignment & (c_alignment - 1):
+        raise ValueError(
+            "Alignment of requested allocation must be a power of two, but got "
+            f"{c_alignment}."
+        )
+
+    return c_alignment
 
 
-def _mkl_memory_from_bytes(bytes data, Py_ssize_t alignment):
+def _mkl_memory_from_bytes(bytes data, Py_ssize_t alignment, cls=None):
     cdef Py_ssize_t nbytes = len(data)
-    cdef MKLMemory mem = MKLMemory(nbytes, alignment=alignment)
-
-    cdef void *dst = mem._memory_ptr
+    cdef MKLMemory mem
+    cdef void *dst
     cdef char *src = data
+
+    if cls is None:
+        cls = MKLMemory
+    elif not (isinstance(cls, type) and issubclass(cls, MKLMemory)):
+        raise TypeError(f"{cls} is not a subclass of MKLMemory")
+
+    mem = cls(nbytes, alignment=alignment)
+    dst = mem._memory_ptr
 
     with nogil:
         memcpy(dst, src, nbytes)
@@ -142,9 +160,9 @@ cdef class MKLMemory:
         other (:class:`MKLMemory`):
             allocation whose size and content the new allocation takes.
         alignment (Optional[int]):
-            address alignment of the allocation in bytes. Expected to be
-            positive and to not exceed ``INT_MAX``. Defaults to the alignment
-            of ``other`` in the copy form, and to `64` otherwise.
+            address alignment of the allocation in bytes. Expected to be a
+            power of two and to not exceed ``INT_MAX``. Defaults to the
+            alignment of ``other`` in the copy form, and to `64` otherwise.
     """
     cdef void *_memory_ptr
     cdef Py_ssize_t _nbytes
@@ -220,9 +238,13 @@ cdef class MKLMemory:
     cdef _cinit_mklmemory(self, object other, object alignment):
         cdef MKLMemory other_mem = <MKLMemory> other
 
-        self._cinit_malloc(other_mem._nbytes, alignment)
-        with nogil:
-            memcpy(self._memory_ptr, other_mem._memory_ptr, self._nbytes)
+        atomic_fetch_add(&other_mem.exported_buffers, 1)
+        try:
+            self._cinit_malloc(other_mem._nbytes, alignment)
+            with nogil:
+                memcpy(self._memory_ptr, other_mem._memory_ptr, self._nbytes)
+        finally:
+            atomic_fetch_sub(&other_mem.exported_buffers, 1)
 
     def __cinit__(self, *args, **kwargs):
         n_args = len(args)
@@ -271,19 +293,14 @@ cdef class MKLMemory:
         return self._memory_ptr
 
     def __getbuffer__(self, Py_buffer *buffer, int flags):
-        buffer.buf = <void *>self._memory_ptr
-        buffer.format = "B"
-        buffer.internal = NULL
-        buffer.itemsize = 1
-        buffer.len = self._nbytes
-        buffer.ndim = 1
-        buffer.obj = self
-        buffer.readonly = 0
-        buffer.shape = &self._nbytes
-        buffer.strides = &buffer.itemsize
-        buffer.suboffsets = NULL
-
         atomic_fetch_add(&self.exported_buffers, 1)
+        try:
+            PyBuffer_FillInfo(
+                buffer, self, self._memory_ptr, self._nbytes, 0, flags
+            )
+        except BaseException:
+            atomic_fetch_sub(&self.exported_buffers, 1)
+            raise
 
     def __releasebuffer__(self, Py_buffer *buffer):
         atomic_fetch_sub(&self.exported_buffers, 1)
@@ -320,12 +337,14 @@ cdef class MKLMemory:
         3.14 there is neither, and a reference the caller holds cannot be told
         apart from one another thread holds: resizing an allocation another
         thread can reach may leave that thread reading freed memory whatever
-        ``refcheck`` is set to, so arrange for exclusive access. The same
-        applies to :meth:`numpy.ndarray.resize`.
+        ``refcheck`` is set to, so arrange for exclusive access.
         """
         cdef void *p
         cdef int shared
         cdef int unclaimed = 0
+
+        if new_nbytes <= 0:
+            raise ValueError("New number of bytes must be positive.")
 
         # claim the exclusive right to reallocate before doing anything else
         if not atomic_compare_exchange_strong(
@@ -355,11 +374,8 @@ cdef class MKLMemory:
                         "risk of leaving those references pointing at freed "
                         "memory."
                     )
-            if new_nbytes <= 0:
-                raise ValueError("New number of bytes must be positive.")
-
             # do not release the GIL here, as that can allow another thread to
-            # read the or export a buffer with the old pointer before
+            # read from or export a buffer with the old pointer before
             # mkl_realloc frees it
             p = mkl_realloc(self._memory_ptr, new_nbytes)
 
@@ -406,7 +422,15 @@ cdef class MKLMemory:
         return self._nbytes
 
     def __sizeof__(self):
-        return self._nbytes
+        return object.__sizeof__(self) + self._nbytes
 
     def __reduce__(self):
-        return (_mkl_memory_from_bytes, (self.tobytes(), self._alignment))
+        cdef type cls = type(self)
+
+        # a subclass should come back as itself
+        if cls is MKLMemory:
+            args = (self.tobytes(), self._alignment)
+        else:
+            args = (self.tobytes(), self._alignment, cls)
+
+        return (_mkl_memory_from_bytes, args, getattr(self, "__dict__", None))
