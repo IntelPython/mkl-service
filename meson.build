@@ -8,6 +8,7 @@ project(
     ).stdout().strip(),
     meson_version: '>=1.8.3',
     default_options: [
+        'c_std=c11',
         'buildtype=release',
     ]
 )
@@ -25,6 +26,20 @@ endif
 thread_dep = dependency('threads')
 
 cc = meson.get_compiler('c')
+
+atomics_args = []
+if cc.get_id() == 'msvc'
+    atomics_args += '/experimental:c11atomics'
+endif
+
+# checked to fail early if missing header
+if not cc.has_header('stdatomic.h', args: atomics_args)
+    error(
+        'mkl-service requires a C compiler supporting C11 atomics',
+        '(i.e., for Windows, Visual Studio 2022 17.5 or newer).'
+    )
+endif
+
 mkl_dep = dependency('MKL', method: 'cmake',
     modules: ['MKL::MKL'],
     cmake_args: [
@@ -60,7 +75,7 @@ py.extension_module(
     subdir: 'mkl'
 )
 
-# Cython extension
+# Cython extensions
 py.extension_module(
     '_py_mkl_service',
     sources: ['mkl/_py_mkl_service.pyx'],
@@ -70,6 +85,17 @@ py.extension_module(
     install: true,
     subdir: 'mkl'
 )
+
+py.extension_module(
+    '_mkl_memory',
+    sources: ['mkl/_mkl_memory.pyx'],
+    dependencies: [mkl_dep],
+    c_args: c_args + atomics_args,
+    link_args: rpath_link_args,
+    install: true,
+    subdir: 'mkl'
+)
+
 
 # Python sources
 py.install_sources(
@@ -82,6 +108,9 @@ py.install_sources(
 )
 
 py.install_sources(
-    ['mkl/tests/test_mkl_service.py'],
+    [
+        'mkl/tests/test_mkl_memory.py',
+        'mkl/tests/test_mkl_service.py',
+    ],
     subdir: 'mkl/tests'
 )
