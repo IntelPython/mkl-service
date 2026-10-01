@@ -35,6 +35,7 @@ For more information about the usage of support functions see [Developer Referen
 ## Building
 
 A C compiler and Intel(R) oneAPI Math Kernel Library (oneMKL) are required to build mkl-service from source.
+The compiler must support C11 atomics (i.e., for Windows, Visual Studio 2022 17.5 or newer).
 
 Executing
 ```sh
