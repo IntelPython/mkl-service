@@ -163,6 +163,19 @@ cdef class MKLMemory:
             address alignment of the allocation in bytes. Expected to be a
             power of two and to not exceed ``INT_MAX``. Defaults to the
             alignment of ``other`` in the copy form, and to `64` otherwise.
+
+    Exported buffers and the copy constructor keep :meth:`realloc` from moving
+    the allocation while they use it, but :meth:`tobytes`, :attr:`nbytes`,
+    :attr:`_pointer`, ``len()`` and ``repr()`` read it without doing so. Under
+    the GIL none of these can overlap a resize. On a free-threaded build, when
+    another thread can reach the object during a resize (see :meth:`realloc`),
+    they may read freed memory, or a pointer and a size that do not belong
+    together; as with :meth:`realloc`, arranging exclusive access is the
+    caller's responsibility.
+
+    Pickling preserves the content, the alignment, the subclass and the
+    instance ``__dict__``, but not attributes a subclass stores in
+    ``__slots__``.
     """
     cdef void *_memory_ptr
     cdef Py_ssize_t _nbytes
@@ -390,6 +403,9 @@ cdef class MKLMemory:
     def tobytes(self):
         """
         Constructs bytes object populated with copy of this allocation.
+
+        The copy does not hold the allocation in place, so it must not overlap
+        a :meth:`realloc` from another thread.
         """
         cdef char* data_ptr = <char*>self._memory_ptr
         return data_ptr[:self._nbytes]
@@ -433,4 +449,5 @@ cdef class MKLMemory:
         else:
             args = (self.tobytes(), self._alignment, cls)
 
+        # attributes held in __slots__ of a subclass are not carried over
         return (_mkl_memory_from_bytes, args, getattr(self, "__dict__", None))

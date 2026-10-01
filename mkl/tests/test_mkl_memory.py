@@ -366,10 +366,39 @@ def test_realloc_preserves_alignment(alignment):
 
 def test_realloc_refcheck_shared():
     mem = mkl.MKLMemory(1024)
-    alias = mem  # noqa: F841
-    with pytest.raises(ValueError, match="referenced by"):
+    # enough references that no Python version can call this unique
+    aliases = [mem] * 3  # noqa: F841
+    with pytest.raises(ValueError, match="referenced by other objects"):
         mem.realloc(2048)
+    assert mem.nbytes == 1024
+    del aliases
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 14),
+    reason="needs PyUnstable_Object_IsUniquelyReferenced",
+)
+def test_realloc_refcheck_may_be_shared():
+    mem = mkl.MKLMemory(1024)
+    # `mem` is loaded as a borrowed reference, so the refcount during the call
+    # is exactly 2, which is ambiguous
+    alias = mem  # noqa: F841
+    with pytest.raises(ValueError, match="may be referenced by another object"):
+        mem.realloc(2048)
+    assert mem.nbytes == 1024
     del alias
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 14),
+    reason="needs PyUnstable_Object_IsUniquelyReferenced",
+)
+def test_realloc_uniquely_referenced():
+    # a bare local is loaded as a borrowed reference, so during the call it is
+    # uniquely referenced and the resize is allowed
+    mem = mkl.MKLMemory(1024)
+    mem.realloc(2048)
+    assert mem.nbytes == 2048
 
 
 def test_realloc_refcheck_false_allows_shared():
