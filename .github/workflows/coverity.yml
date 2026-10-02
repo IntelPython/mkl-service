@@ -1,0 +1,152 @@
+name: Coverity Scan
+
+# Public static analysis via the free Coverity Scan service (scan.coverity.com,
+# operated by Black Duck). Coverity is a compiled-language analyzer: it must wrap
+# the real C build with `cov-build`, so this workflow installs oneMKL, compiles
+# both extensions under capture, and uploads the result for analysis.
+#
+# One-time setup required before the first run:
+#   1. Register IntelPython/mkl-service at https://scan.coverity.com/github
+#      (sign in with GitHub; the project name must match COVERITY_PROJECT below).
+#   2. Add two repository secrets (Settings -> Secrets and variables -> Actions):
+#        COVERITY_SCAN_TOKEN  - the project token from the Project Settings tab
+#        COVERITY_SCAN_EMAIL  - a maintainer email for build notifications
+#
+# Free-tier quota for a project under 100K LOC (mkl-service is ~1.5K) is 28
+# builds/week, max 4/day, so this runs on a weekly schedule plus on demand
+# rather than per-push.
+#
+# `workflow_dispatch` only becomes available once this file is on the default
+# branch, and there is no push trigger, so the first scan will not happen at
+# merge time -- dispatch it manually instead of waiting for the Monday cron.
+
+on:
+  schedule:
+    - cron: "0 1 * * 1"  # Mondays 01:00 UTC; well under the free build quota
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coverity-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  COVERITY_PROJECT: IntelPython/mkl-service
+  ONEAPI_ROOT: /opt/intel/oneapi
+
+jobs:
+  coverity-scan:
+    # Forks lack the COVERITY_SCAN_* secrets; only run on the canonical repo.
+    if: github.repository == 'IntelPython/mkl-service'
+    runs-on: ubuntu-latest
+    # backstop timeout for whole job
+    timeout-minutes: 60
+
+    defaults:
+      run:
+        # The implicit default is `bash -e {0}`, which has no pipefail, so the
+        # `| tee` below would report tee's status and hide a cov-build failure.
+        shell: bash -eo pipefail {0}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+          architecture: x64
+
+      - name: Add Intel repository
+        # Keyring + signed-by rather than the `apt-key add` used elsewhere in
+        # this repo: apt-key is deprecated and slated for removal.
+        run: |
+          wget -qO- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+            | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+            | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+
+      - name: Install Intel oneMKL
+        # Only oneMKL is needed: both conda recipes pin `c_compiler: gcc`, so the
+        # shipped packages are gcc builds and that is what Coverity should see.
+        # icx is exercised separately by build-with-clang.yml, and pulling the
+        # DPC++ compiler in here would analyze a configuration we do not ship.
+        timeout-minutes: 25
+        run: sudo apt-get install -y intel-oneapi-mkl-devel
+
+      - name: Install build dependencies
+        # Cython is pinned here only (not in pyproject.toml) to keep the generated
+        # code stable between scans, so Coverity CIDs and their triage survive
+        run: pip install "setuptools>=77" "cython==3.3.0" "wheel>=0.45.1"
+
+      - name: Download Coverity Build Tool
+        timeout-minutes: 15
+        env:
+          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        run: |
+          curl --location --no-progress-meter --fail-with-body \
+               --retry 5 --retry-connrefused --retry-delay 5 \
+               --data-urlencode "token=${COVERITY_SCAN_TOKEN}" \
+               --data-urlencode "project=${COVERITY_PROJECT}" \
+               --output cov-analysis.tar.gz \
+               https://scan.coverity.com/download/linux64
+          # An invalid token/project is answered with a small HTML error page and
+          # HTTP 200, not the multi-hundred-MB tarball, so --fail-with-body does
+          # not catch it. Fail loudly with a clear hint instead.
+          if [ "$(stat -c '%s' cov-analysis.tar.gz)" -lt 1000000 ]; then
+            echo "::error::Coverity build tool download failed. Verify the COVERITY_SCAN_TOKEN secret and that the registered project name matches '${COVERITY_PROJECT}'."
+            head -c 512 cov-analysis.tar.gz || true
+            exit 1
+          fi
+          mkdir -p cov-analysis
+          tar -xzf cov-analysis.tar.gz --strip 1 -C cov-analysis
+          echo "${PWD}/cov-analysis/bin" >> "$GITHUB_PATH"
+
+      - name: Configure Coverity for GCC
+        run: cov-configure --gcc
+
+      - name: Build under cov-build
+        # cov-build wraps the compiler and can wedge without producing output;
+        # cap it so a hang fails fast instead of idling until the job timeout.
+        # 2 translation units normally finish in well under a minute.
+        timeout-minutes: 20
+        run: |
+          # shellcheck disable=SC1091
+          source "${ONEAPI_ROOT}/setvars.sh"
+          # setup.py hard-requires MKLROOT and only raises a bare ValueError if
+          # it is unset, so surface what setvars.sh resolved it to.
+          echo "MKLROOT=${MKLROOT}"
+          # A non-editable `pip install .` builds in a fresh temporary tree and
+          # pip does not cache wheels built from a direct path, so both C
+          # translation units (_mklinitmodule.c and the Cython-generated
+          # _mkl_service.c) are genuinely recompiled under cov-build. A stale
+          # build/ would instead yield "No files were emitted", which the
+          # upload rejects.
+          cov-build --dir cov-int pip install . --no-build-isolation --no-deps 2>&1 | tee cov-build.log
+          if ! grep -qE "Emitted [1-9][0-9]* .*compilation unit" cov-build.log; then
+            echo "::error::Coverity captured 0 compilation units — the C build did not run under cov-build."
+            exit 1
+          fi
+
+      - name: Submit results to Coverity Scan
+        timeout-minutes: 15
+        env:
+          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
+        run: |
+          tar -czf cov-int.tgz cov-int
+          curl --no-progress-meter --fail-with-body \
+               --retry 5 --retry-connrefused --retry-delay 5 \
+               --form token="${COVERITY_SCAN_TOKEN}" \
+               --form email="${COVERITY_SCAN_EMAIL}" \
+               --form file=@cov-int.tgz \
+               --form version="${GITHUB_SHA}" \
+               --form description="GitHub Actions ${GITHUB_REF_NAME} (run ${GITHUB_RUN_ID})" \
+               --form project="${COVERITY_PROJECT}" \
+               https://scan.coverity.com/builds
