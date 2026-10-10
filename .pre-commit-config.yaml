@@ -50,7 +50,7 @@ repos:
     exclude: "_vendored/conv_template.py"
 
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v23.1.1
+  rev: v23.1.2
   hooks:
   - id: clang-format
     args: ["-i"]
@@ -68,10 +68,10 @@ repos:
     args: ["--config=.flake8"]
     additional_dependencies:
       - flake8-docstrings==1.7.0
-      - flake8-bugbear==26.9.9
+      - flake8-bugbear==26.9.30
 
 - repo: https://github.com/pycqa/isort
-  rev: 9.0.1
+  rev: 9.0.2
   hooks:
   - id: isort
     name: isort (python)
