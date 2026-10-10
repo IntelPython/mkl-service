@@ -1,6 +1,7 @@
 # `mkl-service` - Python package for run-time control of Intel® oneAPI Math Kernel Library (oneMKL).
 [![Conda package](https://github.com/IntelPython/mkl-service/actions/workflows/conda-package.yml/badge.svg)](https://github.com/IntelPython/mkl-service/actions/workflows/conda-package.yml)
 [![Build mkl-service with clang](https://github.com/IntelPython/mkl-service/actions/workflows/build-with-clang.yml/badge.svg)](https://github.com/IntelPython/mkl-service/actions/workflows/build-with-clang.yml)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/intelpython-mkl-service/badge.svg)](https://scan.coverity.com/projects/intelpython-mkl-service)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/IntelPython/mkl-service/badge)](https://securityscorecards.dev/viewer/?uri=github.com/IntelPython/mkl-service)
 
 
