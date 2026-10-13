@@ -57,6 +57,9 @@ jobs:
           - python: '3.15'
             python_spec: '3.15.* *_cp315'
             python_tag: '3.15'
+          - python: '3.15'
+            python_spec: '3.15.* *_cp315t'
+            python_tag: '3.15t'
 
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 15
@@ -148,6 +151,9 @@ jobs:
           - python: '3.15'
             python_spec: '3.15.* *_cp315'
             python_tag: '3.15'
+          - python: '3.15'
+            python_spec: '3.15.* *_cp315t'
+            python_tag: '3.15t'
 
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 15
