@@ -12,6 +12,7 @@ All build/test workflows cover Python 3.10-3.15 plus free-threaded 3.14t and 3.1
 - **build_pip.yml** — validates editable build
 - **pre-commit.yml** — code quality checks (flake8, etc.)
 - **openssf-scorecard.yml** — security posture scanning
+- **coverity.yml** — weekly Coverity Scan static analysis of the C/Cython extensions (scan.coverity.com)
 
 ## CI/CD policy
 - Keep build matrix (Python versions, platforms) in workflow files only
@@ -24,6 +25,7 @@ All build/test workflows cover Python 3.10-3.15 plus free-threaded 3.14t and 3.1
 
 ## Security
 - OpenSSF Scorecard runs automatically
+- Coverity Scan runs weekly via `coverity.yml` (project `IntelPython/mkl-service` on scan.coverity.com; needs the `COVERITY_SCAN_TOKEN`/`COVERITY_SCAN_EMAIL` secrets)
 - CODEOWNERS enforces review policy
 - Dependabot monitors dependencies (`.github/dependabot.yml`)
 
