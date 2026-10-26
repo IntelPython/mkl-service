@@ -65,7 +65,10 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
+          # Free-threaded, so the scan covers the Py_GIL_DISABLED branch in
+          # _mklinitmodule.c and the free-threading paths Cython generates for
+          # the freethreading_compatible modules; a GIL build compiles neither.
+          python-version: "3.14t"
           architecture: x64
 
       - name: Install build dependencies
@@ -127,7 +130,21 @@ jobs:
             exit 1
           fi
 
+      - name: Upload Coverity build log
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverity-build-log
+          path: |
+            cov-build.log
+            cov-int/build-log.txt
+          retention-days: 7
+          if-no-files-found: warn
+
       - name: Submit results to Coverity Scan
+        # Scan keeps only the latest build, so a run dispatched on a feature
+        # branch would replace master's results; such runs stop after capture.
+        if: github.ref == 'refs/heads/master'
         timeout-minutes: 15
         env:
           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
