@@ -10,8 +10,8 @@ Conda package build recipe for conda-forge and Intel channel distribution.
 
 ## Build configuration
 - **Channels:** `conda-forge`, Intel channel
-- **Python versions in CI build matrix:** 3.10, 3.11, 3.12, 3.13, 3.14, 3.15, and free-threaded 3.14t and 3.15t
-- **Compilers:** pinned via `conda_build_config.yaml` (GCC/GXX on Linux, VS2022 on Windows)
+- **Python versions in CI build matrix:** 3.10, 3.11, 3.12, 3.13, 3.14, 3.15, and free-threaded 3.14t and 3.15t (3.11+ for `conda-recipe-cf/`)
+- **Compilers:** pinned via `conda_build_config.yaml` (GCC/GXX on Linux, VS2022 on Windows); `conda-recipe-cf/` also pins gcc 15, clang 21 and `mkl_devel` 2026, as the feedstock's conda-forge pinning does
 - **Dependencies:** `mkl` (runtime), `mkl-devel` (build), `cython >=3.1.0`
 
 ## Build outputs
@@ -21,12 +21,12 @@ Conda package build recipe for conda-forge and Intel channel distribution.
 ## CI usage
 - Built in `.github/workflows/conda-package.yml`
 - Artifacts uploaded per Python version and platform
-- Test stage uses built artifacts from a temporary local channel
+- Test stage runs `conda build --test` on the built artifact, so the `test:` section of the recipe is what CI runs
 
 ## Platform specifics
 - **Linux:** RTLD_GLOBAL handling in runtime init path
 - **Windows:** MKL library path configuration
-- **macOS:** recipe scripts exist, but current GitHub Actions matrix does not build/test macOS
+- **macOS:** built and tested only from `conda-recipe-cf/` in `conda-package-cf.yml`
 
 ## Maintenance
 - Keep recipe metadata in sync with workflow matrix and package metadata

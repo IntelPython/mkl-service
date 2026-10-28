@@ -3,10 +3,10 @@
 CI/CD workflows, automation, security scanning, and package distribution.
 
 ## Workflows
-All build/test workflows cover Python 3.10-3.15 plus free-threaded 3.14t and 3.15t.
+All build/test workflows cover Python 3.10-3.15 plus free-threaded 3.14t and 3.15t, except `conda-package-cf.yml`, which starts at 3.11 like the feedstock.
 
 - **conda-package.yml** — main build/test pipeline (Linux/Windows)
-- **conda-package-cf.yml** — build/test using only conda-forge channel (Linux/Windows)
+- **conda-package-cf.yml** — build/test using only conda-forge channel (Linux/Windows/macOS), set up like `conda-forge/mkl-service-feedstock`: Windows uses `windows-2022` (Visual Studio 2022)
 - **build-with-clang.yml** — Linux Clang compiler compatibility validation
 - **build-with-standard-clang.yml** — standard Clang compiler compatibility validation
 - **build_pip.yml** — validates editable build
@@ -22,6 +22,8 @@ All build/test workflows cover Python 3.10-3.15 plus free-threaded 3.14t and 3.1
 - `include` rows create new matrix combinations and inherit nothing, so `experimental` must be repeated wherever the job reads them
 - Artifact naming: `$PACKAGE_NAME $OS Python $VERSION`, where `$VERSION` is `python_tag` (`3.14`, `3.14t`, `3.15`, or `3.15t`) when set, otherwise `python`
 - Channels: `conda-forge`, Intel channel
+- Build jobs run `conda build --no-test`; test jobs run `conda build --test` on the built package on a fresh runner, so CI runs the test section of the recipe, as the feedstock does
+- `conda-package-cf.yml` and `conda-recipe-cf/` follow `conda-forge/mkl-service-feedstock`: when the feedstock is re-rendered with new pins (compiler versions, `mkl_devel`, Python versions), update `conda-recipe-cf/conda_build_config.yaml` and the `python-versions` input to match
 
 ## Security
 - OpenSSF Scorecard runs automatically
