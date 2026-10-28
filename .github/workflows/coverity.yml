@@ -1,0 +1,162 @@
+name: Coverity Scan
+
+# Public static analysis via the free Coverity Scan service (scan.coverity.com,
+# operated by Black Duck). Coverity is a compiled-language analyzer: it must wrap
+# the real C build with `cov-build`, so this workflow installs the Meson build
+# tooling and oneMKL, compiles all three extensions under capture, and uploads
+# the result for analysis.
+#
+# One-time setup, already done for IntelPython/mkl-service (repeat only if the
+# project is ever re-registered):
+#   1. Register the repo at https://scan.coverity.com/github (sign in with
+#      GitHub; the registered project name must match COVERITY_PROJECT below).
+#   2. Add two repository secrets (Settings -> Secrets and variables -> Actions):
+#        COVERITY_SCAN_TOKEN  - the project token from the Project Settings tab
+#        COVERITY_SCAN_EMAIL  - a maintainer email for build notifications
+#
+# Free-tier quota for a project under 100K LOC (mkl-service is a few thousand)
+# is 28 builds/week, max 4/day, so this runs on a weekly schedule plus on
+# demand rather than per-push.
+#
+# `workflow_dispatch` only becomes available once this file is on the default
+# branch, and there is no push trigger, so the first scan will not happen at
+# merge time -- dispatch it manually instead of waiting for the Monday cron.
+
+on:
+  schedule:
+    - cron: "0 1 * * 1"  # Mondays 01:00 UTC; well under the free build quota
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coverity-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Coverity Scan identifies a project by its registered name, which for
+  # projects registered through GitHub is the `owner/repo` name shown in the
+  # project page heading. The `intelpython-mkl-service` seen in
+  # scan.coverity.com URLs is the slug derived from that name, not the name
+  # itself. mkl_fft's workflow follows the same convention.
+  COVERITY_PROJECT: IntelPython/mkl-service
+
+jobs:
+  coverity-scan:
+    # Forks lack the COVERITY_SCAN_* secrets; only run on the canonical repo.
+    if: github.repository == 'IntelPython/mkl-service'
+    runs-on: ubuntu-latest
+    # backstop timeout for whole job
+    timeout-minutes: 60
+
+    defaults:
+      run:
+        # The implicit default is `bash -e {0}`, which has no pipefail, so the
+        # `| tee` below would report tee's status and hide a cov-build failure.
+        shell: bash -eo pipefail {0}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          # Free-threaded, so the scan covers the Py_GIL_DISABLED branch in
+          # _mklinitmodule.c and the free-threading paths Cython generates for
+          # the freethreading_compatible modules; a GIL build compiles neither.
+          python-version: "3.14t"
+          architecture: x64
+
+      - name: Install build dependencies
+        # The build below runs with --no-build-isolation, so pyproject.toml's
+        # build-system.requires (meson-python, ninja, cmake, mkl-devel) must be
+        # installed up front, as build-with-standard-clang.yml does. The
+        # mkl-devel wheel ships the oneMKL headers, libraries and CMake config
+        # that meson.build locates via `dependency('MKL', method: 'cmake')`:
+        # setup-python puts the interpreter prefix's bin/ on PATH, and CMake's
+        # find_package searches PATH entries with bin/ stripped as install
+        # prefixes, so no MKLROOT or setvars.sh is involved. If a scan ever
+        # fails at configure time, that lookup is the first thing to check.
+        # Cython is pinned here only (not in pyproject.toml) to keep the generated
+        # code stable between scans, so Coverity CIDs and their triage survive
+        run: pip install meson-python ninja cmake "cython==3.3.0" mkl-devel
+
+      - name: Download Coverity Build Tool
+        timeout-minutes: 15
+        env:
+          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+        run: |
+          curl --location --no-progress-meter --fail-with-body \
+               --retry 5 --retry-connrefused --retry-delay 5 \
+               --data-urlencode "token=${COVERITY_SCAN_TOKEN}" \
+               --data-urlencode "project=${COVERITY_PROJECT}" \
+               --output cov-analysis.tar.gz \
+               https://scan.coverity.com/download/linux64
+          # An invalid token/project is answered with a small HTML error page and
+          # HTTP 200, not the multi-hundred-MB tarball, so --fail-with-body does
+          # not catch it. Fail loudly with a clear hint instead.
+          if [ "$(stat -c '%s' cov-analysis.tar.gz)" -lt 1000000 ]; then
+            echo "::error::Coverity build tool download failed. Verify the COVERITY_SCAN_TOKEN secret and that the registered project name matches '${COVERITY_PROJECT}'."
+            head -c 512 cov-analysis.tar.gz || true
+            exit 1
+          fi
+          mkdir -p cov-analysis
+          tar -xzf cov-analysis.tar.gz --strip 1 -C cov-analysis
+          echo "${PWD}/cov-analysis/bin" >> "$GITHUB_PATH"
+
+      - name: Configure Coverity for GCC
+        run: cov-configure --gcc
+
+      - name: Build under cov-build
+        # cov-build wraps the compiler and can wedge without producing output;
+        # cap it so a hang fails fast instead of idling until the job timeout.
+        # 3 translation units normally finish in well under a minute.
+        timeout-minutes: 20
+        run: |
+          # A non-editable `pip install .` has meson-python configure and compile
+          # in a fresh temporary build directory, and pip does not cache wheels
+          # built from a local directory, so all three C translation units
+          # (_mklinitmodule.c and the Cython-generated _py_mkl_service.c and
+          # _mkl_memory.c) are genuinely recompiled under cov-build. An editable
+          # install reusing a stale build/ would instead yield "No files were
+          # emitted", which the upload rejects.
+          cov-build --dir cov-int pip install . --no-build-isolation --no-deps 2>&1 | tee cov-build.log
+          if ! grep -qE "Emitted [1-9][0-9]* .*compilation unit" cov-build.log; then
+            echo "::error::Coverity captured 0 compilation units — the C build did not run under cov-build."
+            exit 1
+          fi
+
+      - name: Upload Coverity build log
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverity-build-log
+          path: |
+            cov-build.log
+            cov-int/build-log.txt
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Submit results to Coverity Scan
+        # Scan keeps only the latest build, so a run dispatched on a feature
+        # branch would replace master's results; such runs stop after capture.
+        if: github.ref == 'refs/heads/master'
+        timeout-minutes: 15
+        env:
+          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
+        run: |
+          tar -czf cov-int.tgz cov-int
+          curl --no-progress-meter --fail-with-body \
+               --retry 5 --retry-connrefused --retry-delay 5 \
+               --form token="${COVERITY_SCAN_TOKEN}" \
+               --form email="${COVERITY_SCAN_EMAIL}" \
+               --form file=@cov-int.tgz \
+               --form version="${GITHUB_SHA}" \
+               --form description="GitHub Actions ${GITHUB_REF_NAME} (run ${GITHUB_RUN_ID})" \
+               --form project="${COVERITY_PROJECT}" \
+               https://scan.coverity.com/builds
