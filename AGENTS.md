@@ -59,6 +59,7 @@ python -m pip install --no-deps --no-build-isolation .
   - `build_pip.yml` — validates editable build
   - `pre-commit.yml` — code quality checks
   - `openssf-scorecard.yml` — security scanning
+  - `coverity.yml` — weekly Coverity Scan static analysis
 
 ## Distribution
 - **Conda:** `conda-forge` and `https://software.repos.intel.com/python/conda`
