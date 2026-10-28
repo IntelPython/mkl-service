@@ -11,10 +11,6 @@ on:
         description: Conda platform subdir (e.g. linux-64, win-64, osx-64)
         required: true
         type: string
-      pkgs-dir:
-        description: Directory to cache conda packages in
-        required: true
-        type: string
       channels-list:
         description: Conda channels to build and test against
         required: true
@@ -70,7 +66,6 @@ jobs:
 
     env:
       build-env-name: 'build'
-      CONDA_PKGS_DIRS: ${{ inputs.pkgs-dir }}
 
     steps:
       - name: Checkout repo
@@ -86,18 +81,6 @@ jobs:
           activate-environment: ${{ env.build-env-name }}
           channels: conda-forge
           python-version: ${{ matrix.python }}
-
-      - name: Cache conda packages
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        env:
-          CACHE_NUMBER: 0  # Increase to reset cache
-        with:
-          path: ${{ inputs.pkgs-dir }}
-          key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-${{hashFiles('**/meta.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
 
       - name: Install conda-build
         run: conda install -n base -y conda-build
@@ -166,7 +149,6 @@ jobs:
       test-env-name: 'test'
       channel-path: './channel'
       pkg-path-in-channel: './channel/${{ inputs.conda-subdir }}'
-      CONDA_PKGS_DIRS: ${{ inputs.pkgs-dir }}
 
     steps:
       - name: Download artifact
@@ -202,25 +184,6 @@ jobs:
 
           echo "PACKAGE_VERSION=${PACKAGE_VERSION}"
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> "$GITHUB_ENV"
-
-      - name: Collect dependencies
-        run: |
-          conda install ${{ env.package-name }}=${{ env.PACKAGE_VERSION }} pytest "python=${{ matrix.python_spec || matrix.python }}" ${{ env.CHANNELS }} --only-deps --dry-run > lockfile
-          cat lockfile
-        env:
-          CHANNELS: '-c ${{ env.channel-path }} ${{ inputs.channels-list }}'
-
-      - name: Cache conda packages
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        env:
-          CACHE_NUMBER: 0  # Increase to reset cache
-        with:
-          path: ${{ inputs.pkgs-dir }}
-          key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-${{hashFiles('lockfile') }}
-          restore-keys: |
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python_tag || matrix.python }}-
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
 
       - name: Install mkl-service
         run: |

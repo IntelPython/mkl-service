@@ -35,4 +35,4 @@ All build/test workflows cover Python 3.10-3.15 plus free-threaded 3.14t and 3.1
 
 ## Notes
 - Workflow/job renames are breaking for downstream tooling
-- Cache key includes `meta.yaml` hash for conda packages
+- Conda jobs do not cache the conda package directory: the channel downloads were faster than restoring the ~1 GB `actions/cache` entries, which were also evicted before the next run
