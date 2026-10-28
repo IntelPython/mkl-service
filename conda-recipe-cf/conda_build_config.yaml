@@ -22,3 +22,13 @@ c_compiler:                   # [win]
     - vs2022                  # [win]
 mkl_devel:                    # [not osx]
     - '2026'                  # [not osx]
+# Python versions of conda-forge/mkl-service-feedstock, plus 3.15t; CI builds
+# and tests one job per entry, see .github/workflows/conda-build-test.yml
+python:
+    - 3.11.* *_cpython
+    - 3.12.* *_cpython
+    - 3.13.* *_cp313
+    - 3.14.* *_cp314
+    - 3.14.* *_cp314t
+    - 3.15.* *_cp315
+    - 3.15.* *_cp315t

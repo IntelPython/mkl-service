@@ -1,0 +1,24 @@
+name: Conda Python matrix
+description: >-
+  Build the conda build/test matrix from the python list of a recipe's
+  conda_build_config.yaml
+
+inputs:
+  recipe-dir:
+    description: Path to the conda recipe directory
+    required: true
+
+outputs:
+  matrix:
+    description: Matrix for strategy.matrix, as JSON
+    value: ${{ steps.read.outputs.matrix }}
+
+runs:
+  using: composite
+  steps:
+    - name: Read Python versions from conda_build_config.yaml
+      id: read
+      shell: bash
+      env:
+        CBC_PATH: ${{ inputs.recipe-dir }}/conda_build_config.yaml
+      run: python3 "${GITHUB_ACTION_PATH}/conda_python_matrix.py" "${CBC_PATH}"
