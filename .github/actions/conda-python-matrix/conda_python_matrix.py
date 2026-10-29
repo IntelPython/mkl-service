@@ -9,9 +9,10 @@ so it runs on any runner without conda.
 
 The python: key must hold full specs, one per line and without selectors,
 such as "3.12.* *_cpython", "3.13.* *_cp313" or "3.14.* *_cp314t", quoted or
-not, so that every job gets an explicit ABI. Each entry becomes one matrix
-entry with:
-- python: the version, e.g. "3.14"
+not, so that every job gets an explicit ABI. The ABI must be cpython or name
+the entry's version (cp314 or cp314t for 3.14), and each build may be listed
+only once, since its python_tag names its artifacts. Each entry becomes one
+matrix entry with:
 - python_spec: the entry itself, for conda build --python
 - python_tag: the version, with a "t" suffix for free-threaded builds, for
   artifact names
@@ -40,6 +41,9 @@ def read_specs(path):
     specs, in_list = [], False
     with open(path, encoding="utf-8") as f:
         for line in f:
+            # In YAML, a comment line doesn't end the list, even at column 0
+            if line.lstrip().startswith("#"):
+                continue
             if line.startswith("python:"):
                 if specs or line.strip() != "python:":
                     raise DeclarationError(
@@ -65,7 +69,7 @@ def read_specs(path):
 
 def build_matrix(specs):
     """Return the strategy.matrix for the given python entries."""
-    parsed = []
+    parsed, seen = [], {}
     for spec in specs:
         m = SPEC_RE.fullmatch(spec)
         if not m:
@@ -73,24 +77,30 @@ def build_matrix(specs):
                 f"unsupported python entry '{spec}', "
                 "expected e.g. '3.14.* *_cp314t'"
             )
-        parsed.append((spec, m.group(1), m.group(2)))
+        version, abi = m.groups()
+        cp = "cp" + version.replace(".", "")
+        if abi not in ("cpython", cp, cp + "t"):
+            raise DeclarationError(
+                f"python entry '{spec}': ABI {abi} doesn't match Python "
+                f"{version}, expected cpython, {cp} or {cp}t"
+            )
+        tag = version + ("t" if abi.endswith("t") else "")
+        if tag in seen:
+            raise DeclarationError(
+                f"python entries '{seen[tag]}' and '{spec}' both build "
+                f"Python {tag}"
+            )
+        seen[tag] = spec
+        parsed.append((spec, version, tag))
 
     builds = collections.Counter(version for _, version, _ in parsed)
     include = []
-    for spec, version, abi in parsed:
-        tag = version + ("t" if abi.endswith("t") else "")
+    for spec, version, tag in parsed:
         if builds[version] == 1:
             label = version
         else:
             label = f"{version}, {spec}, {tag}"
-        include.append(
-            {
-                "python": version,
-                "python_spec": spec,
-                "python_tag": tag,
-                "label": label,
-            }
-        )
+        include.append({"python_spec": spec, "python_tag": tag, "label": label})
     return {"include": include}
 
 
