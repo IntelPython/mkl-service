@@ -20,7 +20,6 @@ jobs:
     with:
       runs-on: ubuntu-latest
       conda-subdir: linux-64
-      pkgs-dir: /home/runner/conda_pkgs_dir
       channels-list: -c conda-forge --override-channels
       recipe-dir: conda-recipe-cf
 
@@ -30,7 +29,6 @@ jobs:
     with:
       runs-on: windows-latest
       conda-subdir: win-64
-      pkgs-dir: D:\conda_pkgs_dir
       channels-list: -c conda-forge --override-channels
       recipe-dir: conda-recipe-cf
 
@@ -40,6 +38,5 @@ jobs:
     with:
       runs-on: macos-26-intel
       conda-subdir: osx-64
-      pkgs-dir: /Users/runner/conda_pkgs_dir
       channels-list: -c conda-forge --override-channels
       recipe-dir: conda-recipe-cf
