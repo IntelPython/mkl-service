@@ -13,8 +13,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Build like conda-forge/mkl-service-feedstock: same Python versions and
-# Visual Studio 2022 on Windows
+# Build like conda-forge/mkl-service-feedstock: the feedstock's Python versions
+# plus 3.15t, which it doesn't build yet, and Visual Studio 2022 on Windows
 jobs:
   linux:
     name: linux
