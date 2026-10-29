@@ -65,9 +65,6 @@ jobs:
       run:
         shell: bash -el {0}
 
-    env:
-      build-env-name: 'build'
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -79,9 +76,8 @@ jobs:
         uses: conda-incubator/setup-miniconda@be893c923ea9cf1cf7cd510fbdde27c7e18cbdcb # v4.1.0
         with:
           miniforge-version: latest
-          activate-environment: ${{ env.build-env-name }}
           channels: conda-forge
-          python-version: ${{ matrix.python }}
+          activate-environment: ''
 
       - name: Install conda-build
         run: conda install -n base -y conda-build
