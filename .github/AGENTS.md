@@ -19,12 +19,11 @@ The conda workflows build and test the Python versions in the `python:` list of 
 
 ## CI/CD policy
 - Platforms are set in the caller workflows. The conda workflows read their Python versions from the `python:` list in the recipe's `conda_build_config.yaml`: the `variants` job of `conda-build-test.yml` turns it into the build/test matrix with the `.github/actions/conda-python-matrix` composite action. The other workflows keep their Python matrix in the workflow file
-- Every entry of a recipe's `python:` list is a full spec on its own line, without selectors (`3.12.* *_cpython`, `3.13.* *_cp313`, `3.14.* *_cp314`, `3.14.* *_cp314t`); the `variants` job rejects bare versions and selectors
+- Every entry of a recipe's `python:` list is a full spec on its own line, without selectors (`3.12.* *_cpython`, `3.13.* *_cp313`, `3.14.* *_cp314`, `3.14.* *_cp314t`); the `variants` job rejects bare versions, selectors, an ABI that doesn't match the version (`3.13.* *_cp314t`) and a second entry for the same build, whose artifact names would collide
 - The `variants` job keeps the check names of the former static matrix: `Build (3.12)` for a version with one build, `Build (3.14, 3.14.* *_cp314t, 3.14t)` for a version with GIL and free-threaded builds. The master ruleset requires the 3.14 `Test` checks by these exact names
 - Required checks: conda build + test on supported Python versions/platforms in CI
 - In workflow-file matrices (`build_pip.yml`), Python 3.14 is expressed as two `include` rows carrying `python_spec` (`3.14.* *_cp314` and `3.14.* *_cp314t`); a bare `--python 3.14` has been observed to select the free-threaded ABI and must not be relied on
 - Python 3.15 follows the same pattern as 3.14: two `include` rows with `python_spec` `3.15.* *_cp315` and `3.15.* *_cp315t`
-- `include` rows create new matrix combinations and inherit nothing, so `experimental` must be repeated wherever the job reads them
 - Artifact naming: `$PACKAGE_NAME $OS Python $VERSION`, where `$VERSION` is `python_tag`: the Python version, with a `t` suffix for free-threaded builds (`3.12`, `3.14`, `3.14t`)
 - Channels: `conda-forge`, Intel channel
 - Build jobs run `conda build --no-test`; test jobs run `conda build --test` on the built package on a fresh runner, so CI runs the test section of the recipe, as the feedstock does
