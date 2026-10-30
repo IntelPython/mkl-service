@@ -75,6 +75,23 @@ Homepage = "https://github.com/IntelPython/mkl-service"
 [tool.black]
 line-length = 80
 
+[tool.cibuildwheel]
+build-verbosity = 1
+
+[tool.cibuildwheel.linux]
+# MKL comes from the mkl wheel at run time, see [tool.gh-ci]
+repair-wheel-command = "auditwheel repair --exclude libmkl_rt.so.3 -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.windows]
+# MSVC, as python.org builds CPython with, not the runner's MinGW
+config-settings = { setup-args = "--vsenv" }
+# MKL comes from the mkl wheel at run time, see [tool.gh-ci]
+repair-wheel-command = "delvewheel repair --no-dll mkl_rt.3.dll -w {dest_dir} {wheel}"
+
+[tool.gh-ci]
+# What the wheels need at run time, which conda packages get from the recipe
+wheel-requires = ["mkl >=2026.2,<2027"]
+
 [tool.isort]
 line_length = 80
 profile = "black"
