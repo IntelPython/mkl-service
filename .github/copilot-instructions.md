@@ -35,7 +35,7 @@ Higher-precedence file overrides; lower must not restate overridden guidance.
 
 ## Source-of-truth files
 - Build/config: `pyproject.toml`, `meson.build`
-- Recipe/deps: `conda-recipe/meta.yaml`, `conda-recipe/conda_build_config.yaml`
+- Recipe/deps: `conda-recipe-cf/meta.yaml`, `conda-recipe-cf/conda_build_config.yaml`
 - CI: `.github/workflows/*.{yml,yaml}`
 - API contracts: `mkl/__init__.py`, `mkl/_py_mkl_service.pyx`, `mkl/_mkl_memory.pyx`
 - Tests: `mkl/tests/test_mkl_service.py`, `mkl/tests/test_mkl_memory.py`

@@ -1,0 +1,8 @@
+# Intel Python CI (gh-ci) settings for mkl-service, see ci/README.md
+version: 1
+workflow: intel-ci.yml
+artifacts:
+  conda: "mkl-service {platform} Python {python}"
+  wheel: "mkl-service {platform} Wheels Python {python}"
+test:
+  requires: [pytest]

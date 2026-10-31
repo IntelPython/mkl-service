@@ -21,6 +21,7 @@ Originally part of Intel® Distribution for Python*, now a standalone package av
 - **C init module:** `mkl/_mklinitmodule.c` — Linux-side MKL runtime preloading / initialization
 - **Helper:** `mkl/_init_helper.py` — Windows venv DLL loading helper
 - **Build system:** meson-python + Cython
+- **Intel Python CI:** `ci/`, `.github/workflows/intel-ci.yml`; see `ci/README.md`
 
 ## Build dependencies
 **Required:**
@@ -48,11 +49,10 @@ python -m pip install --no-deps --no-build-isolation .
 
 ## CI/CD
 - **Platforms in CI workflows:** Linux, Windows, macOS (conda-forge workflow only)
-- **Python versions:** the conda workflows build and test the entries of the `python:` list in the recipe's `conda_build_config.yaml` (`conda-recipe/` or `conda-recipe-cf/`), one build and one test job per entry; the other workflows list their Python versions in the workflow file
+- **Python versions:** the conda workflows build and test the entries of the `python:` list in `conda-recipe-cf/conda_build_config.yaml`, one build and one test job per entry; the other workflows list their Python versions in the workflow file
 - **Python 3.14 ABI selection:** conda jobs must request an explicit ABI, `3.14.* *_cp314` (GIL) or `3.14.* *_cp314t` (free-threaded). Once the recipes stopped constraining `python-gil`, a bare `--python 3.14` was observed to resolve to the free-threaded build, so it must not be relied on.
 - **Python 3.15 ABI selection:** same as 3.14; conda jobs request `3.15.* *_cp315` (GIL) or `3.15.* *_cp315t` (free-threaded) explicitly.
 - **Workflows:** `.github/workflows/`
-  - `conda-package.yml` — main conda build/test pipeline
   - `conda-package-cf.yml` — conda build/test using only conda-forge channel, set up like `conda-forge/mkl-service-feedstock`
   - `build-with-clang.yml` — Linux Clang compatibility
   - `build-with-standard-clang.yml` — standard Clang compiler compatibility validation
@@ -98,7 +98,7 @@ Below directories have local `AGENTS.md` for deeper context:
 - `.github/AGENTS.md` — CI/CD workflows and automation
 - `mkl/AGENTS.md` — Python/Cython implementation
 - `mkl/tests/AGENTS.md` — unit tests
-- `conda-recipe/AGENTS.md` — conda packaging
+- `conda-recipe-cf/AGENTS.md` — conda packaging
 - `examples/AGENTS.md` — usage examples
 
 ---

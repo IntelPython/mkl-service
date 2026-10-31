@@ -5,13 +5,13 @@ CI/CD workflows, automation, security scanning, and package distribution.
 ## Workflows
 The conda workflows build and test the Python versions in the `python:` list of their recipe's `conda_build_config.yaml`; the other build/test workflows list theirs in the workflow file.
 
-- **conda-package.yml** — main build/test pipeline (Linux/Windows)
 - **conda-package-cf.yml** — build/test using only conda-forge channel (Linux/Windows/macOS), set up like `conda-forge/mkl-service-feedstock`: Windows uses `windows-2022` (Visual Studio 2022)
 - **build-with-clang.yml** — Linux Clang compiler compatibility validation
 - **build-with-standard-clang.yml** — standard Clang compiler compatibility validation
 - **build_pip.yml** — validates editable build
 - **pre-commit.yml** — code quality checks (flake8, etc.)
 - **openssf-scorecard.yml** — security posture scanning
+- **intel-ci.yml** — Intel Python CI: builds and tests the conda packages of `conda-recipe-cf` and the wheels, for the platforms and Python versions the recipe and `pyproject.toml` declare (`ci/matrix.py`); see `ci/README.md`
 - **coverity.yml** — weekly Coverity Scan static analysis of the C/Cython extensions (scan.coverity.com)
 
 ## Actions
@@ -21,11 +21,12 @@ The conda workflows build and test the Python versions in the `python:` list of 
 - Platforms are set in the caller workflows. The conda workflows read their Python versions from the `python:` list in the recipe's `conda_build_config.yaml`: the `variants` job of `conda-build-test.yml` turns it into the build/test matrix with the `.github/actions/conda-python-matrix` composite action. The other workflows keep their Python matrix in the workflow file
 - Every entry of a recipe's `python:` list is a full spec on its own line, without selectors (`3.12.* *_cpython`, `3.13.* *_cp313`, `3.14.* *_cp314`, `3.14.* *_cp314t`); the `variants` job rejects bare versions, selectors, an ABI that doesn't match the version (`3.13.* *_cp314t`) and a second entry for the same build, whose artifact names would collide
 - The `variants` job keeps the check names of the former static matrix: `Build (3.12)` for a version with one build, `Build (3.14, 3.14.* *_cp314t, 3.14t)` for a version with GIL and free-threaded builds. The master ruleset requires the 3.14 `Test` checks by these exact names
+- `intel-ci.yml` reads its conda matrix from the same `python:` list of `conda-recipe-cf/conda_build_config.yaml`, and its wheel matrix from the Python classifiers in `pyproject.toml`, with `ci/matrix.py`
 - Required checks: conda build + test on supported Python versions/platforms in CI
 - In workflow-file matrices (`build_pip.yml`), Python 3.14 is expressed as two `include` rows carrying `python_spec` (`3.14.* *_cp314` and `3.14.* *_cp314t`); a bare `--python 3.14` has been observed to select the free-threaded ABI and must not be relied on
 - Python 3.15 follows the same pattern as 3.14: two `include` rows with `python_spec` `3.15.* *_cp315` and `3.15.* *_cp315t`
 - Artifact naming: `$PACKAGE_NAME $OS Python $VERSION`, where `$VERSION` is `python_tag`: the Python version, with a `t` suffix for free-threaded builds (`3.12`, `3.14`, `3.14t`)
-- Channels: `conda-forge`, Intel channel
+- Channels: `conda-forge`
 - Build jobs run `conda build --no-test`; test jobs run `conda build --test` on the built package on a fresh runner, so CI runs the test section of the recipe, as the feedstock does
 - `conda-package-cf.yml` and `conda-recipe-cf/` follow `conda-forge/mkl-service-feedstock`. The feedstock's pins are kept only in `conda-recipe-cf/conda_build_config.yaml` (compiler versions, `mkl_devel`, and Python versions in its `python:` list): when the feedstock is re-rendered with new pins, update them there, and don't restate the numbers in the `AGENTS.md` files
 
