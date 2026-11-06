@@ -63,7 +63,7 @@ WHEEL_PLATFORMS = {
 # The ELF program header and dynamic section values the RUNPATH check reads.
 PT_LOAD, PT_DYNAMIC = 1, 2
 DT_NULL, DT_STRTAB, DT_RPATH, DT_RUNPATH = 0, 5, 15, 29
-ORIGIN_PREFIXES = ("$ORIGIN", "${ORIGIN}")
+ORIGIN = ("$ORIGIN", "${ORIGIN}")
 
 # The rattler-build release fetched when none is on PATH, per system, with the
 # file name it goes under and the sha256 its release publishes.
@@ -152,8 +152,8 @@ def record_hash(data: bytes) -> str:
 
 def elf_search_paths(data: bytes, name: str) -> list[tuple[int, int, str]]:
     """
-    The RPATH and RUNPATH strings of an ELF file, as (file offset, length,
-    value); none for a file that is not ELF.
+    The RPATH and RUNPATH strings of an ELF file, as (RPATH or RUNPATH, file
+    offset, length, value); none for a file that is not ELF.
     """
     if data[:4] != b"\x7fELF":
         return []
@@ -187,8 +187,16 @@ def elf_search_paths(data: bytes, name: str) -> list[tuple[int, int, str]]:
         if tag in (DT_RPATH, DT_RUNPATH):
             start = base + value
             end = data.index(b"\0", start)
-            found.append((start, end - start, data[start:end].decode()))
+            kind = "RPATH" if tag == DT_RPATH else "RUNPATH"
+            found.append((kind, start, end - start, data[start:end].decode()))
     return found
+
+
+def origin_relative(path: str) -> bool:
+    """Whether a search path entry is $ORIGIN or a directory under it."""
+    return any(
+        path == token or path.startswith(token + "/") for token in ORIGIN
+    )
 
 
 def origin_only(data: bytes, name: str) -> tuple[bytes, list[str]]:
@@ -197,18 +205,20 @@ def origin_only(data: bytes, name: str) -> tuple[bytes, list[str]]:
     place as patchelf does, and the entries it dropped.
     """
     edited, dropped = bytearray(data), []
-    for start, length, value in elf_search_paths(data, name):
+    for kind, start, length, value in elf_search_paths(data, name):
         paths = value.split(":")
-        kept = [path for path in paths if path.startswith(ORIGIN_PREFIXES)]
+        kept = [path for path in paths if origin_relative(path)]
         if kept == paths:
             continue
-        # An empty RUNPATH would mean the working directory
+        # An empty search path would mean the working directory
         if not kept:
-            raise BuildError(f"{name}: no $ORIGIN entry in RUNPATH {value!r}")
+            raise BuildError(f"{name}: no $ORIGIN entry in {kind} {value!r}")
         edited[start : start + length] = (
             ":".join(kept).encode().ljust(length, b"\0")
         )
-        dropped += [path for path in paths if path not in kept]
+        dropped += [
+            f"{kind} entry {path}" for path in paths if path not in kept
+        ]
     return bytes(edited), dropped
 
 
@@ -393,6 +403,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     if system == "rattler-build":
         ensure_rattler_build(args.tools)
+    requires = wheel_requires() if system == "wheel" else []
     output = args.output.resolve()
     with tempfile.TemporaryDirectory() as scratch:
         for command in commands(
@@ -404,14 +415,14 @@ def main(argv: list[str] | None = None) -> int:
         ):
             print(f"+ {shlex.join(command)}", flush=True)
             subprocess.run(command, check=True)
+        # Rewritten in scratch, so a refused wheel never reaches the output
+        if system == "wheel":
+            for wheel in sorted(Path(scratch).rglob("*.whl")):
+                for dropped in rewrite_wheel(wheel, requires):
+                    print(f"build: dropped {dropped}")
         built = collect(Path(scratch), output)
-    if system == "wheel":
-        requires = wheel_requires()
-        for wheel in built:
-            for dropped in rewrite_wheel(wheel, requires):
-                print(f"build: dropped RUNPATH entry {dropped}")
-        if requires:
-            print("build: added Requires-Dist " + ", ".join(requires))
+    if requires:
+        print("build: added Requires-Dist " + ", ".join(requires))
     print("build: " + ", ".join(path.name for path in built))
     return 0
 

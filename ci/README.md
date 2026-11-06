@@ -13,7 +13,7 @@
 | `config.yml` | Names the workflow that builds the packages, its artifact names, and what the tests need. |
 | `test.py` | Runs the installed `mkl` module's test suite with pytest. |
 
-The scripts need only the Python standard library. macOS packages build and test on Intel runners, as MKL has no Apple silicon build.
+The scripts need nothing beyond the Python standard library and the tools each one's docstring names. macOS packages build and test on Intel runners, as MKL has no Apple silicon build.
 
 **A pull request into `master`.** Actions builds the oldest and the newest regular Python versions on Linux, Windows and macOS, as a conda package and, where `pyproject.toml` declares the platform, as a wheel, and tests each package.
 

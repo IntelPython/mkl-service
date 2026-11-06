@@ -77,8 +77,8 @@ PLATFORMS = {"linux": "Linux", "windows": "Windows", "macos": "macOS"}
 # The platforms the workflow can build on: GitHub-hosted runners have all
 # three. A declared platform missing here is reported and left out.
 BUILT_PLATFORMS = ("linux", "windows", "macos")
-# What a platform-only selector means on each platform, for both conda-build and
-# rattler-build.
+# What a platform-only selector means on each platform, as rattler-build defines
+# it; CONDA_BUILD_SELECTORS holds where conda-build reads it differently.
 SELECTORS = {
     "linux": {
         "linux": True,
@@ -130,6 +130,9 @@ SELECTORS = {
         "s390x": False,
     },
 }
+# conda-build reads x86 as any x86 CPU and has no osx64; None refuses a skip
+# that uses it.
+CONDA_BUILD_SELECTORS = {"x86": True, "osx64": None}
 CONDA_SKIP_RE = re.compile(r"\s*skip\s*:")
 # conda-build's own selector pattern, which lets a comment follow the selector
 CONDA_SELECTOR_RE = re.compile(r"(.+?)\s*(#.*)?\[([^\[\]]+)\](?(2)[^\(\)]*)$")
@@ -333,12 +336,15 @@ def from_pyproject(path: Path) -> list[Python]:
     return [Python(version, version) for version in versions]
 
 
-def skips_platform(expression: str, platform: str) -> bool | None:
+def skips_platform(expression: str, platform: str, system: str) -> bool | None:
     """
-    Whether a skip expression rules out a whole platform: True or False when it
-    depends on the platform alone, None when it also depends on anything else,
-    such as the Python version.
+    Whether a skip expression rules out a whole platform, as the build system
+    reads it: True or False when it depends on the platform alone, None when it
+    also depends on anything else, such as the Python version.
     """
+    names = SELECTORS[platform] | (
+        CONDA_BUILD_SELECTORS if system == "conda-build" else {}
+    )
     try:
         tree = ast.parse(
             expression.strip().removeprefix("${{").removesuffix("}}").strip(),
@@ -353,8 +359,8 @@ def skips_platform(expression: str, platform: str) -> bool | None:
             return all(values) if isinstance(node.op, ast.And) else any(values)
         if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
             return not value(node.operand)
-        if isinstance(node, ast.Name) and node.id in SELECTORS[platform]:
-            return SELECTORS[platform][node.id]
+        if isinstance(node, ast.Name) and names.get(node.id) is not None:
+            return names[node.id]
         if isinstance(node, ast.Constant) and isinstance(node.value, bool):
             return node.value
         raise ValueError(ast.dump(node))
@@ -365,23 +371,25 @@ def skips_platform(expression: str, platform: str) -> bool | None:
         return None
 
 
-def platforms_without(skips: list[str], where: str) -> list[str]:
+def platforms_without(skips: list[str], where: str, system: str) -> list[str]:
     """
     Every platform in PLATFORMS, but those a skip rules out; a skip that
-    depends on more than the platform is refused.
+    depends on more than the platform, or on a name the build system doesn't
+    define, is refused.
     """
     for skip in skips:
         if any(
-            skips_platform(skip, platform) is None for platform in PLATFORMS
+            skips_platform(skip, platform, system) is None
+            for platform in PLATFORMS
         ):
             raise DeclarationError(
-                f"{where}: the skip {skip!r} depends on more than the "
-                "platform, so the matrix would still list the builds it skips"
+                f"{where}: cannot tell which platforms the skip {skip!r} rules "
+                "out, so the matrix would still list the builds it skips"
             )
     kept = [
         platform
         for platform in PLATFORMS
-        if not any(skips_platform(skip, platform) for skip in skips)
+        if not any(skips_platform(skip, platform, system) for skip in skips)
     ]
     if not kept:
         raise DeclarationError(
@@ -454,7 +462,9 @@ def from_rattler_recipe(recipe: Path) -> list[str]:
         else str(recipe)
     )
     return platforms_without(
-        yaml_build_skips(recipe.read_text(encoding="utf-8"), where), where
+        yaml_build_skips(recipe.read_text(encoding="utf-8"), where),
+        where,
+        "rattler-build",
     )
 
 
@@ -487,7 +497,7 @@ def from_conda_recipe(recipe: Path) -> list[str]:
                 "skip: true  # [selector]"
             )
         skips.append(selector)
-    return platforms_without(skips, where)
+    return platforms_without(skips, where, "conda-build")
 
 
 def from_os_classifiers(path: Path) -> list[str]:
