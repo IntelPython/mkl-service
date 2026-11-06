@@ -78,6 +78,8 @@ line-length = 80
 build-verbosity = 1
 
 [tool.cibuildwheel.linux]
+# The hardening flags conda-forge's compilers set for the conda packages
+environment = { CFLAGS = "-fstack-protector-strong", CPPFLAGS = "-D_FORTIFY_SOURCE=2", LDFLAGS = "-Wl,-z,relro -Wl,-z,now" }
 # MKL comes from the mkl wheel at run time, see [tool.gh-ci]
 # Tagged as the mkl wheel is, as auditwheel doesn't check the excluded library
 repair-wheel-command = "auditwheel repair --plat manylinux_2_28_x86_64 --only-plat --exclude 'libmkl_rt.so.*' -w {dest_dir} {wheel}"

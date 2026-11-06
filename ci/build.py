@@ -35,7 +35,8 @@ pin_compatible: build.py requires >= the version python -m build installed for
 the build, < its next major. It also cuts the RPATH and
 RUNPATH of each ELF file in a wheel to their $ORIGIN entries, dropping absolute
 ones such as the isolated build environment's lib directory, which meson-python
-keeps, and refuses a file that would have none left.
+keeps, and refuses a file that would have none left, or that is not linked
+with full RELRO.
 """
 
 import argparse
@@ -65,8 +66,10 @@ WHEEL_PLATFORMS = {
     "Darwin": "macosx_x86_64",
 }
 # The ELF program header and dynamic section values the RUNPATH check reads.
-PT_LOAD, PT_DYNAMIC = 1, 2
+PT_LOAD, PT_DYNAMIC, PT_GNU_RELRO = 1, 2, 0x6474E552
 DT_NULL, DT_STRTAB, DT_RPATH, DT_RUNPATH = 0, 5, 15, 29
+DT_BIND_NOW, DT_FLAGS, DT_FLAGS_1 = 24, 30, 0x6FFFFFFB
+DF_BIND_NOW, DF_1_NOW = 0x8, 0x1
 ORIGIN = ("$ORIGIN", "${ORIGIN}")
 ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
@@ -216,13 +219,15 @@ def record_hash(data: bytes) -> str:
     return "sha256=" + digest.rstrip(b"=").decode("ascii")
 
 
-def elf_search_paths(data: bytes, name: str) -> list[tuple[int, int, str]]:
+def elf_dynamic(
+    data: bytes, name: str
+) -> tuple[list[tuple[int, int, int, int]], list[tuple[int, int]]] | None:
     """
-    The RPATH and RUNPATH strings of an ELF file, as (RPATH or RUNPATH, file
-    offset, length, value); none for a file that is not ELF.
+    The program headers, as (p_type, p_offset, p_vaddr, p_filesz), and the
+    dynamic entries of an ELF file; None for a file that is not ELF.
     """
     if data[:4] != b"\x7fELF":
-        return []
+        return None
     if data[4:6] != b"\x02\x01":
         raise BuildError(f"{name}: only 64-bit little-endian ELF is read")
     (phoff,) = struct.unpack_from("<Q", data, 0x20)
@@ -240,6 +245,17 @@ def elf_search_paths(data: bytes, name: str) -> list[tuple[int, int, str]]:
                 if tag == DT_NULL:
                     break
                 entries.append((tag, value))
+    return segments, entries
+
+
+def elf_search_paths(data: bytes, name: str) -> list[tuple[str, int, int, str]]:
+    """
+    The RPATH and RUNPATH strings of an ELF file, as (RPATH or RUNPATH, file
+    offset, length, value); none for a file that is not ELF.
+    """
+    if (parsed := elf_dynamic(data, name)) is None:
+        return []
+    segments, entries = parsed
     strtab = dict(entries).get(DT_STRTAB)
     if strtab is None:
         return []
@@ -256,6 +272,19 @@ def elf_search_paths(data: bytes, name: str) -> list[tuple[int, int, str]]:
             kind = "RPATH" if tag == DT_RPATH else "RUNPATH"
             found.append((kind, start, end - start, data[start:end].decode()))
     return found
+
+
+def full_relro(data: bytes, name: str) -> bool:
+    """Whether an ELF file has full RELRO; True for a file that is not ELF."""
+    if (parsed := elf_dynamic(data, name)) is None:
+        return True
+    segments, entries = parsed
+    flags = dict(entries)
+    return any(kind == PT_GNU_RELRO for kind, *_ in segments) and (
+        DT_BIND_NOW in flags
+        or bool(flags.get(DT_FLAGS, 0) & DF_BIND_NOW)
+        or bool(flags.get(DT_FLAGS_1, 0) & DF_1_NOW)
+    )
 
 
 def origin_relative(path: str) -> bool:
@@ -304,7 +333,7 @@ def rewrite_wheel(wheel: Path, requirements: list[str]) -> list[str]:
     """
     Adds Requires-Dist lines to a built wheel and cuts its ELF files' RPATH
     and RUNPATH to their $ORIGIN entries, updating its RECORD; lists the
-    entries it dropped.
+    entries it dropped. Refuses an ELF file without full RELRO.
     """
     with zipfile.ZipFile(wheel) as source:
         members = [(info, source.read(info)) for info in source.infolist()]
@@ -318,6 +347,11 @@ def rewrite_wheel(wheel: Path, requirements: list[str]) -> list[str]:
         else:
             new, paths = origin_only(data, info.filename)
             dropped += [f"{path} from {info.filename}" for path in paths]
+            if not full_relro(new, info.filename):
+                raise BuildError(
+                    f"{info.filename} has no full RELRO; link it with "
+                    "-Wl,-z,relro -Wl,-z,now"
+                )
         if new != data:
             members[index] = (info, new)
             changed[info.filename] = new
@@ -356,6 +390,20 @@ def commands(
     and keeps every other variant setting from that file.
     """
     channel_args = [arg for channel in channels for arg in ("-c", channel)]
+    # The commit a conda package came from, in its info/about.json
+    github = [
+        os.environ.get(name, "")
+        for name in ("GITHUB_SERVER_URL", "GITHUB_REPOSITORY", "GITHUB_SHA")
+    ]
+    extra_meta = (
+        [
+            "--extra-meta",
+            f"remote_url={github[0]}/{github[1]}",
+            f"sha={github[2]}",
+        ]
+        if all(github)
+        else []
+    )
     if system == "rattler-build":
         return [
             [
@@ -385,6 +433,7 @@ def commands(
                 "--no-anaconda-upload",
                 "--output-folder",
                 str(scratch / "conda"),
+                *extra_meta,
                 "--override-channels",
                 *channel_args,
             ]

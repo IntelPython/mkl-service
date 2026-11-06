@@ -38,9 +38,9 @@ Usage:
 Prints the build matrix as JSON for strategy.matrix: {"include": [{"platform":
 "linux", "name": "Linux", "python": "3.14"}, ...]}, every platform with every
 Python version. For a pull_request event only the oldest and the newest regular
-versions are listed. --github-output also writes NAME=<matrix> to
-$GITHUB_OUTPUT, for later jobs. Standard library only; reading pyproject.toml
-needs Python 3.11 or newer for tomllib.
+versions and the newest free-threaded one are listed. --github-output also
+writes NAME=<matrix> to $GITHUB_OUTPUT, for later jobs. Standard library only;
+reading pyproject.toml needs Python 3.11 or newer for tomllib.
 """
 
 import argparse
@@ -591,12 +591,16 @@ def declared_platforms(system: str, selector: Path) -> list[str]:
 
 
 def for_event(pythons: list[Python], event: str) -> list[Python]:
-    """All of them, or for a pull request the oldest and newest regular ones."""
+    """
+    All of them, or for a pull request the oldest and newest regular ones and
+    the newest free-threaded one.
+    """
     if event not in PULL_REQUEST_EVENTS:
         return pythons
     regular = [python for python in pythons if not python.version.endswith("t")]
+    threaded = [python for python in pythons if python.version.endswith("t")]
     regular = regular or pythons
-    return list(dict.fromkeys(regular[:1] + regular[-1:]))
+    return list(dict.fromkeys(regular[:1] + regular[-1:] + threaded[-1:]))
 
 
 def build_matrix(system: str, selector: Path, event: str) -> dict:
