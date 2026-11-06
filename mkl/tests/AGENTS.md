@@ -25,10 +25,10 @@ pytest mkl/tests/
 ```
 
 ## CI integration
-- Tests run in the `conda-package.yml` and `conda-package-cf.yml` workflows, through `conda build --test`, which runs the `test:` section of `conda-recipe/meta.yaml` or `conda-recipe-cf/meta.yaml`
-- Test-only dependencies go in `test: requires:` of both recipes; CI installs nothing else
+- Tests run in the `conda-package-cf.yml` workflow, through `conda build --test`, which runs the `test:` section of `conda-recipe/meta.yaml`, and in `intel-ci.yml` through `ci/test.py`, against the conda packages and the wheels
+- Test-only dependencies go in `test: requires:` of `conda-recipe/meta.yaml` and of `ci/config.yml`; CI installs nothing else
 - Separate test jobs per Python version and CI platform
-- CI coverage: Linux + Windows, plus macOS in `conda-package-cf.yml`
+- CI coverage: Linux, Windows and macOS; the wheels are built for Linux and Windows only
 
 ## Adding tests
 - New API functions → add to `test_mkl_service.py` with validation
