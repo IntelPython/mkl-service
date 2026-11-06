@@ -29,7 +29,10 @@ Wheels build with cibuildwheel, in a manylinux container on Linux, as
 pyproject.toml's [tool.cibuildwheel] says. Run-time requirements that
 pyproject.toml cannot declare, because the conda package gets them from its
 recipe instead, such as MKL's libraries, go in [tool.gh-ci] wheel-requires:
-build.py adds them to each wheel's metadata. It also cuts the RPATH and
+build.py adds them to each wheel's metadata. [tool.gh-ci] pin-compatible maps a
+run-time requirement to the build requirement it follows, like conda's
+pin_compatible: build.py requires >= the version python -m build installed for
+the build, < its next major. It also cuts the RPATH and
 RUNPATH of each ELF file in a wheel to their $ORIGIN entries, dropping absolute
 ones such as the isolated build environment's lib directory, which meson-python
 keeps, and refuses a file that would have none left.
@@ -40,6 +43,7 @@ import base64
 import hashlib
 import os
 import platform
+import re
 import shlex
 import shutil
 import struct
@@ -64,6 +68,7 @@ WHEEL_PLATFORMS = {
 PT_LOAD, PT_DYNAMIC = 1, 2
 DT_NULL, DT_STRTAB, DT_RPATH, DT_RUNPATH = 0, 5, 15, 29
 ORIGIN = ("$ORIGIN", "${ORIGIN}")
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 # The rattler-build release fetched when none is on PATH, per system, with the
 # file name it goes under and the sha256 its release publishes.
@@ -130,8 +135,8 @@ def cibuildwheel_identifier(python: matrix.Python) -> str:
     return f'cp3{minor}{"t" if threaded else ""}-{tag}'
 
 
-def wheel_requires() -> list[str]:
-    """[tool.gh-ci] wheel-requires from pyproject.toml."""
+def wheel_settings() -> tuple[list[str], dict[str, str]]:
+    """[tool.gh-ci] wheel-requires and pin-compatible from pyproject.toml."""
     if matrix.TOMLLIB is None:
         raise BuildError("reading pyproject.toml needs Python 3.11 or newer")
     text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
@@ -141,7 +146,68 @@ def wheel_requires() -> list[str]:
         isinstance(r, str) for r in requires
     ):
         raise BuildError("[tool.gh-ci] wheel-requires must be a list of specs")
-    return requires
+    pins = tool.get("pin-compatible", {})
+    if not isinstance(pins, dict) or not all(
+        isinstance(k, str) and isinstance(v, str) for k, v in pins.items()
+    ):
+        raise BuildError(
+            "[tool.gh-ci] pin-compatible must map a run-time requirement to "
+            "a build requirement"
+        )
+    return requires, pins
+
+
+def canonical(name: str) -> str:
+    """A distribution name as PEP 503 compares it."""
+    return re.sub(r"[-_.]+", "-", name).lower()
+
+
+def build_versions(log: list[str]) -> dict[str, str]:
+    """
+    The version of each build requirement the isolated build environment
+    installed, from the list python -m build logs.
+    """
+    versions, listing = {}, False
+    for line in log:
+        text = ANSI_RE.sub("", line).strip()
+        if text.endswith("Installed build dependency versions:"):
+            listing = True
+        elif listing and (match := re.fullmatch(r"- ([\w.-]+)==(\S+)", text)):
+            versions[canonical(match[1])] = match[2]
+        else:
+            listing = False
+    return versions
+
+
+def pinned(pins: dict[str, str], versions: dict[str, str]) -> list[str]:
+    """Each pinned run-time requirement: >= its build version, < next major."""
+    specs = []
+    for runtime, build in pins.items():
+        version = versions.get(canonical(build))
+        major = version.split(".")[0] if version else ""
+        if not major.isdigit():
+            raise BuildError(
+                f"the build logged no installed {build} version, which "
+                f"[tool.gh-ci] pin-compatible pins {runtime} to"
+            )
+        specs.append(f"{runtime} >={version},<{int(major) + 1}")
+    return specs
+
+
+def run_logged(command: list[str]) -> list[str]:
+    """Runs a command, passing its output through, and returns that output."""
+    lines = []
+    sys.stdout.flush()
+    with subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    ) as process:
+        for line in process.stdout:
+            sys.stdout.buffer.write(line)
+            sys.stdout.buffer.flush()
+            lines.append(line.decode("utf-8", "replace"))
+    if process.returncode:
+        raise subprocess.CalledProcessError(process.returncode, command)
+    return lines
 
 
 def record_hash(data: bytes) -> str:
@@ -403,8 +469,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     if system == "rattler-build":
         ensure_rattler_build(args.tools)
-    requires = wheel_requires() if system == "wheel" else []
+    requires, pins = wheel_settings() if system == "wheel" else ([], {})
     output = args.output.resolve()
+    log: list[str] = []
     with tempfile.TemporaryDirectory() as scratch:
         for command in commands(
             system,
@@ -414,9 +481,10 @@ def main(argv: list[str] | None = None) -> int:
             Path(scratch),
         ):
             print(f"+ {shlex.join(command)}", flush=True)
-            subprocess.run(command, check=True)
+            log += run_logged(command)
         # Rewritten in scratch, so a refused wheel never reaches the output
         if system == "wheel":
+            requires = requires + pinned(pins, build_versions(log))
             for wheel in sorted(Path(scratch).rglob("*.whl")):
                 for dropped in rewrite_wheel(wheel, requires):
                     print(f"build: dropped {dropped}")

@@ -29,7 +29,7 @@ requires = [
   "meson-python>=0.13.0",
   "ninja",
   "Cython>=3.1.0",
-  "mkl-devel>=2026.2,<2027",
+  "mkl-devel",
   "cmake"
 ]
 
@@ -80,18 +80,18 @@ build-verbosity = 1
 [tool.cibuildwheel.linux]
 # MKL comes from the mkl wheel at run time, see [tool.gh-ci]
 # Tagged as the mkl wheel is, as auditwheel doesn't check the excluded library
-repair-wheel-command = "auditwheel repair --plat manylinux_2_28_x86_64 --only-plat --exclude libmkl_rt.so.3 -w {dest_dir} {wheel}"
+repair-wheel-command = "auditwheel repair --plat manylinux_2_28_x86_64 --only-plat --exclude 'libmkl_rt.so.*' -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.windows]
 # MSVC, as python.org builds CPython with, not the runner's MinGW
 config-settings = { setup-args = "--vsenv" }
 # MKL comes from the mkl wheel at run time, see [tool.gh-ci]
-repair-wheel-command = "delvewheel repair --no-dll mkl_rt.3.dll -w {dest_dir} {wheel}"
+repair-wheel-command = "delvewheel repair --no-dll mkl_rt.*.dll -w {dest_dir} {wheel}"
 
 [tool.gh-ci]
-# What the wheels need at run time, which conda packages get from the recipe;
-# the same MKL as [build-system], whose library names the repair commands use
-wheel-requires = ["mkl >=2026.2,<2027"]
+# What the wheels need at run time, which conda packages get from the recipe:
+# mkl >= the mkl-devel version the build used, < its next major
+pin-compatible = { mkl = "mkl-devel" }
 
 [tool.isort]
 line_length = 80
