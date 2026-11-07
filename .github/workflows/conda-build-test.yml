@@ -19,11 +19,6 @@ on:
         description: Path to the conda recipe directory
         required: true
         type: string
-      build-wheels:
-        description: Whether to build and upload wheel packages
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -90,9 +85,6 @@ jobs:
           CONDA_SUBDIR: ${{ inputs.conda-subdir }}
         run: |
           echo "CONDA_BLD=$CONDA/conda-bld/${CONDA_SUBDIR}" >> "$GITHUB_ENV"
-          if [ "${{ inputs.build-wheels }}" = "true" ]; then
-            echo "WHEELS_OUTPUT_FOLDER=${{ github.workspace }}" >> "$GITHUB_ENV"
-          fi
 
       - name: Build conda package
         env:
@@ -109,13 +101,6 @@ jobs:
         with:
           name: ${{ env.package-name }} ${{ runner.os }} Python ${{ matrix.python_tag }}
           path: ${{ env.CONDA_BLD }}/${{ env.package-name }}-*.conda
-
-      - name: Upload wheels artifact
-        if: ${{ inputs.build-wheels }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: ${{ env.package-name }} ${{ runner.os }} Wheels Python ${{ matrix.python_tag }}
-          path: ${{ env.WHEELS_OUTPUT_FOLDER }}/mkl_service-*.whl
 
   test:
     name: Test (${{ matrix.label }})
