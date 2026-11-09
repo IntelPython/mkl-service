@@ -21,6 +21,7 @@ Originally part of Intel® Distribution for Python*, now a standalone package av
 - **C init module:** `mkl/_mklinitmodule.c` — Linux-side MKL runtime preloading / initialization
 - **Helper:** `mkl/_init_helper.py` — Windows venv DLL loading helper
 - **Build system:** meson-python + Cython
+- **Intel CI:** `ci/`, `.github/workflows/intel-ci.yml`; see `ci/README.md`
 
 ## Build dependencies
 **Required:**
@@ -47,13 +48,13 @@ python -m pip install --no-deps --no-build-isolation .
 ```
 
 ## CI/CD
-- **Platforms in CI workflows:** Linux, Windows, macOS (conda-forge workflow only)
-- **Python versions:** the conda workflows build and test the entries of the `python:` list in the recipe's `conda_build_config.yaml` (`conda-recipe/` or `conda-recipe-cf/`), one build and one test job per entry; the other workflows list their Python versions in the workflow file
+- **Platforms in CI workflows:** Linux, Windows and macOS for the conda packages (`conda-package-cf.yml`, `intel-ci.yml`), Linux and Windows for the wheels (`intel-ci.yml`); the other workflows run on Linux
+- **Python versions:** `conda-package-cf.yml` builds and tests the entries of the `python:` list in `conda-recipe/conda_build_config.yaml`, one build and one test job per entry. `intel-ci.yml` reads the same list for its conda packages and the Python classifiers in `pyproject.toml` for its wheels, with `ci/matrix.py`. The other workflows list their Python versions in the workflow file
 - **Python 3.14 ABI selection:** conda jobs must request an explicit ABI, `3.14.* *_cp314` (GIL) or `3.14.* *_cp314t` (free-threaded). Once the recipes stopped constraining `python-gil`, a bare `--python 3.14` was observed to resolve to the free-threaded build, so it must not be relied on.
 - **Python 3.15 ABI selection:** same as 3.14; conda jobs request `3.15.* *_cp315` (GIL) or `3.15.* *_cp315t` (free-threaded) explicitly.
 - **Workflows:** `.github/workflows/`
-  - `conda-package.yml` — main conda build/test pipeline
   - `conda-package-cf.yml` — conda build/test using only conda-forge channel, set up like `conda-forge/mkl-service-feedstock`
+  - `intel-ci.yml` — Intel CI: builds and tests the conda packages and the wheels; see `ci/README.md`
   - `build-with-clang.yml` — Linux Clang compatibility
   - `build-with-standard-clang.yml` — standard Clang compiler compatibility validation
   - `build_pip.yml` — validates editable build
