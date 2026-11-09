@@ -1,33 +1,18 @@
 # AGENTS.md — conda-recipe/
 
-Conda package build recipe for conda-forge and Intel channel distribution.
+The conda recipe, built against `conda-forge` only and set up like `conda-forge/mkl-service-feedstock`.
 
 ## Files
 - **meta.yaml** — package metadata, dependencies, build requirements
 - **build.sh** — Linux/macOS build script
 - **bld.bat** — Windows build script
-- **conda_build_config.yaml** — compiler / stdlib pinning used by conda-build variants, and the `python:` list of versions that CI builds and tests (one job per entry)
-
-## Build configuration
-- **Channels:** `conda-forge`, Intel channel
-- **Python versions in CI build matrix:** from the `python:` list in each recipe's `conda_build_config.yaml`. A plain `conda build conda-recipe` therefore builds every listed version; pass `--python "3.12.* *_cpython"` to build one
-- **Compilers:** pinned via `conda_build_config.yaml` (GCC/GXX on Linux, VS2022 on Windows)
-- **Dependencies:** `mkl` (runtime), `mkl-devel` (build), `cython >=3.1.0`
-
-## Build outputs
-- Conda package: `mkl-service-<version>-<build>.conda`
-- Platform-specific artifacts from CI currently: `linux-64/`, `win-64/`
+- **conda_build_config.yaml** — the feedstock's compiler, stdlib and `mkl_devel` pins, and the `python:` list CI builds
 
 ## CI usage
-- Built in `.github/workflows/conda-package.yml`
-- Artifacts uploaded per Python version and platform
+- Built on Linux, Windows and macOS in `.github/workflows/conda-package-cf.yml` and `.github/workflows/intel-ci.yml`
 - Test stage runs `conda build --test` on the built artifact, so the `test:` section of the recipe is what CI runs
+- Wheels don't come from this recipe: `intel-ci.yml` builds them from `pyproject.toml` with `ci/build.py`
 
 ## Platform specifics
 - **Linux:** RTLD_GLOBAL handling in runtime init path
 - **Windows:** MKL library path configuration
-- **macOS:** built and tested only from `conda-recipe-cf/` in `conda-package-cf.yml`
-
-## Maintenance
-- Keep recipe metadata in sync with workflow matrix and package metadata
-- MKL version pinning: track Intel MKL releases through recipe deps

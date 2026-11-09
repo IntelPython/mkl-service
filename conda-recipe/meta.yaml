@@ -7,8 +7,7 @@ source:
 
 build:
     number: {{ GIT_DESCRIBE_NUMBER }}
-    script_env:
-      - WHEELS_OUTPUT_FOLDER
+    skip: true  # [osx and arm64]
     ignore_run_exports:
       - blas
       - mkl-service
@@ -22,27 +21,29 @@ requirements:
       - cmake
       - ninja
       - python
-      - python-build >=1.2.2
-      - pip >=25.0
-      - mkl-devel
+      - pip
+      - mkl-devel  # [not osx]
+      - mkl-devel <2024 # [osx]
       - cython >=3.1.0
-      - wheel >=0.45.1
     run:
       - python
       - {{ pin_compatible('mkl') }}
 
 test:
     requires:
+      - pip
       - pytest
     imports:
       - mkl
     commands:
+      - pip check
       - pytest -vv --pyargs mkl
 
 about:
     home: https://github.com/IntelPython/mkl-service
     license: BSD-3-Clause
     license_file: LICENSE.txt
+    license_family: BSD
     summary: Python hooks for Intel® oneAPI Math Kernel Library (oneMKL) runtime control settings
     description: |
         <strong>LEGAL NOTICE: Use of this software package is subject to the
