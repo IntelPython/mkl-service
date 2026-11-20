@@ -37,10 +37,11 @@ Usage:
 
 Prints the build matrix as JSON for strategy.matrix: {"include": [{"platform":
 "linux", "name": "Linux", "python": "3.14"}, ...]}, every platform with every
-Python version. For a pull_request event only the oldest and the newest regular
-versions and the newest free-threaded one are listed. --github-output also
-writes NAME=<matrix> to $GITHUB_OUTPUT, for later jobs. Standard library only;
-reading pyproject.toml needs Python 3.11 or newer for tomllib.
+Python version. Only a tag builds them all: for --event pr or push only the
+oldest and the newest regular versions and the newest free-threaded one are
+listed. --github-output also writes NAME=<matrix> to $GITHUB_OUTPUT, for later
+jobs. Standard library only; reading pyproject.toml needs Python 3.11 or newer
+for tomllib.
 """
 
 import argparse
@@ -145,7 +146,8 @@ OS_CLASSIFIERS = {
     "Operating System :: MacOS": ("macos",),
 }
 
-PULL_REQUEST_EVENTS = ("pull_request",)
+# Events that build only some of the declared Python versions
+SUBSET_EVENTS = ("pr", "push")
 OLDEST_MINOR = 10
 FREE_THREADED_MINOR = 13
 # A Free Threading classifier adds 3.Nt from 3.14, the first supported one,
@@ -592,10 +594,10 @@ def declared_platforms(system: str, selector: Path) -> list[str]:
 
 def for_event(pythons: list[Python], event: str) -> list[Python]:
     """
-    All of them, or for a pull request the oldest and newest regular ones and
-    the newest free-threaded one.
+    All of them for a tag; for a pull request or a push the oldest and newest
+    regular ones and the newest free-threaded one.
     """
-    if event not in PULL_REQUEST_EVENTS:
+    if event not in SUBSET_EVENTS:
         return pythons
     regular = [python for python in pythons if not python.version.endswith("t")]
     threaded = [python for python in pythons if python.version.endswith("t")]
@@ -650,7 +652,10 @@ def main(argv: list[str] | None = None) -> int:
         help="build system to read instead of the detected one",
     )
     parser.add_argument(
-        "--event", default="", help="GitHub event name, such as pull_request"
+        "--event",
+        default="tag",
+        choices=("pr", "tag", "push"),
+        help="what the build is for; only a tag builds every version",
     )
     parser.add_argument(
         "--github-output",

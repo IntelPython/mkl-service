@@ -34,9 +34,11 @@ jobs:
 
       - name: Read the declared platforms and Python versions
         id: declared
+        env:
+          EVENT: ${{ startsWith(github.ref, 'refs/tags/') && 'tag' || github.event_name == 'pull_request' && 'pr' || 'push' }}
         run: |
-          python ci/matrix.py --event "$GITHUB_EVENT_NAME" --github-output matrix
-          python ci/matrix.py --system wheel --event "$GITHUB_EVENT_NAME" --github-output wheel
+          python ci/matrix.py --event "$EVENT" --github-output matrix
+          python ci/matrix.py --system wheel --event "$EVENT" --github-output wheel
 
   # macOS runs on Intel runners, as MKL has no Apple silicon build.
   build:
@@ -82,9 +84,7 @@ jobs:
 
   test:
     name: Test ${{ matrix.name }} Python ${{ matrix.python }}
-    needs: [matrix, build]
-    # Test every package that built, even when another build failed
-    if: ${{ !cancelled() && needs.matrix.result == 'success' }}
+    needs: [matrix, build, build-wheel]
     runs-on: ${{ matrix.platform == 'windows' && (vars.GH_CI_WINDOWS_RUNNER || 'windows-2022') || matrix.platform == 'macos' && (vars.GH_CI_MACOS_RUNNER || 'macos-26-intel') || (vars.GH_CI_RUNNER || 'ubuntu-latest') }}
     timeout-minutes: 45
     strategy:
@@ -155,9 +155,7 @@ jobs:
 
   test-wheel:
     name: Test ${{ matrix.name }} Wheels Python ${{ matrix.python }}
-    needs: [matrix, build-wheel]
-    # Test every package that built, even when another build failed
-    if: ${{ !cancelled() && needs.matrix.result == 'success' }}
+    needs: [matrix, build, build-wheel]
     runs-on: ${{ matrix.platform == 'windows' && (vars.GH_CI_WINDOWS_RUNNER || 'windows-2022') || matrix.platform == 'macos' && (vars.GH_CI_MACOS_RUNNER || 'macos-26-intel') || (vars.GH_CI_RUNNER || 'ubuntu-latest') }}
     timeout-minutes: 45
     strategy:
