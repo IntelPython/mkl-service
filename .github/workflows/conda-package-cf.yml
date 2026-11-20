@@ -13,6 +13,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Build like conda-forge/mkl-service-feedstock, whose Python versions are listed
+# in conda-recipe/conda_build_config.yaml, with Visual Studio 2022 on Windows
 jobs:
   linux:
     name: linux
@@ -20,19 +22,17 @@ jobs:
     with:
       runs-on: ubuntu-latest
       conda-subdir: linux-64
-      pkgs-dir: /home/runner/conda_pkgs_dir
       channels-list: -c conda-forge --override-channels
-      recipe-dir: conda-recipe-cf
+      recipe-dir: conda-recipe
 
   windows:
     name: windows
     uses: ./.github/workflows/conda-build-test.yml
     with:
-      runs-on: windows-latest
+      runs-on: windows-2022
       conda-subdir: win-64
-      pkgs-dir: D:\conda_pkgs_dir
       channels-list: -c conda-forge --override-channels
-      recipe-dir: conda-recipe-cf
+      recipe-dir: conda-recipe
 
   osx:
     name: osx
@@ -40,6 +40,5 @@ jobs:
     with:
       runs-on: macos-26-intel
       conda-subdir: osx-64
-      pkgs-dir: /Users/runner/conda_pkgs_dir
       channels-list: -c conda-forge --override-channels
-      recipe-dir: conda-recipe-cf
+      recipe-dir: conda-recipe

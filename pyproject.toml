@@ -42,7 +42,6 @@ classifiers = [
   "Programming Language :: C",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -74,6 +73,27 @@ Homepage = "https://github.com/IntelPython/mkl-service"
 
 [tool.black]
 line-length = 80
+
+[tool.cibuildwheel]
+build-verbosity = 1
+
+[tool.cibuildwheel.linux]
+# The hardening flags conda-forge's compilers set for the conda packages
+environment = { CFLAGS = "-fstack-protector-strong", CPPFLAGS = "-D_FORTIFY_SOURCE=2", LDFLAGS = "-Wl,-z,relro -Wl,-z,now" }
+# MKL comes from the mkl wheel at run time, see [tool.gh-ci]
+# Tagged as the mkl wheel is, as auditwheel doesn't check the excluded library
+repair-wheel-command = "auditwheel repair --plat manylinux_2_28_x86_64 --only-plat --exclude 'libmkl_rt.so.*' -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.windows]
+# MSVC, as python.org builds CPython with, not the runner's MinGW
+config-settings = { setup-args = "--vsenv" }
+# MKL comes from the mkl wheel at run time, see [tool.gh-ci]
+repair-wheel-command = "delvewheel repair --no-dll mkl_rt.*.dll -w {dest_dir} {wheel}"
+
+[tool.gh-ci]
+# What the wheels need at run time, which conda packages get from the recipe:
+# mkl >= the mkl-devel version the build used, < its next major
+pin-compatible = { mkl = "mkl-devel" }
 
 [tool.isort]
 line_length = 80
